@@ -22,5 +22,27 @@ namespace HangKenhFE.Models
         public string? meta_data { get; set; }
         public DateTime create_at { get; set; }
         public DateTime update_at { get; set; }
+        public MetaData GetMetaData()
+        {
+            return !string.IsNullOrEmpty(meta_data)
+                ? JsonSerializer.Deserialize<MetaData>(meta_data)
+                : new MetaData();
+        }
+
+        // Serialize MetaData to JSON string
+        public void SetMetaData(MetaData data)
+        {
+            meta_data = JsonSerializer.Serialize(data);
+        }
+    }
+    public class MetaData
+    {
+        public string? facebook { get; set; }
+        public string? twitter { get; set; }
+        public string? instagram { get; set; }
+        public string? youtube { get; set; }
+        public string? tiktok { get; set; }
+        public string? linkedin { get; set; }
+        public string? pinterest { get; set; }
     }
 }

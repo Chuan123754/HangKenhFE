@@ -25,7 +25,7 @@ namespace HangKenhFE.Models
         [StringLength(20)]
         public string? Status { get; set; }
 
-        public long? AuthorId { get; set; }
+        public long AuthorId { get; set; }
         public bool? Deleted { get; set; }
 
         [StringLength(255)]

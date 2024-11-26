@@ -12902,7 +12902,7 @@ ol.breadcrumb {
 
 .bsb-pagination-1.pagination .page-item {
   display: flex;
-  width: 40px;
+  width: auto;
   height: 40px;
   padding: 10px;
   flex-direction: column;
