@@ -1,4 +1,8 @@
-﻿@page "/project"  
+﻿@page "/project"
+@inject NavigationManager nav
+@inject ICategoriesServices sev
+@inject IPostSer pos
+
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
          class="w-100 h-100" alt="banner-image-3">
@@ -8,56 +12,142 @@
         </h1>
     </div>
 </section>
+
 <section id="project">
-        <div class="container">
-            <h2 class="category-font-header">{{ $cateSelected->title }}</h2>
-            <div class="nav-menu">
-
-               @*  @foreach($categories as $category)
-                    <div class="nav-menu-item {{ $category->id == $cateSelected->id ? 'active' : '' }}">
-                        <a class="nav-link"
-                           href="{{ route('fe.project.category', $category->slug) }}">{{ $category->short_title }}</a>
+    <div class="container">
+        <h2 class="category-font-header">@CateSelected?.Title</h2>
+        <div class="nav-menu">
+            @if (CategoriesList != null)
+            {
+                @foreach (var category in CategoriesList)
+                {
+                    <div class="nav-menu-item @(category.Id == CateSelected?.Id ? "active" : "")">
+                        <a class="nav-link" @onclick="() => OnCategorySelected(category)">
+                            @category.Short_title
+                        </a>
                     </div>
-                @endforeach *@
-            </div>
 
-            <div class="title-underline phone"></div>
+                }
+            }
+        </div>
 
-            <main>
-                @* @if($posts->isNotEmpty())
-                    @foreach($postChucks as $index => $postChunk)
-                        <article>
-                            <div class="project-content {{ $index%2!=0 ? 'flex-row-reverse': '' }}">
-                                @foreach($postChunk as $key => $post)
-                                    <div class="{{ $key == 0 ? 'project-main-block' : 'project-sub-block' }}">
-                                        <div class="{{ $key == 0 ? 'project-main-block-image' : 'project-sub-image' }}"
-                                        >
-                                            <a href="{{ route('fe.project.detail', ['slug' => $cateSelected->slug, 'detail' => $post->slug]) }}"
-                                               class="w-100">
-                                                <img src="{{ get_media($post, 'feature_image', 'image') }}"
-                                                     alt="{{ $post->title }}" class="w-100 h-100 object-fit-cover"/>
-                                            </a>
-                                        </div>
-                                        <div class="project-article-content">
-                                            <a href="{{ route('fe.project.detail', ['slug' => $cateSelected->slug, 'detail' => $post->slug]) }}">
-                                                <h3 class="project-article-title {{ $key == 0 ? 'main-title' : 'sub-title' }}">
-                                                    {{ $post->title }}
-                                                </h3>
-                                            </a>
-                                            <div class="project-article-author">
-                                                <p>Project by {{ $post->author_name ?? 'NTK Son Vu' }}</p>
-                                                @if(!empty($post->photo_by))
-                                                    <p>Photo: {{ $post->photo_by }}</p>
-                                                @endif
-                                            </div>
+        <div class="title-underline phone"></div>
+
+        <main>
+            @if (Posts != null && Posts.Any())
+            {
+                @foreach (var postChunk in PostChunks)
+                {
+                    <article>
+                        <div class="project-content @(PostChunks.IndexOf(postChunk) % 2 != 0 ? "flex-row-reverse" : "")">
+                            @foreach (var post in postChunk)
+                            {
+                                <div class="@(post == postChunk.First() ? "project-main-block" : "project-sub-block")">
+                                    <div class="@(post == postChunk.First() ? "project-main-block-image" : "project-sub-image")">
+                                        <a @onclick="() => NavDetails(post.Id)" class="w-100">
+                                            <img src="@post.Feature_image" 
+                                                 alt="@post.Title " 
+                                                 class="w-100 h-100 object-fit-cover" />
+                                        </a>
+
+                                    </div>
+                                    <div class="project-article-content">
+                                        <a @onclick="() => NavDetails(post.Id)">
+                                            <h3 class="project-article-title @(post == postChunk.First() ? "main-title" : "sub-title")">
+                                                @post.Title
+                                            </h3>
+                                        </a>
+                                        <div class="project-article-author">
+                                            <p>Project by @post.Designer?.Name</p>
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
-                        </article>
-                    @endforeach
-                @endif
-                {!! $posts->links('pagination::category-pagination') !!} *@
-            </main>
-        </div>
-    </section>
+                                </div>
+                            }
+                        </div>
+                    </article>
+                }
+            }
+            <Pagination TItem="Files" PageNumber="page_number" TotalPages="total_pages" PageSize="page_size" TotalItems="totalItems" OnPageChanged="GoToPage" OnPageSizeChanged="OnPageSizeChanged" />
+        </main>
+    </div>
+</section>
+
+
+
+@code {
+    private List<Categories> CategoriesList = new();
+    private Categories CateSelected;
+    private List<Product_Posts> Posts = new();
+    private List<List<Product_Posts>> PostChunks = new();
+    private int page_number = 1;
+    private int total_pages = 1;
+    private int page_size = 10;
+    private int totalItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPosts();
+    }
+
+    private async Task GoToPage(int page)
+    {
+        page_number = page;
+        await LoadPosts();
+    }
+
+    private async Task OnPageSizeChanged(int newPageSize)
+    {
+        page_size = newPageSize;
+        page_number = 1;
+        await LoadPosts();
+    }
+
+    private async Task LoadPosts()
+    {
+        // Lấy danh sách danh mục
+        CategoriesList = await sev.GetAllType("project");
+
+        // Nếu không có danh mục nào, không làm gì cả
+        if (CategoriesList == null || !CategoriesList.Any())
+        {
+            return;
+        }
+
+        // Nếu không có danh mục nào được chọn, chọn danh mục đầu tiên
+        if (CateSelected == null)
+        {
+            CateSelected = CategoriesList.FirstOrDefault();
+        }
+
+        // Tải bài viết theo danh mục đã chọn
+        if (CateSelected != null)
+        {
+            Posts = await pos.GetByTypeAsyncCate("project", CateSelected.Id, page_number, page_size);
+            totalItems = await pos.GetTotalCountAsyncCate("project", CateSelected.Id);
+            total_pages = (int)Math.Ceiling((double)totalItems / page_size);
+
+            // Chia bài viết thành các nhóm nhỏ
+            PostChunks = Posts
+                .Select((post, index) => new { post, index })
+                .GroupBy(x => x.index / 3) // Chia thành từng nhóm 3 bài viết
+                .Select(group => group.Select(x => x.post).ToList())
+                .ToList();
+        }
+    }
+
+    private async Task OnCategorySelected(Categories category)
+    {
+        // Nếu danh mục đã chọn khác danh mục hiện tại
+        if (category != null && category.Id != CateSelected?.Id)
+        {
+            CateSelected = category; // Cập nhật danh mục được chọn
+            page_number = 1;         // Reset lại trang về trang đầu tiên
+            await LoadPosts();       // Tải lại bài viết cho danh mục đã chọn
+        }
+    }
+    private void NavDetails(long id)
+    {
+        nav.NavigateTo($"/project-detail/{id}");
+    }
+}
+

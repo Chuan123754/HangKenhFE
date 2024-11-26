@@ -17,16 +17,7 @@ namespace HangKenhFE.Services
             _baseUrl = configuration.GetValue<string>("ApiSettings:BaseUrl"); // Lấy URL từ appsettings.json
         }
 
-        public async Task Create(Categories c)
-        {
-            await _client.PostAsJsonAsync($"{_baseUrl}/api/Category/add-category", c);
-        }
-
-        public async Task Delete(long id)
-        {
-            await _client.DeleteAsync($"{_baseUrl}/api/Category/delete-category?id={id}");
-        }
-
+      
         public async Task<Categories> Details(long id)
         {
             return await _client.GetFromJsonAsync<Categories>($"{_baseUrl}/api/Category/details/{id}");
@@ -35,6 +26,11 @@ namespace HangKenhFE.Services
         public async Task<List<Categories>> GetAll()
         {
             return await _client.GetFromJsonAsync<List<Categories>>($"{_baseUrl}/api/Category/show");
+        }
+
+        public async Task<List<Categories>> GetAllType(string type)
+        {
+            return await _client.GetFromJsonAsync<List<Categories>>($"{_baseUrl}/api/Category/GetAllType?type={type}");
         }
 
         public async Task<List<Categories>> GetByTypeAsync(string type, int pageNumber, int pageSize, string searchTerm)
@@ -55,9 +51,6 @@ namespace HangKenhFE.Services
             return count;
         }
 
-        public async Task Update(Categories c)
-        {
-            await _client.PutAsJsonAsync($"{_baseUrl}/api/Category/edit-category", c);
-        }
+     
     }
 }
