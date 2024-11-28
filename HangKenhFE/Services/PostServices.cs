@@ -21,7 +21,7 @@ namespace HangKenhFE.Services
             var response = await _client.PostAsJsonAsync($"{_baseUrl}/api/Product_Post/Create-page?{tagIdsString}", post);
             response.EnsureSuccessStatusCode(); // Kiểm tra phản hồi
 
-           await response.Content.ReadFromJsonAsync<Product_Posts>(); // Trả về sản phẩm vừa tạo
+            await response.Content.ReadFromJsonAsync<Product_Posts>(); // Trả về sản phẩm vừa tạo
         }
 
         public async Task CreatePost(Product_Posts post, List<long> tagIds, List<long> category)
@@ -47,7 +47,7 @@ namespace HangKenhFE.Services
             var response = await _client.PostAsJsonAsync($"{_baseUrl}/api/Product_Post/Create-product?{tagIdsString}&{categoriesString}", post);
             response.EnsureSuccessStatusCode(); // Kiểm tra phản hồi
 
-             await response.Content.ReadFromJsonAsync<Product_Posts>();
+            await response.Content.ReadFromJsonAsync<Product_Posts>();
         }
 
 
@@ -69,7 +69,7 @@ namespace HangKenhFE.Services
         {
             return await _client.GetFromJsonAsync<List<Product_Posts>>($"{_baseUrl}/api/Product_Post/Get-all-type?Type={type}");
         }
-        
+
         public async Task<Product_Posts> GetByIdType(long id, string type)
         {
             return await _client.GetFromJsonAsync<Product_Posts>($"{_baseUrl}/api/Product_Post/GetByIdAndType?id={id}&type={type}");
@@ -126,6 +126,31 @@ namespace HangKenhFE.Services
             // Gửi yêu cầu GET đến API
             var response = await _client.GetStringAsync($"{_baseUrl}/api/Product_Post/Get-Name-Designer?id={id}");
             return response; // Kết quả trả về sẽ là chuỗi JSON hoặc chuỗi đơn giản
+        }
+
+        public async Task<List<Product_variants>> GetAllByClient()
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/GetAllByClient";
+            // Lấy dữ liệu từ API và ánh xạ vào danh sách Product_variants
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProduct(string type, int pageNumber, int pageSize, string searchTerm)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-type-product?type={type}&pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProduct(string type, string searchTerm)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product?type={type}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
         }
     }
 }

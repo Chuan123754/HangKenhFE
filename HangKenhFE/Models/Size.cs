@@ -16,6 +16,7 @@ namespace HangKenhFE.Models
         public DateTime Create_at { get; set; }
         public DateTime Update_at { get; set; }
         public DateTime Delete_at { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Product_Attributes> Product_Attributes { get; set; } = new List<Product_Attributes>();
 
     }

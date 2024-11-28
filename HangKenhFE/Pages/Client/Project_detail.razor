@@ -133,7 +133,6 @@
     protected async override Task OnInitializedAsync()
     {
         posts_project = await sev.GetByIdType(Id, "project");
-        Console.WriteLine($"Post Title: {posts_project?.Title}, Description: {posts_project?.Description}");
         abc = await sev.GetNameDesigner(posts_project.AuthorId);
         banner = await bnser.GetBannerByProductPostId(Id);
         list_post = await sev.GetCountByType("post", Id);
