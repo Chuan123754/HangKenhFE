@@ -6,9 +6,18 @@ namespace HangKenhFE.IServices
     {
         Task<List<Product_Posts>> GetAllType(string type);
         Task<Product_Posts> GetByIdType(long id, string type);
-
+        Task<List<Product_Posts>> GetCountByType(string type, long designerId);
+        Task<List<Product_variants>> GetAllByClient();
         Task<List<Product_Posts>> GetByTypeAsync(string type, int pageNumber, int pageSize, string searchTerm);
         Task<int> GetTotalCountAsync(string type, string searchTerm);
+        //Phân trang theo type và id cate
+        Task<List<Product_Posts>> GetByTypeAsyncCate(string type, long categoryId, int pageNumber, int pageSize);
+        Task<List<Product_variants>> GetByTypeAsyncProduct(string type, int pageNumber, int pageSize, string searchTerm);
+        // Lấy tổng số bài viết theo type và tìm kiếm
+        Task<int> GetTotalCountAsyncProduct(string type, string searchTerm);
+        // Lấy tổng số bài viết theo type và id cate
+        Task<string?> GetNameDesigner(long id);
+        Task<int> GetTotalCountAsyncCate(string type, long categoryId);
         // Tạo bài viết
         Task CreatePost(Product_Posts post, List<long> tagIds, List<long> category);
         Task CreatePage(Product_Posts post, List<long> tagIds);

@@ -1,0 +1,149 @@
+﻿@typeparam TItem
+@if (TotalItems > 0)
+{
+<div class="d-flex justify-content-center">
+    <ul class="pagination bsb-pagination-1 pagination-lg justify-content-center">
+        @if (PageNumber > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" @onclick="PreviousPage" aria-label="Trang trước">
+                    <span aria-hidden="true">Trang trước</span>
+                </a>
+            </li>
+        }
+        
+        @if (GetPageNumbers(TotalPages, PageNumber).Any() && GetPageNumbers(TotalPages, PageNumber).First() > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" @onclick="@(async () => await GoToPage(1))">1</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+        }
+
+        @foreach (var pageIndex in GetPageNumbers(TotalPages, PageNumber))
+        {
+            <li class="page-item @(pageIndex == PageNumber ? "active" : "")">
+                <a class="page-link" @onclick="@(async () => await GoToPage(pageIndex))">@pageIndex</a>
+            </li>
+        }
+
+        @if (GetPageNumbers(TotalPages, PageNumber).Any() && GetPageNumbers(TotalPages, PageNumber).Last() < TotalPages)
+        {
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            <li class="page-item">
+                <a class="page-link" @onclick="@(async () => await GoToPage(TotalPages))">@TotalPages</a>
+            </li>
+        }
+
+        @if (PageNumber < TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" @onclick="NextPage" aria-label="Trang kế tiếp">
+                    <span aria-hidden="true">Trang kế tiếp</span>
+                </a>
+            </li>
+        }
+
+    </ul>
+    </div>
+}
+else
+{
+   <div>Không có dữ liệu</div>
+}
+
+@code {
+    [Parameter] public int PageNumber { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public int PageSize { get; set; }
+    [Parameter] public int TotalItems { get; set; }
+    [Parameter] public EventCallback<int> OnPageSizeChanged { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private async Task PageSizeChanged(ChangeEventArgs e)
+    {
+        PageSize = int.Parse(e.Value.ToString());
+        await OnPageSizeChanged.InvokeAsync(PageSize);
+    }
+
+    private async Task PreviousPage()
+    {
+        if (PageNumber > 1)
+        {
+            await OnPageChanged.InvokeAsync(PageNumber - 1);
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (PageNumber < TotalPages)
+        {
+            await OnPageChanged.InvokeAsync(PageNumber + 1);
+        }
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page != PageNumber)
+        {
+            await OnPageChanged.InvokeAsync(page);
+        }
+    }
+
+    private List<int> GetPageNumbers(int total_pages, int current_page, int max_visible_pages = 3)
+    {
+        var pages = new List<int>();
+        int startPage, endPage;
+        if (total_pages <= max_visible_pages)
+        {
+            startPage = 1;
+            endPage = total_pages;
+        }
+        else
+        {
+            int maxPagesBeforeCurrentPage = (int)Math.Floor(max_visible_pages / 2.0);
+            int maxPagesAfterCurrentPage = (int)Math.Ceiling(max_visible_pages / 2.0) - 1;
+
+            if (current_page <= maxPagesBeforeCurrentPage)
+            {
+                startPage = 1;
+                endPage = max_visible_pages;
+            }
+            else if (current_page + maxPagesAfterCurrentPage >= total_pages)
+            {
+                startPage = total_pages - max_visible_pages + 1;
+                endPage = total_pages;
+            }
+            else
+            {
+                startPage = current_page - maxPagesBeforeCurrentPage;
+                endPage = current_page + maxPagesAfterCurrentPage;
+            }
+        }
+
+        for (int i = startPage; i <= endPage; i++)
+        {
+            pages.Add(i);
+        }
+
+        return pages;
+    }
+}
+<style>
+
+    .pagination .page-item.disabled .page-link {
+        background: none !important; /* Xóa màu nền cho trạng thái disabled */
+        color: gray; /* Màu chữ mờ hơn để báo hiệu không thể nhấn */
+    }
+
+    .pagination .page-item .page-link {
+        background: none !important; /* Xóa màu nền */
+        border: none !important; /* Xóa viền (nếu cần) */
+        color: inherit; /* Giữ nguyên màu chữ */
+    }
+
+</style>

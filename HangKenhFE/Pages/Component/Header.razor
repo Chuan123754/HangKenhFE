@@ -2,8 +2,8 @@
     <div class="logo middle-header border-bottom pc">
         <a href="/">
             <h1>
-                <img src="{{ get_option('logo') }}"
-                     class="img-logo" alt="hangkenh">
+                <img src="/main/assets/images/Logo_HANGKENH_26-03-01.svg"
+                     class="img-logo" style="width: 222px; height:88px" alt="hangkenh">
             </h1>
         </a>
     </div>
@@ -11,7 +11,7 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg p-0 h-100 d-block">
                 <div class="collapse navbar-collapse justify-content-between flex-grow-0 h-100" id="navbarNav">
-                    <ul class="navbar-nav quick-access h-100 justify-content-around w-100">
+                    <ul class="navbar-nav quick-access h-100 mt-2 justify-content-around w-100">
                       @*   @php($menu = collect(get_menu_nav('Main menu')) )
                         @php($mainMenu = $menu->take(6))
                         @php($secondMenu = $menu->slice(6))
@@ -19,9 +19,9 @@
                             <li class="nav-item"><a href="{{ $item['link'] }}"
                                                     class="text-decoration-none nav-link">{{ $item['label'] }}</a></li>
                         @endforeach *@
-                        <li class="nav-item">
+                 @*        <li class="nav-item">
                             <a href="/" class="text-decoration-none nav-link">Trang chủ</a>
-                        </li>
+                        </li> *@
                         <li class="nav-item">
                             <a href="/introduce" class="text-decoration-none nav-link">Giới thiệu</a>
                         </li>
@@ -36,6 +36,9 @@
                         </li>
                         <li class="nav-item">
                             <a href="/magazine" class="text-decoration-none nav-link">Blogs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/contact" class="text-decoration-none nav-link">Liên hệ</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav quick-action h-100">

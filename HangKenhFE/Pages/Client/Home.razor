@@ -1,187 +1,151 @@
 ﻿@page "/"
 @inject IPostSer sev
-<section class="section-banner m-0">
-    <div class="banner home pc">
-        <div class="banner-item">
-            <div class="banner-image w-100">
-                <img src="main/assets/images/banner-2.jpg" alt="" />
-            </div>
-            <div class="banner-box">
-                <h2 class="banner-title wow" data-wow-delay=".1s">
-                    Cây tre
-                </h2>
-                <p class="banner-description  wow" data-wow-delay=".2s">
-                    Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám.
-                    Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt
-                    Nam, mang tỉnh biểu trưng truyền thống Việt Nam.
-                </p>
-                <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                    <span>SHOP NOW</span>
-                    <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                    </svg>
-                </a>
-            </div>
-            <p class="banner-title-preview">Ellis</p>
+
+@if (bannr_5?.Any() == true)
+{
+    <section class="section-banner m-0">
+        <div class="banner home pc">
+            @foreach (var banner in bannr_5)
+            {
+                <div class="banner-item">
+                    <div class="banner-image w-100">
+                        <img src="@banner.Feature_image" />
+                    </div>
+                    <div class="banner-box">
+                        <h2 class="banner-title wow" data-wow-delay=".1s">
+                           @banner.Title
+                        </h2>
+                        <p class="banner-description wow" data-wow-delay=".2s">
+                           @banner.Description
+                        </p>
+                        <a class="shop-link wow" href="#" data-wow-delay=".3s">
+                            <span>SHOP NOW</span>
+                            <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
+                                      stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                            </svg>
+                        </a>
+                    </div>
+                    <p class="banner-title-preview">@banner.Title</p>
+                </div>
+            }
         </div>
-        <div class="banner-item">
-            <div class="banner-image w-100">
-                <img src="main/assets/images/banner-2.jpg" alt="" />
+        <div class="phone">
+            <div class="banner-show">
+                <img src="main/assets/images/home/banner-1-phone.png" class="banner-1 d-block">
+                <img src="main/assets/images/home/banner-2-phone.png" class="banner-2 d-none">
+                <img src="main/assets/images/home/banner-3-phone.png" class="banner-3 d-none">
+                <img src="main/assets/images/home/banner-4-phone.png" class="banner-4 d-none">
+                <img src="main/assets/images/home/banner-5-phone.png" class="banner-5 d-none">
             </div>
-            <div class="banner-box">
-                <h2 class="banner-title wow" data-wow-delay=".1s">
-                    Cây tre
-                </h2>
-                <p class="banner-description  wow" data-wow-delay=".2s">
-                    Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám.
-                    Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt
-                    Nam, mang tỉnh biểu trưng truyền thống Việt Nam.
-                </p>
-                <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                    <span>SHOP NOW</span>
-                    <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                    </svg>
-                </a>
+            <div class="banner-show-content">
+                <div class="banner-1 banner-content">
+                    <h3>Ellis</h3>
+                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
+                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
+                        <span>SHOP NOW</span>
+                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
+                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="banner-2">
+                    <h3>Modernist Rugs</h3>
+                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
+                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
+                        <span>SHOP NOW</span>
+                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
+                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="banner-3">
+                    <h3>Abstract Rugs</h3>
+                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
+                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
+                        <span>SHOP NOW</span>
+                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
+                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="banner-4">
+                    <h3>Abstract Rugs</h3>
+                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
+                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
+                        <span>SHOP NOW</span>
+                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
+                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="banner-5">
+                    <h3>Round Rugs</h3>
+                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
+                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
+                        <span>SHOP NOW</span>
+                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
+                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                    </a>
+                </div>
             </div>
-            <p class="banner-title-preview">Abstract Rugs</p>
+            <div class="row banner-gid">
+                <div class="col-6 banner-gid-item d-none banner-gid-1" onclick="showBanner(1)">
+                    <img src="main/assets/images/home/banner-1-phone.png">
+                    <h3>Ellis</h3>
+                </div>
+                <div class="col-6 banner-gid-item d-flex banner-gid-2" onclick="showBanner(2)">
+                    <img src="main/assets/images/home/banner-2-phone.png">
+                    <h3>Modernist Rugs</h3>
+                </div>
+                <div class="col-6 banner-gid-item  d-flex banner-gid-3" onclick="showBanner(3)">
+                    <img src="main/assets/images/home/banner-3-phone.png">
+                    <h3>Abstract Rugs</h3>
+                </div>
+                <div class="col-6 banner-gid-item  d-flex banner-gid-4">
+                    <img src="main/assets/images/home/banner-4-phone.png" onclick="showBanner(4)">
+                    <h3>Abstract Rugs</h3>
+                </div>
+                <div class="col-6 banner-gid-item  d-flex banner-gid-5">
+                    <img src="main/assets/images/home/banner-5-phone.png" onclick="showBanner(5)">
+                    <h3>Round Rugs</h3>
+                </div>
+            </div>
         </div>
-        <div class="banner-item ">
-            <div class="banner-image w-100">
-                <img src="main/assets/images/banner-2.jpg" alt="" />
-            </div>
-            <div class="banner-box">
-                <h2 class="banner-title wow" data-wow-delay=".1s">
-                    Cây tre
-                </h2>
-                <p class="banner-description  wow" data-wow-delay=".2s">
-                    Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám.
-                    Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt
-                    Nam, mang tỉnh biểu trưng truyền thống Việt Nam.
-                </p>
-                <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                    <span>SHOP NOW</span>
-                    <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                    </svg>
-                </a>
-            </div>
-            <p class="banner-title-preview">Ellis</p>
-        </div>
-        <div class="banner-item">
-            <div class="banner-image w-100">
-                <img src="main/assets/images/banner-2.jpg" alt="" />
-            </div>
-            <div class="banner-box">
-                <h2 class="banner-title wow" data-wow-delay=".1s">
-                    Cây tre
-                </h2>
-                <p class="banner-description  wow" data-wow-delay=".2s">
-                    Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám.
-                    Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt
-                    Nam, mang tỉnh biểu trưng truyền thống Việt Nam.
-                </p>
-                <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                    <span>SHOP NOW</span>
-                    <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                    </svg>
-                </a>
-            </div>
-            <p class="banner-title-preview">Abstract Rugs</p>
-        </div>
-        <div class="banner-item">
-            <div class="banner-image w-100">
-                <img src="main/assets/images/banner-1.jpg" alt="" />
-            </div>
-            <div class="banner-box">
-                <h2 class="banner-title wow" data-wow-delay=".1s">
-                    Cây tre
-                </h2>
-                <p class="banner-description  wow" data-wow-delay=".2s">
-                    Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám.
-                    Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt
-                    Nam, mang tỉnh biểu trưng truyền thống Việt Nam.
-                </p>
-                <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                    <span>SHOP NOW</span>
-                    <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                    </svg>
-                </a>
-            </div>
-            <p class="banner-title-preview">Round Rugs</p>
-        </div>
-    </div>
-</section>
+    </section>
+}
 <section class="featured-post">
     <div class="container">
         <div class="row">
-            <div class="col-4">
-                <div class="card border-0">
+            @foreach (var pj in product_posts_list.Take(3).ToList())
+            {
+                <div class="col-4">
+                    <div class="card border-0">
                     <div class="post-image">
                         <div class="post-date-tag">
-                            Jan 29, 2021
+                            @pj.Created_at
                         </div>
-                        <img class="w-100" src="main/assets/images/featured-image-1.jpg" alt="">
+                        <img style="width: 416px; height: 535px" class="w-100" src="@pj.Feature_image" alt="@pj.Title">
                     </div>
                     <a href="" class="featured-category">
                         <span></span>
                         <span>INSPIRED BY NATURE</span>
                     </a>
                     <h3 class="featured-title">
-                        Flora and Fauna Inspired Rugs
+                       @pj.Title
                     </h3>
                     <span class="featured-author">
-                        By Ariana Yaptanggo
+                        @pj.Designer?.Name
                     </span>
                 </div>
             </div>
-            <div class="col-4">
-                <div class="card border-0">
-                    <div class="post-image">
-                        <div class="post-date-tag">
-                            Jan 29, 2021
-                        </div>
-                        <img class="w-100" src="main/assets/images/featured-image-1.jpg" alt="">
-                    </div>
-                    <a href="" class="featured-category">
-                        <span></span>
-                        <span>BORDERED RUGS</span>
-                    </a>
-                    <h3 class="featured-title">
-                        Shop Our Modern Rugs Selection
-                    </h3>
-                    <span class="featured-author">
-                        By Ariana Yaptanggo
-                    </span>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="card border-0">
-                    <div class="post-image">
-                        <div class="post-date-tag">
-                            Jan 29, 2021
-                        </div>
-                        <img class="w-100" src="main/assets/images/featured-image-1.jpg" alt="">
-                    </div>
-                    <a href="" class="featured-category">
-                        <span></span>
-                        <span>MODERNIST RUGS</span>
-                    </a>
-                    <h3 class="featured-title">
-                        Contemporary Bordered Designs
-                    </h3>
-                    <span class="featured-author">
-                        By Ariana Yaptanggo
-                    </span>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -268,234 +232,285 @@
             </div>
         </div>
         <div class="product-list">
+
             <div class="row product mt-48px">
-                @*    @for($i = 0; $i < 3; $i++) *@
-                <div class="col-6 col-lg-3 col-md-3 product">
-                    <figure class="card product-card">
-                        <div class="product-image">
-                            <div class="img-wrap">
-                                <img src="main/assets/images/product-1.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
+                @foreach (var item in tak4)
+                {
+                    <div class="col-6 col-lg-3 col-md-3 product">
+                        <figure class="card product-card">
+                            <div class="product-image">
+                                <div class="img-wrap">
+                                    <img src="@item.Posts?.Feature_image"
+                                         class="w-100 h-100 object-fit-cover"
+                                         alt="">
+                                </div>
+                                <div class="img-wrap-hide">
+                                    <img src="@GetFirstImageUrl(item.Posts.Image_library)"
+                                         class="w-100 h-100 object-fit-cover"
+                                         alt="">
+                                </div>
+                                <div class="product-action">
+                                    <a href="javascript:void(0)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+                                            <g clip-path="url(#clip0_1486_972)">
+                                                <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_1486_972">
+                                                    <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    </a>
+                                    <a href="javascript:void(0)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+                                            <g clip-path="url(#clip0_1486_978)">
+                                                <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_1486_978">
+                                                    <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="img-wrap-hide">
-                                <img src="main/assets/images/product-3.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="product-action">
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_972)">
-                                            <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_972">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
+                            <figcaption class="product-info">
+                                <a href="" class="product-name">@item.Posts.Title</a>
+                                <div class="product-description">
+                                    <span class="description">@item.Posts?.Designer?.Name</span>
+                                </div>
+                                @if (item.MinPrice.HasValue && item.MaxPrice.HasValue)
+                                {
+                                    <div class="product-price">
+                                        <span class="price">Giá: @item.MinPrice - @item.MaxPrice VND</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>Chưa có giá</div>
+                                }
+                                <a onclick="showSidebar('sidebar-filter-category')"
+                                   class="btn-white btn-contract btn-contract-mobile">
+                                    <div>Liên hệ</div>
                                 </a>
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_978)">
-                                            <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_978">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                        <figcaption class="product-info">
-                            <a href="" class="product-name">Alpaca</a>
-                            <div class="product-description">
-                                <span class="description">Sarabande</span>
-                            </div>
-                            <div class="product-price">
-                                <span class="price">$1.280</span>
-                            </div>
-                            <a onclick="showSidebar('sidebar-filter-category')"
-                               class="btn-white btn-contract btn-contract-mobile">
-                                <div>Liên hệ</div>
-                            </a>
-                        </figcaption>
-                    </figure>
-                </div>
-                <div class="col-6 col-lg-3 col-md-3 product">
-                    <figure class="card product-card">
-                        <div class="product-image">
-                            <div class="img-wrap">
-                                <img src="main/assets/images/product-1.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="img-wrap-hide">
-                                <img src="main/assets/images/product-3.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="product-action">
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_972)">
-                                            <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_972">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_978)">
-                                            <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_978">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                        <figcaption class="product-info">
-                            <a href="" class="product-name">Alpaca</a>
-                            <div class="product-description">
-                                <span class="description">Sarabande</span>
-                            </div>
-                            <div class="product-price">
-                                <span class="price">$1.280</span>
-                            </div>
-                            <a onclick="showSidebar('sidebar-filter-category')"
-                               class="btn-white btn-contract btn-contract-mobile">
-                                <div>Liên hệ</div>
-                            </a>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-6 col-lg-3 col-md-3 product">
-                    <figure class="card product-card">
-                        <div class="product-image">
-                            <div class="img-wrap">
-                                <img src="main/assets/images/product-1.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="img-wrap-hide">
-                                <img src="main/assets/images/product-3.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="product-action">
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_972)">
-                                            <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_972">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_978)">
-                                            <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_978">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                        <figcaption class="product-info">
-                            <a href="" class="product-name">Alpaca</a>
-                            <div class="product-description">
-                                <span class="description">Sarabande</span>
-                            </div>
-                            <div class="product-price">
-                                <span class="price">$1.280</span>
-                            </div>
-                            <a onclick="showSidebar('sidebar-filter-category')"
-                               class="btn-white btn-contract btn-contract-mobile">
-                                <div>Liên hệ</div>
-                            </a>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-6 col-lg-3 col-md-3 product">
-                    <figure class="card product-card">
-                        <div class="product-image">
-                            <div class="img-wrap">
-                                <img src="main/assets/images/product-1.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="img-wrap-hide">
-                                <img src="main/assets/images/product-3.jpg"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="">
-                            </div>
-                            <div class="product-action">
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_972)">
-                                            <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_972">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_978)">
-                                            <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_978">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                        <figcaption class="product-info">
-                            <a href="" class="product-name">Alpaca</a>
-                            <div class="product-description">
-                                <span class="description">Sarabande</span>
-                            </div>
-                            <div class="product-price">
-                                <span class="price">$1.280</span>
-                            </div>
-                            <a onclick="showSidebar('sidebar-filter-category')"
-                               class="btn-white btn-contract btn-contract-mobile">
-                                <div>Liên hệ</div>
-                            </a>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                @*    @endfor *@
+                            </figcaption>
+                        </figure>
+                    </div>
+                }
             </div>
         </div>
+    </div>
+</section>
+
+@if (product4?.Any() == true)
+{
+    <!-- Swiper CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" rel="stylesheet" />
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <section class="section-5">
+        <!-- Slider for PC -->
+        <div class="swiper trending-slide pc">
+            <div class="swiper-wrapper">
+                @foreach (var product in product4)
+                {
+                    <div class="swiper-slide ms-2">
+                        <div class="swiper-wrapper">
+                            <div class="row">
+                                <div class="col-9">
+                                    <video id="content_video_@product.Id" class="video-js vjs-default-skin video-js-pc"
+                                           controls preload="auto" poster="main/assets/images/introduce-video.png">
+                                        <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
+                                                type="video/youtube" />
+                                    </video>
+                                </div>
+                                <div class="col-3">
+                                    <div class="position-relative">
+                                        <img style="height: 700px" src="@product.Posts.Feature_image"
+                                             alt="@product.Posts.Title">
+                                        <div class="img-title d-flex flex-column" style="gap: 8px">
+                                            <a href="#">
+                                                <h4 class="title">@product.Posts.Title</h4>
+                                            </a>
+                                            <p class="desc">##Danh mục</p>
+                                            <p class="price">@product.MinPrice VND</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- Pagination and Navigation -->
+            <div class="swiper-pagination pc"></div>
+            <div class="swiper-button-prev pc"></div>
+            <div class="swiper-button-next pc"></div>
+        </div>
+
+        <!-- Slider for Phone -->
+        <div class="trending-slide-phone phone">
+            @foreach (var product in product4)
+            {
+                <div class="trending-item">
+                    <div class="trending-item-image">
+                        <video id="content_video_m@product.Id" class="video-js vjs-default-skin video-js-mobile"
+                               controls preload="auto" poster="@("/main/assets/images/introduce-video.png")">
+                            <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
+                                    type="video/youtube" />
+                        </video>
+                    </div>
+                    <div class="trending-item-content">
+                        <div class="position-relative">
+                            <img src="@product." alt="@product.Posts.Title">
+                            <div class="img-title d-flex flex-column" style="gap: 8px">
+                                <a href="#">
+                                    <h4 class="title">@product.Posts.Title</h4>
+                                </a>
+                                <p class="desc">#Danh mục</p>
+                                <p class="price">@product.MinPrice VND</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- Video.js and Swiper.js Scripts -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="/main/assets/js/Youtube.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+    <script>
+        // Initialize Video.js for PC
+        var videos = document.getElementsByClassName('video-js-pc');
+        for (var i = 0; i < videos.length; i++) {
+            videojs(videos[i].id, { autoplay: false });
+        }
+
+        // Initialize Video.js for Mobile
+        var mobileVideos = document.getElementsByClassName('video-js-mobile');
+        for (var i = 0; i < mobileVideos.length; i++) {
+            videojs(mobileVideos[i].id, { autoplay: false });
+        }
+
+        // Initialize Swiper.js for PC
+        var swiperPC = new Swiper('.trending-slide.pc', {
+            loop: true,
+            pagination: {
+                el: '.swiper-pagination.pc',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next.pc',
+                prevEl: '.swiper-button-prev.pc',
+            },
+        });
+
+        // Initialize Swiper.js for Mobile
+        var swiperPhone = new Swiper('.trending-slide-phone.phone', {
+            loop: true,
+            pagination: {
+                el: '.swiper-pagination.phone',
+                clickable: true,
+            },
+        });
+    </script>
+}
+
+@* <section class="section-5">
+    <div class="swiper trending-slide pc">
+        <div class="swiper-wrapper">
+            @foreach (var posttiem in product4)
+            {
+            <div class="row pc">
+                @if ($products->isNotEmpty())
+                @foreach ($products as $index => $product)
+                <div class="col-lg-3 col-md-3 col-6 wow slideInRight" data-wow-delay="0.{{$index}}s">
+                    @include('frontend.shortcodes.product_item', [
+                                'product' => $product
+                                ])
+                </div>
+
+                @endforeach
+                @endif
+            </div>
+
+            <div class="phone product-list-phone slider">
+                @if ($products->isNotEmpty())
+                @foreach ($products as $product)
+                <article>
+                    @include('frontend.shortcodes.product_item', [
+                                'product' => $product
+                                ])
+                </article>
+
+                @endforeach
+                @endif
+            </div>
+        </div>
+        @*   <div class="product-list">
+        <div class="row product mt-48px">
+        @for($i = 0; $i < 3; $i++)
+        <div class="col-6 col-lg-3 col-md-3 product">
+        <figure class="card product-card">
+        <div class="product-image">
+        <div class="img-wrap">
+        <img src="main/assets/images/product-1.jpg"
+        class="w-100 h-100 object-fit-cover"
+        alt="">
+        </div>
+        <div class="img-wrap-hide">
+        <img src="main/assets/images/product-3.jpg"
+        class="w-100 h-100 object-fit-cover"
+        alt="">
+        </div>
+        <div class="product-action">
+        <a href="javascript:void(0)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+        <g clip-path="url(#clip0_1486_972)">
+        <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
+        </g>
+        <defs>
+        <clipPath id="clip0_1486_972">
+        <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
+        </clipPath>
+        </defs>
+        </svg>
+        </a>
+        <a href="javascript:void(0)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+        <g clip-path="url(#clip0_1486_978)">
+        <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
+        </g>
+        <defs>
+        <clipPath id="clip0_1486_978">
+        <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
+        </clipPath>
+        </defs>
+        </svg>
+        </a>
+        </div>
+        </div>
+        <figcaption class="product-info">
+        <a href="" class="product-name">Alpaca</a>
+        <div class="product-description">
+        <span class="description">Sarabande</span>
+        </div>
+        <div class="product-price">
+        <span class="price">$1.280</span>
+        </div>
+        <a onclick="showSidebar('sidebar-filter-category')"
+        class="btn-white btn-contract btn-contract-mobile">
+        <div>Liên hệ</div>
+        </a>
+        </figcaption>
+        </figure>
+        </div>
+        </div>
+        </div> *@
     </div>
 </section>
 <section class="section-5">
@@ -507,32 +522,64 @@
                     <div class="swiper-wrapper">
                         <div class="row">
                             <div class="col-9">
-                                <img src="main/assets/images/section-5.jpg" alt="banner 1">
+                                <video id="content_video_@posttiem.Post_Id" class="video-js vjs-default-skin video-js-pc"
+                                       controls preload="auto" poster="{{asset('main/assets/images/introduce-video.png')}}">
+                                    <source src="@posttiem.Posts?.product_video"
+                                            type="video/youtube" />
+                                </video>
                             </div>
                             <div class="col-3">
                                 <div class="position-relative">
-                                    <img src="main/assets/images/section-5-2.jpg"
-                                         alt="banner 2">
+                                    <img src="@posttiem.Posts?.Feature_image"
+                                         alt="@posttiem.Posts?.Title">
                                     <div class="img-title d-flex flex-column" style="gap: 8px">
-                                        <h4 class="title">The Rug Company Catalog</h4>
-                                        <p class="desc">Sarabande</p>
-                                        <p class="price">$1.990</p>
+                                        <a href="{{ get_permalink($product) }}">
+                                            <h4 class="title">@posttiem.Posts?.Title</h4>
+                                        </a>
+                                        <p class="desc">{{ get_main_category($product->categories)->title ?? '' }}</p>
+                                        <p class="price">@posttiem.MinPrice VND</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                @*     @endfor  *@
-            </div>
-            <div class="swiper-pagination"></div>
-            <!-- If we need navigation buttons -->
-            <div class="swiper-button-prev">
-            </div>
-            <div class="swiper-button-next"></div>
+            }
         </div>
+        <div class="swiper-pagination pc"></div>
+        <!-- If we need navigation buttons -->
+        <div class="swiper-button-prev pc">
+        </div>
+        <div class="swiper-button-next pc"></div>
     </div>
-</section>
+    <div class="trending-slide-phone phone">
+        @foreach (var itemphone in product4)
+        {
+            <div class="trending-item">
+                <div class="trending-item-image">
+                    <video id="content_video_@itemphone.Post_Id" class="video-js vjs-default-skin video-js-mobile"
+                           controls preload="auto" poster="main/assets/images/introduce-video.png">
+                        <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
+                                type="video/youtube" />
+                    </video>
+                </div>
+                <div class="trending-item-content">
+                    <div class="position-relative">
+                        <img src="@itemphone.Posts?.Feature_image"
+                             alt="@itemphone.Posts?.Title">
+                        <div class="img-title d-flex flex-column" style="gap: 8px">
+                            <a href="{{ get_permalink($product) }}">
+                                <h4 class="title">{{ $product->title ?? '' }}</h4>
+                            </a>
+                            <p class="desc">{{ get_main_category($product->categories)->title ?? '' }}</p>
+                            <p class="price">@itemphone.MinPrice VND</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section> *@
 <section class="library">
     <div class="container">
         <div class="row">
@@ -692,7 +739,7 @@
             <div class="col-12 col-md-6 pe-md-0">
                 <div class="post-big-item position-relative">
                     <a href="" class="post-big-image">
-                        <img src="main/assets/images/post-5.jpg" class="object-fit-cover h-100 w-100"
+                        <img src="main/assets/images/post-5.jpg" class="object-fit-cover h-150 w-100"
                              alt="">
                     </a>
                     <div class="content-post">
@@ -708,19 +755,19 @@
                             sợi đa
                             dạng như tre, lá chuối, mohair, merino và alpaca.
                         </div>
-                        <button class="btn-more mx-auto mt-12px">
-                            <span>Xem thêm</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
-                                 fill="none">
-                                <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
-                                      stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                            </svg>
-                        </button>
+                        @*  <button class="btn-more mx-auto mt-12px">
+                        <span>Xem thêm</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                        fill="none">
+                        <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                        stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                        </button> *@
                     </div>
                 </div>
             </div>
             <div class="col-12 col-md-6 ps-md-0 d-grid">
-                @* @for($i = 0; $i <=3; $i++)*@
+                @*    @for ($i = 0; $i <= 4; $i++) *@
                 <div class="d-flex align-items-center border-custom">
                     <div class="f-image">
                         <img src="main/assets/images/post-6.jpg"
@@ -728,12 +775,26 @@
                              alt="">
                     </div>
                     <div class="px-4">
-                        <h4 class="post-right-title">1. Spinning</h4>
+                        <h4 class="post-right-title">1. Chuẩn bị sợi</h4>
                         <p class="post-right-desc">
-                            The rugs are thoroughly washed on both sides; water
-                            is squeezed through the
-                            pile with
-                            wooden paddles called 'pharwa' and left to dry naturally in the sun.
+                            Chải sợi > Se sợi > Nhuộm sợi > Phơi khô > Quấn sợi
+                            Quá trình chuẩn bị sợi từ những bước sơ khai của sợi đến khi sợi được nhuộm xong, phơi khô và cone lại
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center border-custom">
+                    <div class="f-image">
+                        <img src="main/assets/images/post-6.jpg"
+                             class="w-100 h-100"
+                             alt="">
+                    </div>
+                    <div class="px-4">
+                        <h4 class="post-right-title">2. Vẽ thiết kế thảm</h4>
+                        <p class="post-right-desc">
+                            Là quá trình Designer thiết kế thảm trên một âm bản của tấm thảm theo đúng tỷ lệ 1:1.
+                            Bản vẽ hoàn thiện về màu sắc, đường nét, tỷ lệ knots sợi và các phương pháp hiệu ứng mặt.
+                            Nó được đặt sau khung dệt để hướng dẫn người thợ dệt thảm.
                         </p>
                     </div>
                 </div>
@@ -744,12 +805,9 @@
                              alt="">
                     </div>
                     <div class="px-4">
-                        <h4 class="post-right-title">1. Spinning</h4>
+                        <h4 class="post-right-title">3. Dệt thảm</h4>
                         <p class="post-right-desc">
-                            The rugs are thoroughly washed on both sides; water
-                            is squeezed through the
-                            pile with
-                            wooden paddles called 'pharwa' and left to dry naturally in the sun.
+                            Tùy vào dòng thảm được dệt theo phương pháp nào mà người thợ sẽ đan các sợi lại với nhau tạo ra tấm thảm có mật độ sợi theo thiết kế.
                         </p>
                     </div>
                 </div>
@@ -760,32 +818,12 @@
                              alt="">
                     </div>
                     <div class="px-4">
-                        <h4 class="post-right-title">1. Spinning</h4>
+                        <h4 class="post-right-title">4. Hoàn thiện thảm</h4>
                         <p class="post-right-desc">
-                            The rugs are thoroughly washed on both sides; water
-                            is squeezed through the
-                            pile with
-                            wooden paddles called 'pharwa' and left to dry naturally in the sun.
+                            Tấm thảm sau khi dệt song sẽ được dỡ khỏi khung dệt và đem đi tỉa hoa, làm hiệu ứng mặt thảm, hoàn thiện mép viền của tấm thảm trước khi được đem đi giặt sạch và phơi khô
                         </p>
                     </div>
                 </div>
-                <div class="d-flex align-items-center border-custom">
-                    <div class="f-image">
-                        <img src="main/assets/images/post-6.jpg"
-                             class="w-100 h-100"
-                             alt="">
-                    </div>
-                    <div class="px-4">
-                        <h4 class="post-right-title">1. Spinning</h4>
-                        <p class="post-right-desc">
-                            The rugs are thoroughly washed on both sides; water
-                            is squeezed through the
-                            pile with
-                            wooden paddles called 'pharwa' and left to dry naturally in the sun.
-                        </p>
-                    </div>
-                </div>
-                @*              @endfor  *@
             </div>
         </div>
     </div>
@@ -793,11 +831,44 @@
 
 @code {
     private List<Product_Posts> product_posts_list = new List<Product_Posts>();
+    private List<Product_Posts> post_banner = new List<Product_Posts>();
+    private List<Product_Posts> bannr_5 = new List<Product_Posts>();
+    private List<Product_variants> product4 = new List<Product_variants>();
+    private List<Product_variants> tak4 = new List<Product_variants>();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPosts();
+    }
     private async Task LoadPosts()
     {
-
-        //  product_posts_list = await sev.GetAllType("project");
-        product_posts_list = product_posts_list.Where(s => s.Type == "project").OrderByDescending(s => s.Title).Take(3).ToList();
+        product_posts_list = await sev.GetAllType("project");
+        post_banner = await sev.GetAllType("post");
+        bannr_5 = post_banner.Take(5).ToList();
+        product4 = await sev.GetAllByClient();
+        tak4 = product4.Take(4).ToList();
 
     }
+    private string GetFirstImageUrl(string imageUrls)
+    {
+        if (string.IsNullOrEmpty(imageUrls))
+        {
+            return string.Empty;
+        }
+
+        var urls = imageUrls.Split(',');
+        return urls.FirstOrDefault() ?? string.Empty;
+    }
 }
+<script>
+    function showBanner(id) {
+        $(".banner-show").find(".d-block").removeClass("d-block").addClass('d-none');
+        $(".banner-show").find('.banner-' + id).addClass('d-block').removeClass('d-none');
+
+        $(".banner-show-content").find(".banner-content").removeClass("banner-content");
+        $(".banner-show-content").find('.banner-' + id).addClass('banner-content');
+
+
+        $(".banner-gid").find('.d-none').removeClass('d-none').addClass('d-flex');
+        $(".banner-gid-" + id).addClass('d-none');
+    }
+</script>

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace HangKenhFE.Models
 {
@@ -6,7 +7,6 @@ namespace HangKenhFE.Models
     {
         [Key]
         public long Id { get; set; }
-        [Required]
         public string Title { get; set; }
         public string Slug { get; set; }
         public string? Description { get; set; }
@@ -14,6 +14,7 @@ namespace HangKenhFE.Models
         public DateTime Create_at { get; set; }
         public DateTime Update_at { get; set; }
         public DateTime Delete_at { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Product_variants> Product_Variants { get; set; } = new List<Product_variants>();
     }
 }
