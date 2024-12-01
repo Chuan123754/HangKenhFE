@@ -1,11 +1,11 @@
 ﻿@page "/"
 @inject IPostSer sev
 
-@if (bannr_5?.Any() == true)
+@if (Secsion1_post_banner5?.Any() == true)
 {
     <section class="section-banner m-0">
         <div class="banner home pc">
-            @foreach (var banner in bannr_5)
+            @foreach (var banner in Secsion1_post_banner5.Take(5).ToList())
             {
                 <div class="banner-item">
                     <div class="banner-image w-100">
@@ -30,106 +30,18 @@
                 </div>
             }
         </div>
-        <div class="phone">
-            <div class="banner-show">
-                <img src="main/assets/images/home/banner-1-phone.png" class="banner-1 d-block">
-                <img src="main/assets/images/home/banner-2-phone.png" class="banner-2 d-none">
-                <img src="main/assets/images/home/banner-3-phone.png" class="banner-3 d-none">
-                <img src="main/assets/images/home/banner-4-phone.png" class="banner-4 d-none">
-                <img src="main/assets/images/home/banner-5-phone.png" class="banner-5 d-none">
-            </div>
-            <div class="banner-show-content">
-                <div class="banner-1 banner-content">
-                    <h3>Ellis</h3>
-                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
-                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                        <span>SHOP NOW</span>
-                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="banner-2">
-                    <h3>Modernist Rugs</h3>
-                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
-                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                        <span>SHOP NOW</span>
-                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="banner-3">
-                    <h3>Abstract Rugs</h3>
-                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
-                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                        <span>SHOP NOW</span>
-                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="banner-4">
-                    <h3>Abstract Rugs</h3>
-                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
-                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                        <span>SHOP NOW</span>
-                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="banner-5">
-                    <h3>Round Rugs</h3>
-                    <p>Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh biểu trưng truyền thống Việt Nam.</p>
-                    <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                        <span>SHOP NOW</span>
-                        <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-            <div class="row banner-gid">
-                <div class="col-6 banner-gid-item d-none banner-gid-1" onclick="showBanner(1)">
-                    <img src="main/assets/images/home/banner-1-phone.png">
-                    <h3>Ellis</h3>
-                </div>
-                <div class="col-6 banner-gid-item d-flex banner-gid-2" onclick="showBanner(2)">
-                    <img src="main/assets/images/home/banner-2-phone.png">
-                    <h3>Modernist Rugs</h3>
-                </div>
-                <div class="col-6 banner-gid-item  d-flex banner-gid-3" onclick="showBanner(3)">
-                    <img src="main/assets/images/home/banner-3-phone.png">
-                    <h3>Abstract Rugs</h3>
-                </div>
-                <div class="col-6 banner-gid-item  d-flex banner-gid-4">
-                    <img src="main/assets/images/home/banner-4-phone.png" onclick="showBanner(4)">
-                    <h3>Abstract Rugs</h3>
-                </div>
-                <div class="col-6 banner-gid-item  d-flex banner-gid-5">
-                    <img src="main/assets/images/home/banner-5-phone.png" onclick="showBanner(5)">
-                    <h3>Round Rugs</h3>
-                </div>
-            </div>
-        </div>
     </section>
 }
 <section class="featured-post">
     <div class="container">
         <div class="row">
-            @foreach (var pj in product_posts_list.Take(3).ToList())
+            @foreach (var pj in Secsion2_project_noibat3.Take(3).ToList())
             {
                 <div class="col-4">
                     <div class="card border-0">
                         <div class="post-image">
                             <div class="post-date-tag">
-                                @pj.Created_at
+                                @pj.Created_at.ToString("dd/MM/yyyy HH:mm:ss")
                             </div>
                             <img style="width: 416px; height: 535px" class="w-100" src="@pj.Feature_image" alt="@pj.Title">
                         </div>
@@ -168,7 +80,7 @@
                     </h2>
                 </div>
                 <button class="btn-more">
-                    <span>Xem thêm</span>
+                    <span>Liên hệ</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
                          fill="none">
                         <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
@@ -176,47 +88,36 @@
                     </svg>
                 </button>
             </div>
-            <div class="tblock-right">
-                <img src="main/assets/images/banner-111.png"
-                     alt="Ảnh 2">
+            @foreach (var sp1 in Secsion3_product_trendy4.Take(1).ToList())
+            {
+                <div class="tblock-right">
+                    <img src="@sp1.Feature_image"
+                     alt="@sp1.Title">
                 <div class="img-desc">
-                    <h2>Channels copper</h2>
+                    <h2>@sp1.Title</h2>
                     <div class="decoration-title d-flex align-center">
                         <div></div>
                     </div>
                     <p>
-                        Viền cấu tào từ hoa văn cách điệu từ đốt tre và nền trơn màu ghi xám. Đường viền thảm màu
-                        xanh rêu và cỏ úa nhạt được ghép từ những hoa văn cách điệu từ đốt tre Việt Nam, mang tỉnh
-                        biểu trưng truyền thống Việt Nam.
+                        @sp1.Short_description
                     </p>
                 </div>
             </div>
+            }
         </div>
         <div class="trending-box trending-box-item mt-24px">
-            <div class="flex-item">
-                <div class="position-relative">
-                    <img src="main/assets/images/banner-222.png" alt="Ảnh 3" class="img-fluid">
+            @foreach (var sp3 in Secsion3_product_trendy4.Skip(1).Take(3).ToList())
+            {
+                <div class="flex-item">
+                    <div class="position-relative">
+                    <img src="@sp3.Feature_image" alt="Ảnh 3" class="img-fluid">
                     <div class="img-title">
-                        <h2>Tonal Textures</h2>
+                        <h2>@sp3.Title</h2>
                     </div>
                 </div>
             </div>
-            <div class="flex-item">
-                <div class="position-relative">
-                    <img src="main/assets/images/banner-222.png" alt="Ảnh 3" class="img-fluid">
-                    <div class="img-title">
-                        <h2>Tonal Textures</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-item">
-                <div class="position-relative">
-                    <img src="main/assets/images/banner-222.png" alt="Ảnh 3" class="img-fluid">
-                    <div class="img-title">
-                        <h2>Tonal Textures</h2>
-                    </div>
-                </div>
-            </div>
+            }
+           
         </div>
     </div>
 </section>
@@ -422,66 +323,69 @@
 <section class="library">
     <div class="container">
         <div class="row">
-            <div class="col-md-6 col-12">
-                <img class="w-100" src="main/assets/images/image-63.jpg" alt="">
-                <div class="article">
-                    <h3 class="article-heading">Projects Gallery</h3>
-                    <div class="article-description">
-                        Từ thực vật trừu tượng đến động vật có họa tiết, hãy khám phá khả năng thiết kế riêng và tùy
-                        chỉnh của chúng tôi thông qua các dự án lấy cảm hứng từ thiên nhiên này. Heart of the Vine,
-                        một tấm thảm trải kín tường và tấm lót cầu thang được thiết kế riêng cho…
+            @foreach (var item1 in Secsion4_project_antuong.Take(1).ToList())
+            {
+                <div class="col-md-6 col-12">
+                    <img class="w-100" src="@item1.Feature_image" alt="@item1.Title">
+                    <div class="article">
+                        <h3 class="article-heading">@item1.Title</h3>
+                        <div class="article-description">
+                           @item1.Short_description
+                        </div>
+                        <button class="btn-more">
+                            <span>Xem thêm</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
+                                 fill="none">
+                                <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
+                                      stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                            </svg>
+                        </button>
                     </div>
-                    <button class="btn-more">
-                        <span>Xem thêm</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
-                             fill="none">
-                            <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
-                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                    </button>
                 </div>
-            </div>
+            }
             <div class="col-md-6 col-12">
                 <div class="d-grid">
-                    <div class="col">
-                        <img src="main/assets/images/image-64.jpg" class="w-100" alt="">
-                        <div class="article">
-                            <h3 class="article-heading">OEM By HangKenh Rugs</h3>
-                            <div class="article-description">
-                                Từ thực vật trừu tượng đến động vật có họa tiết, hãy khám phá khả năng thiết…
+                    @foreach (var item2 in Secsion4_project_antuong.Take(1).Skip(1).ToList())
+                    {
+                        <div class="col">
+                            <img src="@item2.Feature_image" class="w-100" alt="@item2.Title">
+                            <div class="article">
+                                <h3 class="article-heading">@item2.Title</h3>
+                                <div class="article-description">
+                                    @item2.Short_description
+                                </div>
+                                <button class="btn-more">
+                                    <span>Xem thêm</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
+                                         fill="none">
+                                        <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
+                                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                    </svg>
+                                </button>
                             </div>
-                            <button class="btn-more">
-                                <span>Xem thêm</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
-                                     fill="none">
-                                    <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
-                                          stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                                </svg>
-                            </button>
                         </div>
-                    </div>
-                    <div class="col mt-24px">
-                        <img src="main/assets/images/article-2.jpg" class="w-100" alt="">
-                        <div class="article">
-                            <h3 class="article-heading">OEM By HangKenh Rugs</h3>
-                            <div class="article-description">
-                                Từ thực vật trừu tượng đến động vật có họa tiết, hãy khám phá khả năng thiết kế
-                                riêng và tùy
-                                chỉnh của chúng tôi thông qua các dự án lấy cảm hứng từ thiên nhiên này. Heart of
-                                the Vine,
-                                một tấm thảm trải kín tường và tấm lót cầu thang được thiết kế riêng cho…
-                            </div>
-                            <button class="btn-more">
-                                <span>Xem thêm</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
-                                     fill="none">
-                                    <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
-                                          stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                                </svg>
-                            </button>
+                    }
+                    @foreach (var item3 in Secsion4_project_antuong.Take(1).Skip(2).ToList())
+                    {
+                        <div class="col mt-24px">
+                            <img src="@item3.Feature_image" class="w-100" alt="@item3.Title">
+                            <div class="article">
+                                <h3 class="article-heading">@item3.Title</h3>
+                                <div class="article-description">
+                                    @item3.Short_description
+                                </div>
+                                <button class="btn-more">
+                                    <span>Xem thêm</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
+                                         fill="none">
+                                        <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
+                                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                    </svg>
+                                </button>
 
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
@@ -504,7 +408,7 @@
                 <div class="col-md-4 col-12">
                     <div class="post-image">
                         <div class="post-date-tag">
-                            @pj.Created_at
+                            @pj.Created_at.ToString("dd/MM/yyyy HH:mm:ss")
                         </div>
                         <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
                     </div>
@@ -531,93 +435,47 @@
     <div class="container">
         <div class="row">
             <div class="col-12 col-md-6 pe-md-0">
-                <div class="post-big-item position-relative">
-                    <a href="" class="post-big-image">
-                        <img src="main/assets/images/post-5.jpg" class="object-fit-cover h-150 w-100"
-                             alt="">
-                    </a>
-                    <div class="content-post">
-                        <div class="post-big-title">Nghề thủ công</div>
-                        <div class="post-big-short-desc">
-                            Có nhiều cách để làm một tấm thảm bằng tay và nhiều chất liệu để bạn lựa chọn. Các loại
-                            sợi
-                            khác nhau thể hiện các đặc tính khác nhau về độ bền, độ mềm và độ bóng. Một số loại mịn
-                            và
-                            mát khi chạm vào trong khi một số khác lại mềm mại và ấm áp một cách xa hoa. Ngoài sự
-                            quyến
-                            rũ rõ ràng hơn của len, lụa và bông, chúng tôi đã khám phá những ưu điểm của các loại
-                            sợi đa
-                            dạng như tre, lá chuối, mohair, merino và alpaca.
+                @foreach (var item in Secsion5_post_quytrinh.Take(1).ToList())
+                {
+                    <div class="post-big-item position-relative">
+                        <a href="" class="post-big-image">
+                            <img src="@item.Feature_image" class="object-fit-cover h-150 w-100"
+                                 alt="">
+                        </a>
+                        <div class="content-post">
+                            <div class="post-big-title">Nghề thủ công</div>
+                            <div class="post-big-short-desc">
+                                @item.Short_description
+                            </div>
+                            <button class="btn-more mx-auto mt-12px">
+                                <span>Xem thêm</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                                     fill="none">
+                                    <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                          stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                </svg>
+                            </button>
                         </div>
-                        @*  <button class="btn-more mx-auto mt-12px">
-                        <span>Xem thêm</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
-                        fill="none">
-                        <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
-                        stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                        </svg>
-                        </button> *@
                     </div>
-                </div>
+                }
             </div>
             <div class="col-12 col-md-6 ps-md-0 d-grid">
-                @*    @for ($i = 0; $i <= 4; $i++) *@
-                <div class="d-flex align-items-center border-custom">
-                    <div class="f-image">
-                        <img src="main/assets/images/post-6.jpg"
-                             class="w-100 h-100"
-                             alt="">
+                @foreach (var it in Secsion5_post_quytrinh.Take(4).Skip(1).ToList())
+                {
+                    <div class="d-flex align-items-center border-custom">
+                        <div class="f-image">
+                            <img src="@it.Feature_image"
+                                 class="w-100 h-100"
+                                 alt="">
+                        </div>
+                        <div class="px-4">
+                            <h4 class="post-right-title">@it.Title</h4>
+                            <p class="post-right-desc">
+                                @it.Short_description
+                            </p>
+                        </div>
                     </div>
-                    <div class="px-4">
-                        <h4 class="post-right-title">1. Chuẩn bị sợi</h4>
-                        <p class="post-right-desc">
-                            Chải sợi > Se sợi > Nhuộm sợi > Phơi khô > Quấn sợi
-                            Quá trình chuẩn bị sợi từ những bước sơ khai của sợi đến khi sợi được nhuộm xong, phơi khô và cone lại
-                        </p>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center border-custom">
-                    <div class="f-image">
-                        <img src="main/assets/images/post-6.jpg"
-                             class="w-100 h-100"
-                             alt="">
-                    </div>
-                    <div class="px-4">
-                        <h4 class="post-right-title">2. Vẽ thiết kế thảm</h4>
-                        <p class="post-right-desc">
-                            Là quá trình Designer thiết kế thảm trên một âm bản của tấm thảm theo đúng tỷ lệ 1:1.
-                            Bản vẽ hoàn thiện về màu sắc, đường nét, tỷ lệ knots sợi và các phương pháp hiệu ứng mặt.
-                            Nó được đặt sau khung dệt để hướng dẫn người thợ dệt thảm.
-                        </p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-custom">
-                    <div class="f-image">
-                        <img src="main/assets/images/post-6.jpg"
-                             class="w-100 h-100"
-                             alt="">
-                    </div>
-                    <div class="px-4">
-                        <h4 class="post-right-title">3. Dệt thảm</h4>
-                        <p class="post-right-desc">
-                            Tùy vào dòng thảm được dệt theo phương pháp nào mà người thợ sẽ đan các sợi lại với nhau tạo ra tấm thảm có mật độ sợi theo thiết kế.
-                        </p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-custom">
-                    <div class="f-image">
-                        <img src="main/assets/images/post-6.jpg"
-                             class="w-100 h-100"
-                             alt="">
-                    </div>
-                    <div class="px-4">
-                        <h4 class="post-right-title">4. Hoàn thiện thảm</h4>
-                        <p class="post-right-desc">
-                            Tấm thảm sau khi dệt song sẽ được dỡ khỏi khung dệt và đem đi tỉa hoa, làm hiệu ứng mặt thảm, hoàn thiện mép viền của tấm thảm trước khi được đem đi giặt sạch và phơi khô
-                        </p>
-                    </div>
-                </div>
+                }
             </div>
         </div>
     </div>
@@ -625,8 +483,12 @@
 
 @code {
     private List<Product_Posts> product_posts_list = new List<Product_Posts>();
+    private List<Product_Posts> Secsion2_project_noibat3 = new List<Product_Posts>();
+    private List<Product_Posts> Secsion3_product_trendy4 = new List<Product_Posts>();
+    private List<Product_Posts> Secsion4_project_antuong = new List<Product_Posts>();
+    private List<Product_Posts> Secsion5_post_quytrinh = new List<Product_Posts>();
     private List<Product_Posts> post_banner = new List<Product_Posts>();
-    private List<Product_Posts> bannr_5 = new List<Product_Posts>();
+    private List<Product_Posts> Secsion1_post_banner5 = new List<Product_Posts>();
     private List<Product_variants> product4 = new List<Product_variants>();
     private List<Product_variants> tak4 = new List<Product_variants>();
     protected override async Task OnInitializedAsync()
@@ -637,7 +499,11 @@
     {
         product_posts_list = await sev.GetAllType("project");
         post_banner = await sev.GetAllType("post");
-        bannr_5 = post_banner.Take(5).ToList();
+        Secsion1_post_banner5 = await sev.GetAllByClientTypeCate("post", "banner-item");
+        Secsion2_project_noibat3 = await sev.GetAllByClientTypeCate("project", "du-an-noi-bat-3");
+        Secsion3_product_trendy4 = await sev.GetAllByClientTypeCate("product", "san-pham-trendy-4");
+        Secsion4_project_antuong = await sev.GetAllByClientTypeCate("project", "du-an-da-lam-3");
+        Secsion5_post_quytrinh = await sev.GetAllByClientTypeCate("post", "quy-trinh");
         product4 = await sev.GetAllByClient();
         tak4 = product4.Take(4).ToList();
 

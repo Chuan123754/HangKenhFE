@@ -8,6 +8,7 @@ namespace HangKenhFE.IServices
         Task<Product_Posts> GetByIdType(long id, string type);
         Task<List<Product_Posts>> GetCountByType(string type, long designerId);
         Task<List<Product_variants>> GetAllByClient();
+        Task<List<Product_Posts>> GetAllByClientTypeCate(string type, string cate);
         Task<List<Product_Posts>> GetByTypeAsync(string type, int pageNumber, int pageSize, string searchTerm);
         Task<int> GetTotalCountAsync(string type, string searchTerm);
         //Phân trang theo type và id cate

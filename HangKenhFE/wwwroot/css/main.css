@@ -193,6 +193,15 @@
     scroll-behavior: smooth;
   }
 }
+.toast-success {
+    background-color: #4caf50 !important; /* Nền xanh */
+    color: #fff !important; /* Màu chữ trắng */
+}
+
+.toast-error {
+    background-color: #f44336 !important; /* Nền đỏ */
+    color: #fff !important; /* Màu chữ trắng */
+}
 
 body {
   margin: 0;

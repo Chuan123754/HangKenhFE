@@ -5,6 +5,7 @@ using HangKenhFE.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using ViewsFE.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ builder.Services.AddScoped<IPostSer, PostServices>();
 builder.Services.AddScoped<IDesignerServices, DesignerServices>();
 builder.Services.AddScoped<IBannerServices, BannerServices>();
 builder.Services.AddScoped<ICategoriesServices, CategoriesServices>();
+builder.Services.AddScoped<IContacServices, ContacServices>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

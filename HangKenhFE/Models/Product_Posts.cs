@@ -24,11 +24,6 @@ namespace HangKenhFE.Models
 
         [StringLength(20)]
         public string? Status { get; set; }
-        public bool? bannernoibat { get; set; }
-        public bool? duannoibat { get; set; }
-        public bool? trendy { get; set; }
-        public bool? baivietnoibat { get; set; }
-        public bool? quytrinh { get; set; }
         public long AuthorId { get; set; }
         public bool? Deleted { get; set; }
 
@@ -48,7 +43,7 @@ namespace HangKenhFE.Models
 
         public DateTime? Deleted_at { get; set; }
 
-        public DateTime? Created_at { get; set; }
+        public DateTime Created_at { get; set; }
 
         public DateTime? Updated_at { get; set; }
         [JsonIgnore]
