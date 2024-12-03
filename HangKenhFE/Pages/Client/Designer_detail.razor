@@ -195,12 +195,14 @@
     private Designer designer = new Designer();
     private MetaData metaData = new MetaData();
     private List<Product_Posts> list_post = new List<Product_Posts>();
+    private List<Product_variants> list_product = new List<Product_variants>();
     private Banner banner = new Banner();
     protected async override Task OnInitializedAsync()
     {
         designer = await sev.GetById(Id);
         banner = await bnser.GetBannerByDesignerId(Id);
         list_post = await pot.GetCountByType("post", Id);
+        list_product = await pot.GetCountByTypeDesigner( Id);
 
         metaData = designer.GetMetaData();
     }

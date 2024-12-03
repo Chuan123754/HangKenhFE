@@ -1,5 +1,6 @@
 ﻿using HangKenhFE.IServices;
 using HangKenhFE.Models;
+using Newtonsoft.Json;
 
 namespace HangKenhFE.Services
 {
@@ -12,59 +13,13 @@ namespace HangKenhFE.Services
             _client = new HttpClient();
             _baseUrl = configuration.GetValue<string>("ApiSettings:BaseUrl"); // Lấy URL từ appsettings.json
         }
-
-        public async Task CreatePage(Product_Posts post, List<long> tagIds)
+        public async Task<List<Product_Attributes>> GetProductAttributesByProductVarianIdClient(long id)
         {
-            // Chuyển đổi danh sách tagIds và category thành chuỗi query string
-            var tagIdsString = string.Join("&tagIds=", tagIds);
-
-            var response = await _client.PostAsJsonAsync($"{_baseUrl}/api/Product_Post/Create-page?{tagIdsString}", post);
-            response.EnsureSuccessStatusCode(); // Kiểm tra phản hồi
-
-            await response.Content.ReadFromJsonAsync<Product_Posts>(); // Trả về sản phẩm vừa tạo
+            string requestURL = $"{_baseUrl}/api/ProductAttributes/GetProductAttributesByProductVarianIdClient?id={id}";
+            var response = await _client.GetStringAsync(requestURL);
+            return JsonConvert.DeserializeObject<List<Product_Attributes>>(response);
         }
-
-        public async Task CreatePost(Product_Posts post, List<long> tagIds, List<long> category)
-        {
-            // Chuyển đổi danh sách tagIds và category thành chuỗi query string
-            var tagIdsString = string.Join("&tagIds=", tagIds);
-            var categoriesString = string.Join("&cate=", category);
-
-            // Gửi yêu cầu POST với các tham số cần thiết
-            var response = await _client.PostAsJsonAsync($"{_baseUrl}/api/Product_Post/Create-post?{tagIdsString}&{categoriesString}", post);
-            response.EnsureSuccessStatusCode(); // Kiểm tra phản hồi
-
-            await response.Content.ReadFromJsonAsync<Product_Posts>(); // Trả về sản phẩm vừa tạo
-        }
-
-        public async Task CreateProduct(Product_Posts post, List<long> tagIds, List<long> category)
-        {
-            // Chuyển đổi danh sách tagIds và category thành chuỗi query string
-            var tagIdsString = string.Join("&tagIds=", tagIds);
-            var categoriesString = string.Join("&cate=", category);
-
-            // Gửi yêu cầu POST với các tham số cần thiết
-            var response = await _client.PostAsJsonAsync($"{_baseUrl}/api/Product_Post/Create-product?{tagIdsString}&{categoriesString}", post);
-            response.EnsureSuccessStatusCode(); // Kiểm tra phản hồi
-
-            await response.Content.ReadFromJsonAsync<Product_Posts>();
-        }
-
-
-        public async Task CreateProject(Product_Posts post, List<long> tagIds, List<long> category)
-        {
-            var tagIdsString = string.Join("&tagIds=", tagIds);
-            var categoriesString = string.Join("&cate=", category);
-            var url = $"{_baseUrl}/api/Product_Post/Create-project?tagIds={tagIdsString}&cate={categoriesString}";
-            var response = await _client.PostAsJsonAsync(url, post);
-            response.EnsureSuccessStatusCode();
-        }
-
-        public async Task Delete(long id)
-        {
-            await _client.DeleteAsync($"{_baseUrl}/api/Product_Post/Delete-post?id={id}");
-        }
-
+       
         public async Task<List<Product_Posts>> GetAllType(string type)
         {
             return await _client.GetFromJsonAsync<List<Product_Posts>>($"{_baseUrl}/api/Product_Post/Get-all-type?Type={type}");
@@ -116,10 +71,7 @@ namespace HangKenhFE.Services
             return count;
         }
 
-        public async Task Update(Product_Posts post)
-        {
-            await _client.PutAsJsonAsync($"{_baseUrl}/api/Product_Post/Edit-post", post);
-        }
+   
 
         public async Task<string?> GetNameDesigner(long id)
         {
@@ -156,6 +108,11 @@ namespace HangKenhFE.Services
         public async Task<List<Product_Posts>> GetAllByClientTypeCate(string type, string cate)
         {
             return await _client.GetFromJsonAsync<List<Product_Posts>>($"{_baseUrl}/api/Product_Post/Get-all-client-type-cate?type={type}&cate={cate}");
+        }
+
+        public async Task<List<Product_variants>> GetCountByTypeDesigner(long designerId)
+        {
+            return await _client.GetFromJsonAsync<List<Product_variants>>($"{_baseUrl}/api/Product_Post/GetCountByTypeDesigner?designerId={designerId}");
         }
     }
 }
