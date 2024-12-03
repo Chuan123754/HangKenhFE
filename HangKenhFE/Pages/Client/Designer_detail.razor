@@ -148,23 +148,23 @@
                 <div></div>
             </div>
         </div>
-        @if (list_post != null && list_post.Count > 0)
+        @if (list_product != null && list_product.Count > 0)
         {
-            for (int i = 0; i < list_post.Count; i++)
+            for (int i = 0; i < list_product.Count; i++)
             {
-                var post = list_post[i]; // Lấy bài viết theo chỉ số `i`
+                var post = list_product[i]; // Lấy bài viết theo chỉ số `i`
 
                 <div class="row mb-80px @(i % 2 != 0 ? "flex-row-reverse" : "")">
                     <div class="col-6">
                         <div style="height: 675px">
-                            <img src="@post.Feature_image" class="w-100 h-100 object-fit-cover" alt="@post.Title">
+                            <img src="@post.Posts.Feature_image" class="w-100 h-100 object-fit-cover" alt="@post.Posts.Title">
                         </div>
                         <div class="article">
-                            <h3 class="article-heading">@post.Title</h3>
+                            <h3 class="article-heading">@post.Posts.Title</h3>
                             <div class="article-description">
-                                @post.Short_description
+                                @post.Posts.Short_description
                             </div>
-                            <a>
+                            <a @onclick="() => NavDetails(post.Id)">
                                 <button class="btn-white">
                                     <span>Xem thêm</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21" fill="none">
@@ -177,8 +177,8 @@
                     </div>
                     <div class="col-6" style="height: 1000px">
                         <img class="w-100 h-100 object-fit-cover"
-                             src="@GetFirstImageUrl(post.Image_library)"
-                             alt="@post.Title">
+                             src="@GetFirstImageUrl(post.Posts.Image_library)"
+                             alt="@post.Posts.Title">
                     </div>
                 </div>
             }
@@ -218,7 +218,7 @@
     }
     private void NavDetails(long id)
     {
-        nav.NavigateTo($"/project-detail/{id}");
+        nav.NavigateTo($"/product-detail/{id}");
     }
 
     private string GetCleanText(string input)

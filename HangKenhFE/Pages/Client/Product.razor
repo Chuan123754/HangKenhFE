@@ -1,12 +1,13 @@
 ﻿@page "/product-detail/{id:long}"
 @inject IPostSer sev
 @inject IBannerServices baner
+@inject NavigationManager nav
 <section class="section-banner">
-    <img src="main/assets/images/banner-category.jpg"
+    <img src="@banner.Meta_data"
          class="w-100 h-100" alt="banner-image-3">
     <div class="title-banner">
         <h1>
-            Sản phẩm
+            @banner.Name
         </h1>
     </div>
 </section>
@@ -422,14 +423,16 @@
                 <div class="col-3 product">
                     <figure class="card product-card">
                         <div class="product-image">
-                            <div class="img-wrap">
-                                <img src="@prod.Posts.Feature_image"
-                                     class="w-100 h-100 object-fit-cover">
-                            </div>
-                            <div class="img-wrap-hide">
-                                <img src="@GetFirstImageUrl(prod.Posts.Image_library)"
-                                     class="w-100 h-100 object-fit-cover">
-                            </div>
+                            <a @onclick="() => NavDetails(prod.Id)" class="w-100">
+                                <div class="img-wrap">
+                                    <img src="@prod.Posts.Feature_image"
+                                         class="w-100 h-100 object-fit-cover">
+                                </div>
+                                <div class="img-wrap-hide">
+                                    <img src="@GetFirstImageUrl(prod.Posts.Image_library)"
+                                         class="w-100 h-100 object-fit-cover">
+                                </div>
+                            </a>
                             <div class="product-action">
                                 <a href="javascript:void(0)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
@@ -458,7 +461,7 @@
                             </div>
                         </div>
                         <figcaption class="product-info">
-                            <a href="" class="product-name">@prod.Posts.Title</a>
+                            <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Posts.Title</a>
                             <div class="product-description">
                                 <span class="description">@prod.Posts?.Designer?.Name</span>
                             </div>
@@ -517,7 +520,8 @@
             selectedSizeId = selectedProduct.Size.Id;
             selectedColorId = selectedProduct.Color.Id;
         }
-     //   banner = await baner.GetBannerByProductPostId(productPostId);
+        productPostId = selectedProduct.Product_Variant.Posts.Id;
+        banner = await baner.GetBannerByProductPostId(productPostId);
         await LoadPosts();
     }
     private void OnColorChanged(long colorId)
@@ -578,5 +582,9 @@
 
         var urls = imageUrls.Split(',');
         return urls.FirstOrDefault() ?? string.Empty;
+    }
+    private void NavDetails(long id)
+    {
+        nav.NavigateTo($"/product-detail/{id}");
     }
 }
