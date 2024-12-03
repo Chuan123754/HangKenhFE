@@ -129,7 +129,7 @@
             // Chia bài viết thành các nhóm nhỏ
             PostChunks = Posts
                 .Select((post, index) => new { post, index })
-                .GroupBy(x => x.index / 3) // Chia thành từng nhóm 3 bài viết
+                .GroupBy(x => x.index / 2) // Chia thành từng nhóm 3 bài viết
                 .Select(group => group.Select(x => x.post).ToList())
                 .ToList();
         }
