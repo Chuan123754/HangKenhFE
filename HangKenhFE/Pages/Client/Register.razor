@@ -165,32 +165,19 @@
             else
             {
                 await JS.InvokeVoidAsync("toastr.success", "Đăng nhập thành công");
-                var serializedUser = JsonSerializer.Serialize(result);
-
-                // Lưu chuỗi JSON vào SessionStorage
+                var serializedUser = Newtonsoft.Json.JsonConvert.SerializeObject(result);
                 await SessionStorage.SetItemAsync("UserInfo", serializedUser);
+
+
                 navigationManager.NavigateTo("/introduce");
             }
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("toastr.error", $"Đăng nhập thất bại");
+            Console.WriteLine($"Lỗi: {ex.Message}");
+            await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
         }
     }
-    private async Task<Users> GetUserFromSession()
-    {
-        var serializedUser = await SessionStorage.GetItemAsStringAsync("UserInfo");
-
-        if (string.IsNullOrEmpty(serializedUser))
-        {
-            return null;
-        }
-
-        return JsonSerializer.Deserialize<Users>(serializedUser);
-    }
-
-
-
     private async Task HandleRegisterAsync()
     {
     }
