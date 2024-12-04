@@ -3,6 +3,7 @@
 @inject ICartService cartServices
 @inject IProductAttributeServies productAttributeServices
 @inject IProductVariantServices productVariantServices
+@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
          class="w-100 h-100" alt="banner-image-3">
@@ -17,6 +18,90 @@
         <div class="row">         
             <main class="col-md-9">
                 <div class="row product mt-48px">
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter text-nowrap datatable">
+                            <thead>
+                                <tr>
+                                    <th>Hình Ảnh</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Màu</th>
+                                    <th>Kích thước</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in lst_CartDetails)
+                                {
+                                    <tr>
+                                        <td><img src="@item.Product_Attributes.Image" alt="Hình ảnh" style="width: 80px; height: auto;" /></td>
+                                        <td>@item.Product_Attributes.SKU </td>
+                                        <td class="sort-city">
+                                            <div class="d-flex align-items-center">
+                                                <span>@item.Product_Attributes.Color.Title</span>
+                                                <div class="color-preview"
+                                                     style="width: 24px; height: 24px; background-color: @item.Product_Attributes.Color.Color_code; border-radius: 50%; border: 1px solid #ddd; margin-left: 8px;">
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@item.Product_Attributes.Size.Title</td>
+                                        <td>
+@*                                             <button class="btn btn-sm btn-outline-secondary" @onclick="() => UpdateQuantityView(item.Id, item.Quantity - 1)">-</button> *@
+                                            <span class="mx-2">@item.Quantity</span>
+                                           @*  <button class="btn btn-sm btn-outline-secondary" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1)">+</button> *@
+                                        </td>
+                                        <td class="text-start">
+                                            @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
+                                            {
+                                                <div>
+                                                    <span style="text-decoration: line-through; color: gray;">
+                                                        @string.Format("{0:N0}", item.Product_Attributes.Regular_price).Replace(".", ",") VNĐ
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span style="font-weight: bold; color: red;">
+                                                        @string.Format("{0:N0}", item.Product_Attributes.Sale_price).Replace(".", ",") VNĐ
+                                                    </span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    <span>
+                                                        @string.Format("{0:N0}", item.Product_Attributes.Regular_price).Replace(".", ",") VNĐ
+                                                    </span>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="text-start">
+                                            @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
+                                            {
+                                                <span>
+                                                    @string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Sale_price)).Replace(".", ",") VNĐ
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>
+                                                    @string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Regular_price)).Replace(".", ",") VNĐ
+                                                </span>
+
+
+                                            }
+                                        </td>
+                                        <td>
+
+                                        @*     <button class="btn btn-danger" @onclick="() => DeleteOrderDetail(item.Id)">
+                                                <i class="bi bi-trash3"></i>
+                                            </button> *@
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <nav class="mt-48px">
                     <ul class="pagination bsb-pagination-1 pagination-lg justify-content-center">
@@ -32,5 +117,39 @@
 </section>
 @code
 {
+    private Users user = new Users();
+    private List<Cart_details> lst_CartDetails = new List<Cart_details>();
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Lấy thông tin người dùng từ session
+            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
+            if (!string.IsNullOrEmpty(userInfo))
+            {
+                // Giải mã và Deserialize người dùng từ session
+                var unescapedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(userInfo);
+                user = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(unescapedJson);
+                StateHasChanged();  // Cập nhật UI sau khi lấy thông tin người dùng
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCartDetails();
+
+    } 
+
+    private async Task LoadCartDetails()
+    {
+        var cartDetails = await cartDetailsService.GetAll();
+        var cart = await cartServices.GetAll();
+        var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
+        lst_CartDetails = cartDetails.Where(c => c.Cart_id == cartUser.Id).ToList();
+
+    }
 
 }
