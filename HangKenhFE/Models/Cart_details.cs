@@ -18,11 +18,11 @@ namespace HangKenhFE.Models
         public long Cart_id { get; set; }
         public int Quantity { get; set; }
         [StringLength(20)]
-        public string? Status {  get; set; }
+        public string? Status { get; set; }
         [ForeignKey("Cart_id")]
         public virtual Carts? Carts { get; set; }
         [ForeignKey("Product_id")]
         [JsonIgnore]
-        public virtual Product_variants? Product_Variants { get; set; }
+        public virtual Product_Attributes? Product_Attributes { get; set; }
     }
 }

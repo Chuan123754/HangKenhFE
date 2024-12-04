@@ -15,7 +15,7 @@ namespace HangKenhFE.Models
         public virtual Product_variants? Product_Variants { get; set; }
         [ForeignKey("Wishlist_id")]
         [JsonIgnore]
-        public virtual Wishlist? Wishlist {  get; set; }
+        public virtual Wishlist? Wishlist { get; set; }
 
     }
 }

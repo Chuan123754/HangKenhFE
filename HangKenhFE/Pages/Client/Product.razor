@@ -1,6 +1,13 @@
-﻿@page "/product-detail/{id:long}"
-@inject IPostSer sev
-@inject IBannerServices baner
+﻿@page "/product-detail/{Id:long}"
+@inject IPostSer postServices
+@inject IUserService userServices
+@inject IBannerServices bannerServices
+@inject ISizeServices sizeServices
+@inject IColorServices colorServices
+@inject IProductAttributeServies productAttributeServices
+@inject ICartService cartServices
+@inject ICartDetailsService cartDetailServices
+
 @inject NavigationManager nav
 <section class="section-banner">
     <img src="@banner.Meta_data"
@@ -36,23 +43,72 @@
             </div>
             <div class="block-right">
                 <div class="product-details">
-                    <h2 class="product-name-detail">@selectedProduct?.Product_Variant.Posts.Title</h2>
+                    <h2 class="product-name-detail">@selectedProduct?.Product_Variant?.Posts?.Title</h2>
                     <p class="product-brand">THAM LEN HANGKENH</p>
-                    <div class="product-price-rating">
-                        <span class="product-price">@selectedProduct?.Regular_price?.ToString("N0") VND</span>
-                        @*  <div class="product-rating">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/ae8a9102393f7664e188490355b26e9810292c69bcd30f6abfa3cb486a5d9e71?apiKey=bd6438bf7c024f24bc56e779baad0a38&"
-                        alt="Product rating stars" class="rating-stars" />
-                        <span class="rating-value">4.8 of 5</span>
-                        </div> *@
-                    </div>
+                        <div class="product-details-list">
+                            <div>
+                                <p>SẢN PHẨM</p>
+                                <p>@selectedProduct?.Product_Variant?.Posts?.Title</p>
+                            </div>
+                            <div>
+                                <p>CHẤT LIỆU</p>
+                                <p>@selectedProduct?.Product_Variant?.Material?.Title</p>
+                            </div>
+                            <div>
+                                <p>CÔNG NGHỆ DỆT</p>
+                                <p>@selectedProduct?.Product_Variant?.Textile_Technology?.Title</p>
+                            </div>
+                            <div>
+                                <p>PHONG CÁCH</p>
+                                <p>@selectedProduct?.Product_Variant?.Style?.Title</p>
+                            </div>
+                            <div>
+                                <p>MÔ TẢ</p>
+                                <p>@selectedProduct?.Product_Variant?.Description</p>
+                            </div>
+                        </div>
+                        <span class="product-price">
+                        @if (selectedProduct?.Sale_price != null && selectedProduct?.Sale_price > 0)
+                        {
+                            <div>
+                                <span style="text-decoration: line-through; color: gray;">
+                                    @string.Format("{0:N0}", selectedProduct?.Regular_price).Replace(".", ",") VNĐ
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-weight: bold; color: red;">
+                                    @string.Format("{0:N0}", selectedProduct?.Sale_price).Replace(".", ",") VNĐ
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <span>
+                                    @string.Format("{0:N0}", selectedProduct?.Regular_price).Replace(".", ",") VNĐ
+                                </span>
+                            </div>
+                        }
+                        </span>
+                    <span class="product-price">  
+                      
+                        @if(selectedProduct?.Stock <= 0 || selectedProduct?.Stock == null)
+                        {
+                            <span style="font-weight: bold; color: red;">
+                                <p>HẾT HÀNG</p>
+                            </span>
+                        }
+                        else
+                        {
+                            <p>Số lượng trong kho : @selectedProduct.Stock</p>
+                        }
+                    </span>
                     <div class="product-size-guide">
                         <span class="product-size-label">1. Chọn kích thước thảm</span>
-                        <a href="#" class="size-guide-link">Hướng dẫn chọn kích thước</a>
                     </div>
                     <div class="w-100 select-option">
                         <select class="product-size-selector w-100" @onchange="OnSizeChanged">
-                            @foreach (var size in productAttributesList.GroupBy(p => p.Size_Id).Select(p => p.FirstOrDefault()).Select(p => p.Size))
+                            @foreach (var size in lst_Size)
                             {
                                 <option value="@size.Id">@size.Title</option>
                             }
@@ -60,48 +116,42 @@
                     </div>
                     <div class="product-color-guide">
                         <span class="product-color-label">2. Chọn màu sắc</span>
-                        <span class="selected-color">Color is choose</span>
                     </div>
                     <div class="row product-color-select">
-                        @foreach (var color in productAttributesList.GroupBy(p => p.Color_Id).Select(p => p.FirstOrDefault()).Select(p => p.Color))
+                        @foreach (var color in lst_Color)
                         {
+                            <div class="bg-element-filter bg-element-filter-image"
+                                 style="
+                                     display: flex;
+                                     gap: 8px;
+                                     cursor: pointer;
+                                     border: 2px solid @(selectedColorId == color.Id ? "blue" : "#ddd");
+                                     padding: 10px;
+                                     background-color: @(selectedColorId == color.Id ? "#f0f8ff" : "transparent");
+                                     border-radius: 5px;"
+                                     @onclick="() => OnColorChanged(color.Id)">
 
-                            <div class="bg-element-filter bg-element-filter-image @(selectedColorId == color.Id ? "active" : "")"
-                                 style="display: flex; gap: 8px; cursor: pointer;"
-                                 @onclick="() => OnColorChanged(color.Id)">
                                 <div class="color-preview"
-                                     style="width: 24px; height: 24px; background-color: @color.Color_code; border-radius: 50%; border: 1px solid #ddd;">
+                                     style="
+                                             width: 24px;
+                                             height: 24px;
+                                             background-color: @color.Color_code;
+                                             border: 1px solid #ddd;">
                                 </div>
-                                <span style="line-height: 24px; font-size: 14px; text-align: center">@color.Title</span>
+                                <span style="
+                                            line-height: 24px;
+                                            font-size: 14px;
+                                            text-align: center;
+                                            font-weight: @(selectedColorId == color.Id ? "bold" : "normal");">
+                                    @color.Title
+                                </span>
                             </div>
-
                         }
                     </div>
-                    <p class="payment-info">
-                        Pay 50% now & 50% upon shipment on all Made To Order sizes
-                    </p>
-                    <div class="return-info">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/800f590aae734ab19cea8e5d31b49b1c67fe3b95e11a738c1a2c974ce7dc4d13?apiKey=bd6438bf7c024f24bc56e779baad0a38&"
-                             alt="Return icon" class="return-icon" />
-                        <p class="return-details">
-                            $149 Unlimited Furniture Delivery. Allow 2-4 weeks for delivery once the item has
-                            shipped. This item can
-                            be returned within 30 days of delivery.
-                            <img src="main/assets/images/question.svg" alt="question">
-                        </p>
-                    </div>
-                    <div class="return-info">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/800f590aae734ab19cea8e5d31b49b1c67fe3b95e11a738c1a2c974ce7dc4d13?apiKey=bd6438bf7c024f24bc56e779baad0a38&"
-                             alt="Delivery icon" class="delivery-icon" />
-                        <p class="return-details">
-                            This item is subject to a 25% restocking fee if returned.
-                            <img src="main/assets/images/question.svg" alt="question">
-                        </p>
 
-                    </div>
                     <div class="product-actions">
                         <button class="btn btn-dark btn-add-to-cart">
-                            <span class="add-to-cart-text">Shop now</span>
+                            <span class="add-to-cart-text">Thêm vào giỏ hàng</span>
                             <img src="main/assets/images/shop-now.svg" alt="question">
                         </button>
                         <span class="product-detail-btn-like">
@@ -112,265 +162,6 @@
                             <img src="main/assets/images/zoom.svg"
                                  class="zoom">
                         </span>
-                    </div>
-                    <p class="product-categories">
-                        Categories: Kitchen & Dining RoomChairs, Benches & Stools
-                    </p>
-                    <div class="product-share">
-                        <span class="share-label">Share this product</span>
-                        <img src="main/assets/images/fb.svg" alt="fb">
-                        <img src="main/assets/images/twitter.svg" alt="twitter">
-                        <img src="main/assets/images/social.svg" alt="social">
-                        <img src="main/assets/images/youtube.svg" alt="youtube">
-                        <img src="main/assets/images/ista.svg" alt="insta">
-                    </div>
-                    <div class="product-dimensions">
-                        <div class="product-tech-sheet">
-                            <p>Tech Sheet</p>
-                            <img src="main/assets/images/push.svg" alt="tech sheet">
-                        </div>
-                        <div class="product-composition">
-                            <p>Composition</p>
-                            <img src="main/assets/images/minus.svg" alt="Composition">
-                        </div>
-                        <div class="product-composition">
-                            <p>Composition</p>
-                            <div>
-                                <p>PL 91%</p>
-                                <p>EA 9%</p>
-                            </div>
-                        </div>
-                        <div class="product-weight">
-                            <p>Weight — GR/M2</p>
-                            <p>260</p>
-                        </div>
-                        <div class="product-height">
-                            <p>Height — CM</p>
-                            <p>150</p>
-                        </div>
-                        <div class="product-length">
-                            <p>Length — M</p>
-                            <p>50</p>
-                        </div>
-                        <div class="product-fabric-feature">
-                            <p>Fabric Features</p>
-                            <img src="main/assets/images/push.svg" alt="Fabric Features">
-                        </div>
-                        <div class="product-treatments">
-                            <p>Treatments on Request</p>
-                            <img src="main/assets/images/push.svg" alt="Treatments on Request">
-                        </div>
-                    </div>
-                    <div class="product-details-list">
-                        <div>
-                            <p>Cushion Content</p>
-                            <p>
-                                High-resiliency foam core cushions are wrapped in soft fiber padding and a
-                                hypo-allergenic blend of down and
-                                feathers, for a plush seat with a casual silhouette
-                            </p>
-                        </div>
-
-                        <div>
-                            <p>Seat and Back</p>
-                            <p>Sinuous spring construction</p>
-                        </div>
-                        <div>
-                            <p>Frame</p>
-                            <p>Kiln-dried hardwood frame</p>
-                        </div>
-                        <div>
-                            <p>Color and Finish</p>
-                            <p>
-                                Due to the handcrafted nature of our custom furniture, expect slight variation in the
-                                appearance of each
-                                unique piece
-                            </p>
-                        </div>
-
-                        <div>
-                            <p>Care Instructions</p>
-                            <p>Please reference our upholstery care guide</p>
-                        </div>
-
-                        <p>
-                            Origin<br />
-                            Imported
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="product-detail-mobile phone">
-            <div class="container">
-                <div class="header-product-detail">
-                    <h1 class="product-title">Gold Handloom Cashmere Blend Low Pile</h1>
-                    <p class="product-desc">THE RUG COMPANY</p>
-                    <div class="d-flex">
-                        <div class="product-price"> $1,998.00</div>
-                        <div class="product-rating">
-                            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/ae8a9102393f7664e188490355b26e9810292c69bcd30f6abfa3cb486a5d9e71?apiKey=bd6438bf7c024f24bc56e779baad0a38&"
-                                 alt="Product rating stars" class="rating-stars" />
-                            <span class="rating-value">4.8 of 5</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-product">
-                    @*        @for ($i = 0; $i <= 3; $i ++) *@
-
-                    <div class="slider-product-items">
-                        <img src="main/assets/images/product-1.jpg" alt="banner 1">
-                    </div>
-                    @*    @endfor *@
-                </div>
-                <div class="product-block-info">
-                    <div class="product-details">
-                        <div class="product-size-guide">
-                            <span class="product-size-label">1. Chọn kích thước thảm</span>
-                            <a href="#" class="size-guide-link">Size and fitting guide</a>
-                        </div>
-                        <div class="w-100 select-option">
-                            <select class="product-size-selector w-100">
-                                <option value="">Kích thước 2,5m x 2,5m</option>
-                            </select>
-                        </div>
-                        <div class="product-color-guide">
-                            <span class="product-color-label">2. Chọn màu sắc</span>
-                            <span class="selected-color">Color is choose</span>
-                        </div>
-                        <div class="row product-color-select">
-                            <div class="bg-element-filter bg-element-filter-image selected">
-                                <img src="main/assets/images/color/color-duck-green.png">
-                            </div>
-                            @*  @for($i = 0; $i < 10; $i++) *@
-
-                            <div class="bg-element-filter bg-element-filter-image">
-                                <img src="main/assets/images/color/color-duck-green.png">
-                            </div>
-                            @*     @endfor *@
-                        </div>
-                        <p class="payment-info">
-                            Pay 50% now & 50% upon shipment on all Made To Order sizes
-                        </p>
-                        <div class="return-info">
-                            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/800f590aae734ab19cea8e5d31b49b1c67fe3b95e11a738c1a2c974ce7dc4d13?apiKey=bd6438bf7c024f24bc56e779baad0a38&"
-                                 alt="Return icon" class="return-icon" />
-                            <p class="return-details">
-                                $149 Unlimited Furniture Delivery. Allow 2-4 weeks for delivery once the item has
-                                shipped. This item can
-                                be returned within 30 days of delivery.
-                                <img src="main/assets/images/question.svg" alt="question">
-                            </p>
-                        </div>
-                        <div class="return-info">
-                            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/800f590aae734ab19cea8e5d31b49b1c67fe3b95e11a738c1a2c974ce7dc4d13?apiKey=bd6438bf7c024f24bc56e779baad0a38&"
-                                 alt="Delivery icon" class="delivery-icon" />
-                            <p class="return-details">
-                                This item is subject to a 25% restocking fee if returned.
-                                <img src="main/assets/images/question.svg" alt="question">
-                            </p>
-
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-dark btn-add-to-cart">
-                                <span class="add-to-cart-text">Shop now</span>
-                                <img src="main/assets/images/shop-now.svg" alt="question">
-                            </button>
-                            <span class="product-detail-btn-like">
-                                <img src="main/assets/images/like.svg"
-                                     class="like">
-                            </span>
-                            <span class="product-detail-btn-zoom">
-                                <img src="main/assets/images/zoom.svg"
-                                     class="zoom">
-                            </span>
-                        </div>
-                        <p class="product-categories">
-                            Categories: Kitchen & Dining RoomChairs, Benches & Stools
-                        </p>
-                        <div class="product-share">
-                            <span class="share-label">Share this product</span>
-                            <img src="main/assets/images/fb.svg" alt="fb">
-                            <img src="main/assets/images/twitter.svg" alt="twitter">
-                            <img src="main/assets/images/social.svg" alt="social">
-                            <img src="main/assets/images/youtube.svg" alt="youtube">
-                            <img src="main/assets/images/ista.svg" alt="insta">
-                        </div>
-                        <div class="product-dimensions">
-                            <div class="product-tech-sheet">
-                                <p>Tech Sheet</p>
-                                <img src="main/assets/images/push.svg" alt="tech sheet">
-                            </div>
-                            <div class="product-composition">
-                                <p>Composition</p>
-                                <img src="main/assets/images/minus.svg" alt="Composition">
-                            </div>
-                            <div class="product-composition">
-                                <p>Composition</p>
-                                <div>
-                                    <p>PL 91%</p>
-                                    <p>EA 9%</p>
-                                </div>
-                            </div>
-                            <div class="product-weight">
-                                <p>Weight — GR/M2</p>
-                                <p>260</p>
-                            </div>
-                            <div class="product-height">
-                                <p>Height — CM</p>
-                                <p>150</p>
-                            </div>
-                            <div class="product-length">
-                                <p>Length — M</p>
-                                <p>50</p>
-                            </div>
-                            <div class="product-fabric-feature">
-                                <p>Fabric Features</p>
-                                <img src="main/assets/images/push.svg" alt="Fabric Features">
-                            </div>
-                            <div class="product-treatments">
-                                <p>Treatments on Request</p>
-                                <img src="main/assets/images/push.svg" alt="Treatments on Request">
-                            </div>
-                        </div>
-                        <div class="product-details-list">
-                            <div>
-                                <p>Cushion Content</p>
-                                <p>
-                                    High-resiliency foam core cushions are wrapped in soft fiber padding and a
-                                    hypo-allergenic blend of down and
-                                    feathers, for a plush seat with a casual silhouette
-                                </p>
-                            </div>
-
-                            <div>
-                                <p>Seat and Back</p>
-                                <p>Sinuous spring construction</p>
-                            </div>
-                            <div>
-                                <p>Frame</p>
-                                <p>Kiln-dried hardwood frame</p>
-                            </div>
-                            <div>
-                                <p>Color and Finish</p>
-                                <p>
-                                    Due to the handcrafted nature of our custom furniture, expect slight variation in the
-                                    appearance of each
-                                    unique piece
-                                </p>
-                            </div>
-
-                            <div>
-                                <p>Care Instructions</p>
-                                <p>Please reference our upholstery care guide</p>
-                            </div>
-
-                            <p>
-                                Origin<br />
-                                Imported
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -422,7 +213,7 @@
             <div class="text-underline"></div>
         </div>
         <div class="row pc">
-            @foreach (var prod in product_list)
+            @foreach (var prod in productVariant_list)
             {
                 <div class="col-3 product">
                     <figure class="card product-card">
@@ -498,70 +289,113 @@
     <Pagination TItem="Product_Posts" PageNumber="page_number" TotalPages="total_pages" PageSize="page_size" TotalItems="totalItems" OnPageChanged="GoToPage" OnPageSizeChanged="OnPageSizeChanged" />
 </nav>
 
-
-
 @code {
     [Parameter]
     public long Id { get; set; }
-    private List<Product_Attributes> productAttributesList = new List<Product_Attributes>();
+    private List<Product_variants> productVariant_list = new List<Product_variants>();
+    private List<Product_Attributes> productAttributes_List = new List<Product_Attributes>();
+    private List<Size> lst_Size = new List<Size>();
+    private List<Color> lst_Color = new List<Color>();
+    private List<Cart_details> lst_CartDetails = new List<Cart_details>();
+    private Cart_details cartDetails = new Cart_details();
+    private Cart cart = new Cart();
+    private long? selectedSizeId;
+    private long? selectedColorId;
+
     private Product_Attributes? selectedProduct;
     private Banner banner = new Banner();
-    private List<Product_variants> product_list = new List<Product_variants>();
+
+    private long productPostId;
+
     private string search_query = string.Empty;
     private int page_number = 1;
     private int total_pages = 1;
     private int page_size = 4;
     private int totalItems;
-    private long productPostId;
-    private long selectedSizeId;
-    private long selectedColorId;
     protected async override Task OnInitializedAsync()
     {
-        productAttributesList = await sev.GetProductAttributesByProductVarianIdClient(Id);
-        if (productAttributesList.Any())
+        productAttributes_List = await postServices.GetProductAttributesByProductVarianIdClient(Id);
+
+        if (productAttributes_List == null || !productAttributes_List.Any())
         {
-            selectedProduct = productAttributesList.First();
-            selectedSizeId = selectedProduct.Size.Id;
-            selectedColorId = selectedProduct.Color.Id;
+            return;
         }
-        productPostId = selectedProduct.Product_Variant.Posts.Id;
-        banner = await baner.GetBannerByProductPostId(productPostId);
+        lst_Size = productAttributes_List
+            .Where(p => p.Size != null)
+            .Select(p => p.Size!)
+            .DistinctBy(size => size.Id) 
+            .ToList();
+
+        lst_Color = productAttributes_List
+            .Where(p => p.Size_Id == selectedSizeId && p.Color != null) 
+            .Select(p => p.Color!)       
+            .Distinct()                 
+            .ToList();
+
+        selectedProduct = productAttributes_List.First();
+        selectedSizeId = selectedProduct.Size?.Id ?? 0;
+        selectedColorId = selectedProduct.Color?.Id ?? 0;
+        productPostId = selectedProduct.Product_Variant?.Posts?.Id ?? 0;
+
+        if (productPostId > 0)
+        {
+            banner = await bannerServices.GetBannerByProductPostId(productPostId);
+        }
+
         await LoadPosts();
     }
+
     private void OnColorChanged(long colorId)
     {
         selectedColorId = colorId;
         UpdateSelectedProduct();
     }
+
     private void OnSizeChanged(ChangeEventArgs e)
     {
-        if (long.TryParse(e.Value?.ToString(), out long sizeId))
-        {
-            selectedSizeId = sizeId;
-            UpdateSelectedProduct();
-        }
+        selectedSizeId = Convert.ToInt64(e.Value);
+        lst_Color = productAttributes_List
+            .Where(p => p.Size_Id == selectedSizeId && p.Color != null)
+            .Select(p => p.Color!)
+            .Distinct()
+            .ToList();
+        UpdateSelectedProduct();
     }
+
     private void UpdateSelectedProduct()
     {
-        selectedProduct = productAttributesList.FirstOrDefault(p =>
+        selectedProduct = productAttributes_List.FirstOrDefault(p =>
             p.Color.Id == selectedColorId && p.Size.Id == selectedSizeId);
 
         // Nếu không tìm thấy biến thể phù hợp, đặt về null hoặc biến thể mặc định.
         if (selectedProduct == null)
         {
-            selectedProduct = productAttributesList.FirstOrDefault();
+            selectedProduct = productAttributes_List.FirstOrDefault();
         }
     }
+
+    private async void AddToCart(long productAttributeId)
+    {
+        
+    }
+
+
+
+
+
+
+
     private async Task GoToPage(int page)
     {
         page_number = page;
         await LoadPosts();
     }
+
     private async Task LoadPosts()
     {
         string searchTerm = string.IsNullOrEmpty(search_query) ? "" : search_query;
-        product_list = await sev.GetByTypeAsyncProduct("product", page_number, page_size, searchTerm);
-        totalItems = await sev.GetTotalCountAsync("product", searchTerm);
+        productVariant_list = await postServices.GetByTypeAsyncProduct("product", page_number, page_size, searchTerm);
+        totalItems = await postServices.GetTotalCountAsync("product", searchTerm);
         total_pages = (int)Math.Ceiling((double)totalItems / page_size);
     }
 
@@ -571,12 +405,14 @@
         page_number = 1;
         await LoadPosts();
     }
+
     private async Task OnSearch(ChangeEventArgs e)
     {
         page_number = 1; // Đặt lại trang đầu tiên khi tìm kiếm
         search_query = e.Value?.ToString() ?? string.Empty;
         await LoadPosts();
     }
+
     private string GetFirstImageUrl(string imageUrls)
     {
         if (string.IsNullOrEmpty(imageUrls))
@@ -587,9 +423,13 @@
         var urls = imageUrls.Split(',');
         return urls.FirstOrDefault() ?? string.Empty;
     }
-    private void NavDetails(long id)
+
+    private async void NavDetails(long id)
     {
+        selectedProduct = productAttributes_List.FirstOrDefault(p => p.Id == id);
+        StateHasChanged();
         nav.NavigateTo($"/product-detail/{id}");
+
     }
 }
 <style>

@@ -267,10 +267,7 @@
                                         @if (ps.MinPrice.HasValue && ps.MaxPrice.HasValue)
                                         {
                                             <div class="product-price">
-                                                <span class="price">
-                                                    Giá: @($"{(ps.MinPrice ?? 0 - ps.MaxPrice ?? 0):N0} VND")
-                                                </span>
-
+                                                @string.Format("{0:N0}", ps?.MinPrice).Replace(".", ",") VNĐ -   @string.Format("{0:N0}", ps?.MaxPrice).Replace(".", ",") VNĐ
                                             </div>
                                         }
                                         else
@@ -278,10 +275,10 @@
                                             <div>Chưa có giá</div>
                                         }
                                     </div>
-                                    <a onclick="showSidebar('sidebar-filter-category')"
+@*                                     <a onclick="showSidebar('sidebar-filter-category')"
                                        class="btn-white btn-contract btn-contract-mobile">
                                         <div>Liên hệ</div>
-                                    </a>
+                                    </a> *@
                                 </figcaption>
                             </figure>
                         </div>

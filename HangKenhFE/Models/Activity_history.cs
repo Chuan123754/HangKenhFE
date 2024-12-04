@@ -13,7 +13,6 @@ namespace HangKenhFE.Models
         public string Subject_type { get; set; }
         public DateTime Time { get; set; }
         public string AccountId { get; set; }
-
         [ForeignKey("AccountId")]
         public virtual Account Account { get; set; }
 

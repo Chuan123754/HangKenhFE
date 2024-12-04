@@ -25,6 +25,6 @@ namespace HangKenhFE.Models
         [StringLength(255)]
         public string? Path { get; set; }
         public DateTime? Created_at { get; set; }
-        public DateTime? Updated_at { get;set; }
+        public DateTime? Updated_at { get; set; }
     }
 }

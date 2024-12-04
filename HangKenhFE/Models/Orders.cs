@@ -17,10 +17,14 @@ namespace HangKenhFE.Models
         [Key]
         public long Id { get; set; }
         public string? CreatedByAdminId { get; set; }
-        public decimal? TotalAmount { get; set; }
+        public decimal? TotalAmount { get; set; } // tổng tiền hàng đã giảm
+        public decimal? TotalPrincipal { get; set; } // tổng tiền hàng 
+        public decimal? FeeShipping { get; set; } // phí ship
+        public decimal? Totalmoney { get; set; } // tổng tiền + phí ship 
         public long? User_id { get; set; } // khách hàng ( hóa đơn treo có thể chưa thêm khách hàng )
         [StringLength(20)]
         public string? Status { get; set; }
+        public string? TypePayment { get; set; }
         public string? Note { get; set; }
         public DateTime? Approved_at { get; set; }
         public DateTime? Created_at { get; set; } = DateTime.Now;
@@ -36,6 +40,13 @@ namespace HangKenhFE.Models
         public virtual Account? Admin { get; set; }
         [ForeignKey("User_id")]
         public virtual Users? Users { get; set; }
+        public long? Address_Id { get; set; }
+        [ForeignKey("Address_Id")]
+        public virtual Address? Address { get; set; }
+        public long? Payment_Id { get; set; }
+        [ForeignKey("Payment_Id")]
+        [JsonIgnore]
+        public virtual Payment? Payment { get; set; }
     }
 }
 

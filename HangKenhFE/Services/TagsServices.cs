@@ -1,5 +1,6 @@
 ﻿using HangKenhFE.IServices;
 using HangKenhFE.Models;
+using Newtonsoft.Json;
 
 namespace HangKenhFE.Services
 {
@@ -10,15 +11,21 @@ namespace HangKenhFE.Services
         {
             client = new HttpClient();
         }
+        public async Task<List<Post_tags>> GetTagByPostId(long postId)
+        {
+            string requestURL = $"https://localhost:7011/api/Tags/GetTagByPostId?postId={postId}";
+            var response = await client.GetStringAsync(requestURL);
+            return JsonConvert.DeserializeObject<List<Post_tags>>(response);
+        }
         public async Task Create(Tags tag)
         {
             var response = await client.PostAsJsonAsync("https://localhost:7011/api/Tags/add", tag);
             if (response.IsSuccessStatusCode)
             {
                 // Lấy lại tag đã được tạo từ response
-                 await response.Content.ReadFromJsonAsync<Tags>();
+                await response.Content.ReadFromJsonAsync<Tags>();
             }
-             // Trả về null nếu không thành công
+            // Trả về null nếu không thành công
         }
 
         public async Task Delete(long id)

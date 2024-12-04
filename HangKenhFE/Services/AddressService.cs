@@ -8,7 +8,7 @@ using HangKenhFE.IServices;
 
 namespace HangKenhFE.Services
 {
-    public class AddressService: IAddressServices
+    public class AddressService : IAddressServices
     {
         private readonly HttpClient _httpClient;
 
@@ -24,6 +24,7 @@ namespace HangKenhFE.Services
         }
         public async Task<List<Address>> GetAddressByUserId(long userId)
         {
+
             string requestURL = $"https://localhost:7011/api/Address/GetAddressByUserId?userId={userId}";
             var response = await _httpClient.GetStringAsync(requestURL);
             return JsonConvert.DeserializeObject<List<Address>>(response);
@@ -34,17 +35,37 @@ namespace HangKenhFE.Services
             var response = await _httpClient.GetStringAsync(requestURL);
             return JsonConvert.DeserializeObject<Address>(response);
         }
-        public async Task CreateAddress(Address address)
+        public async Task<bool> CreateAddress(Address address)
         {
-            await _httpClient.PostAsJsonAsync("https://localhost:7011/api/Address/CreateAddress", address);
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("https://localhost:7011/api/Address/CreateAddress", address);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error: {errorMessage}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return false;
+            }
+
         }
-        public async Task UpdateAddress( Address address, long id)
+        public async Task UpdateAddress(Address address, long id)
         {
             await _httpClient.PutAsJsonAsync($"https://localhost:7011/api/Address/UpdateAddress?id={id}", address);
         }
         public async Task SetAsDefault(long id, Address address)
         {
-            await _httpClient.PutAsJsonAsync($"https://localhost:7011/api/Address/SetAsDefault?id={id}",address);
+            await _httpClient.PutAsJsonAsync($"https://localhost:7011/api/Address/SetAsDefault?id={id}", address);
         }
         public async Task DeleteAddress(long id)
         {
@@ -53,7 +74,7 @@ namespace HangKenhFE.Services
         // lấy api địa chỉ Việt Nam từ bên tứ 3
         public async Task<List<Province>> GetProvincesAsync()
         {
-            string url = "https://open.oapi.vn/location/provinces?size=100"; 
+            string url = "https://open.oapi.vn/location/provinces?size=100";
             var response = await _httpClient.GetFromJsonAsync<ProvinceResponse>(url);
 
             return response?.Data ?? new List<Province>();
@@ -69,7 +90,7 @@ namespace HangKenhFE.Services
         public async Task<List<Ward>> GetWardsAsync(int idDistrict)
         {
             string url = $"https://open.oapi.vn/location/wards/{idDistrict}";
-            var response = await _httpClient.GetFromJsonAsync<WardResponse>(url); 
+            var response = await _httpClient.GetFromJsonAsync<WardResponse>(url);
 
             return response?.Data ?? new List<Ward>();
         }
@@ -78,7 +99,7 @@ namespace HangKenhFE.Services
     // Định nghĩa cấu trúc dữ liệu phản hồi từ API
     public class ProvinceResponse
     {
-        public List<Province> Data { get; set; } 
+        public List<Province> Data { get; set; }
         public string Code { get; set; }
     }
     public class DistrictResponse

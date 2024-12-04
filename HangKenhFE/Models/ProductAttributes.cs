@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace HangKenhFE.Models
 {
     public partial class Product_Attributes
     {
-        [Key]
         public long Id { get; set; }
         public string? SKU { get; set; } // mã biến thể sản phẩm
         public long Product_Variant_Id { get; set; }
@@ -22,6 +22,7 @@ namespace HangKenhFE.Models
         public virtual Color? Color { get; set; }
         [ForeignKey("Product_Variant_Id")]
         public virtual Product_variants? Product_Variant { get; set; }
+        [JsonIgnore]
         public virtual ICollection<P_attribute_discount> p_attribute_discount { get; set; } = new List<P_attribute_discount>();
 
     }
