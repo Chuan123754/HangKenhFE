@@ -36,24 +36,13 @@ namespace HangKenhFE.Services
 
         public async Task Create(Cart_details cartDetails)
         {
-            var cart = await FetchCart(cartDetails.Cart_id);
-            var user = await FetchUser(cart.UserId);
-            var product = await FetchProduct(cartDetails.Product_id);
-
-            var cartDetailsToSend = PrepareCartDetails(cartDetails, cart, user, product);
-            string requestURL = $"{_baseUrl}/api/CartDetails/cartdetails-post";
-            await SendPostRequest(requestURL, cartDetailsToSend);
+           
+            await _httpClient.PostAsJsonAsync("https://localhost:7011/api/CartDetails/cartdetails-post", cartDetails);
         }
 
         public async Task Update(Cart_details cartDetails)
         {
-            var cart = await FetchCart(cartDetails.Cart_id);
-            var user = await FetchUser(cart.UserId);
-            var product = await FetchProduct(cartDetails.Product_id);
-
-            var cartDetailsToSend = PrepareCartDetails(cartDetails, cart, user, product);
-            string requestURL = $"{_baseUrl}/api/CartDetails/cartdetails-put";
-            await SendPutRequest(requestURL, cartDetailsToSend);
+            await _httpClient.PutAsJsonAsync($"https://localhost:7011/api/CartDetails/cartdetails-put", cartDetails);
         }
 
         public async Task Delete(long id)
