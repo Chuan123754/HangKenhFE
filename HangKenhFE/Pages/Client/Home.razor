@@ -41,7 +41,7 @@
                     <div class="card border-0">
                         <div class="post-image">
                             <div class="post-date-tag">
-                                @pj.Created_at.ToString("dd/MM/yyyy HH:mm:ss")
+                                @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss") ?? "N/A"
                             </div>
                             <img style="width: 416px; height: 535px" class="w-100" src="@pj.Feature_image" alt="@pj.Title">
                         </div>
@@ -408,7 +408,7 @@
                 <div class="col-md-4 col-12">
                     <div class="post-image">
                         <div class="post-date-tag">
-                            @pj.Created_at.ToString("dd/MM/yyyy HH:mm:ss")
+                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss") ?? "N/A"
                         </div>
                         <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
                     </div>

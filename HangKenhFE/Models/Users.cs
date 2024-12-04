@@ -13,19 +13,16 @@ namespace HangKenhFE.Models
     [Table("users")]
     public partial class Users
     {
-        [Key]
         public long Id { get; set; }
         [StringLength(255)]
         public string? Name { get; set; }
         [StringLength(20)]
         [Unicode(false)]
-        [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 số.")]
         public string? Phone { get; set; }
         [StringLength(255)]
         [Unicode(false)]
         [EmailAddress]
         public string? Email { get; set; }
-        public DateTime? EmailVerifiedAt { get; set; }
         [StringLength(255)]
         public string? Password { get; set; }
         [StringLength(int.MaxValue)]
@@ -33,10 +30,14 @@ namespace HangKenhFE.Models
         public string? Address { get; set; }
         public DateTime? Created_at { get; set; }
         public DateTime? Updated_at { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Orders> Orders { get; set; } = new List<Orders>();
         [InverseProperty("Users")]
         [JsonIgnore]
         public Wishlist? Wishlist { get; set; }
         [JsonIgnore]
         public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+        [JsonIgnore]
+        public virtual ICollection<UserVouchers> UserVouchers { get; set; } = new List<UserVouchers>();
     }
 }

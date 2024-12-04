@@ -155,7 +155,7 @@
                             <a @onclick="() => NavDetails(postsToShow[0].Id)" class="w-100">
                                 <div class="post-image">
                                     <div class="post-date-tag">
-                                        @postsToShow[0].Created_at.ToString("dd/MM/yyyy HH:mm:ss")
+                                        @postsToShow[0].Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
                                     </div>
                                     <img class="w-100" src="@postsToShow[0].Feature_image" alt="" height="1040px">
                                 </div>

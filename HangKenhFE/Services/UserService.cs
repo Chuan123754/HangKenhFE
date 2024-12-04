@@ -1,11 +1,16 @@
 ﻿using HangKenhFE.IServices;
 using HangKenhFE.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace HangKenhFE.Services
 {
@@ -16,7 +21,7 @@ namespace HangKenhFE.Services
         public UserService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-        } 
+        }
 
         public async Task<List<Users>> GetAll()
         {
@@ -32,24 +37,16 @@ namespace HangKenhFE.Services
             return JsonConvert.DeserializeObject<Users>(response);
         }
 
-        public async Task Create(Users user)
+        public async Task<Users> Create(Users user)
         {
-            user.Id = 0; 
             user.Created_at = DateTime.Now;
             user.Updated_at = DateTime.Now;
 
             // Kiểm tra trùng lặp email
-            if (await IsEmailExists(user.Email))
+            if (!string.IsNullOrWhiteSpace(user.Email) && await IsEmailExists(user.Email))
             {
                 throw new Exception("Email đã tồn tại.");
             }
-
-            // Kiểm tra trùng lặp số điện thoại
-            if (await IsPhoneExists(user.Phone))
-            {
-                throw new Exception("Số điện thoại đã tồn tại.");
-            }
-
             string userRequestURL = "https://localhost:7011/api/Users/Users-post";
             var userJsonContent = JsonConvert.SerializeObject(user);
             var userContent = new StringContent(userJsonContent, Encoding.UTF8, "application/json");
@@ -61,7 +58,6 @@ namespace HangKenhFE.Services
                 throw new Exception($"API call failed with status code {userResponse.StatusCode} and message: {errorContent}");
             }
 
-            // Lấy đối tượng người dùng từ phản hồi
             var createdUserJson = await userResponse.Content.ReadAsStringAsync();
             var createdUser = JsonConvert.DeserializeObject<Users>(createdUserJson);
 
@@ -70,10 +66,11 @@ namespace HangKenhFE.Services
                 throw new Exception("Không thể lấy được người dùng vừa tạo.");
             }
 
+            // Tạo giỏ hàng cho người dùng mới
             var cart = new Carts
             {
                 Id = 0,
-                UserId = createdUser.Id, 
+                UserId = createdUser.Id,
                 Status = "New",
                 Description = "Giỏ hàng mặc định"
             };
@@ -88,7 +85,11 @@ namespace HangKenhFE.Services
                 var errorContent = await cartResponse.Content.ReadAsStringAsync();
                 throw new Exception($"API call failed with status code {cartResponse.StatusCode} and message: {errorContent}");
             }
+
+            // Trả về đối tượng người dùng vừa được tạo
+            return createdUser;
         }
+
 
         public async Task Update(Users user)
         {
@@ -116,7 +117,6 @@ namespace HangKenhFE.Services
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                // Nếu mã trạng thái là 404, thì email chưa tồn tại
                 return false;
             }
         }
@@ -132,8 +132,62 @@ namespace HangKenhFE.Services
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                // Nếu mã trạng thái là 404, thì số điện thoại chưa tồn tại
                 return false;
+            }
+        }
+        public async Task Register(Users user)
+        {
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7011/api/Users/register", user);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Đăng ký thất bại: {errorMessage}");
+            }
+        }
+
+        public async Task<Users> Login(Users user)
+        {
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7011/api/Users/login", user);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Đăng nhập thất bại: {errorMessage}");
+            }
+
+            var rawContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"JSON trả về từ API: {rawContent}");
+
+            // Deserialize JSON trả về
+            var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(rawContent);
+            if (userResponse == null)
+            {
+                throw new Exception("Không thể đọc dữ liệu trả về từ API.");
+            }
+
+            return userResponse;
+        }
+
+        public class ResponseLogin
+        {
+            public string Message { get; set; }
+            public Users User { get; set; }
+        }
+
+
+        //public async Task Logout(long idUser)
+        //{
+        //    await _httpClient.PostAsJsonAsync($"https://localhost:7011/api/Users/logout?userId={idUser}");
+        //}
+        public async Task Logout(long idUser)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"https://localhost:7011/api/Users/logout?userId={idUser}", new { });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Đăng xuất thất bại: {errorMessage}");
             }
         }
     }

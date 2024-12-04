@@ -1,10 +1,14 @@
 ﻿@page "/cart"
+@inject ICartDetailsService cartDetailsService
+@inject ICartService cartServices
+@inject IProductAttributeServies productAttributeServices
+@inject IProductVariantServices productVariantServices
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
          class="w-100 h-100" alt="banner-image-3">
     <div class="title-banner">
         <h1>
-            Cart
+            GIỎ HÀNG CỦA BẠN 
         </h1>
     </div>
 </section>
@@ -12,33 +16,7 @@
     <div class="container">
         <div class="row">         
             <main class="col-md-9">
-                @*   @include('frontend.components.breadcrumb_cate', ['title' => 'Bộ sưu tập']) *@
                 <div class="row product mt-48px">
-                    @*    @for($i = 0; $i < 6; $i++) *@
-                    <div class="col-6 product">
-                        <figure class="card product-card gap-0">
-                            <div class="product-image">
-                                <div class="img-wrap">
-                                    <img src="main/assets/images/product-1.jpg"
-                                         class="w-100 h-100 object-fit-cover">
-                                </div>
-                                <div class="img-wrap-hide">
-                                    <img src="main/assets/images/product-3.jpg"
-                                         class="w-100 h-100 object-fit-cover">
-                                </div>
-                            </div>
-                            <figcaption class="project-article-content">
-                                <div class="project-article-title sub-title">
-                                    <p>Agatha</p>
-                                </div>
-                                <div class="project-article-author">
-                                    <p>Project by NTK Sơn Vũ</p>
-                                    <p>Photo: DaniNguyen</p>
-                                </div>
-                            </figcaption>
-                        </figure>
-                    </div>
-                    @*  @endfor *@
                 </div>
                 <nav class="mt-48px">
                     <ul class="pagination bsb-pagination-1 pagination-lg justify-content-center">
@@ -52,3 +30,7 @@
         </div>
     </div>
 </section>
+@code
+{
+
+}

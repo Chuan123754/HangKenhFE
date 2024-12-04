@@ -126,7 +126,6 @@ namespace HangKenhFE.Services
                         Name = user.Name,
                         Phone = user.Phone,
                         Email = user.Email,
-                        EmailVerifiedAt = user.EmailVerifiedAt,
                         Password = user.Password,
                         RememberToken = user.RememberToken,
                         Address = user.Address,

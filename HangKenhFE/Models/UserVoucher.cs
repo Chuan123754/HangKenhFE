@@ -24,9 +24,9 @@ namespace HangKenhFE.Models
         // Navigation properties
         [ForeignKey("UserId")]
         [JsonIgnore]
-        public virtual Users Users { get; set; }
+        public virtual Users? Users { get; set; }
         [ForeignKey("VoucherId")]
         [JsonIgnore]
-        public virtual Vouchers Vouchers { get; set; }
+        public virtual Vouchers? Vouchers { get; set; }
     }
 }

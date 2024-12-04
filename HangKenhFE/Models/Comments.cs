@@ -13,7 +13,7 @@ namespace HangKenhFE.Models
     public class Comments
     {
         [Key]
-        public long Id { get; set; }    
+        public long Id { get; set; }
         public long Post_id { get; set; }
         public long User_id { get; set; }
         public long User_admin_id { get; set; }
@@ -26,7 +26,7 @@ namespace HangKenhFE.Models
         [StringLength(20)]
         public string? Status { get; set; }
         public DateTime? Created_at { get; set; }
-        public DateTime? Updated_at { get;set; }
+        public DateTime? Updated_at { get; set; }
         [ForeignKey("User_id")]
         [JsonIgnore]
         public virtual Users? Users { get; set; }

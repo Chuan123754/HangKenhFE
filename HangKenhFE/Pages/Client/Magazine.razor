@@ -38,7 +38,7 @@
                     <header>
                         <div class="post-image">
                             <div class="post-date-tag">
-                                @posts.Created_at.ToString("dd/MM/yyyy HH:mm:ss")
+                                @posts.Created_at.ToString?("dd/MM/yyyy HH:mm:ss")
                             </div>
                             <img class="w-100" src="@posts.Feature_image" alt="@posts.Title">
                         </div>

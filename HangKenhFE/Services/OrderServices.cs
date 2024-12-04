@@ -1,38 +1,148 @@
 ﻿using HangKenhFE.IServices;
 using HangKenhFE.Models;
+using QRCoder;
+using HangKenhFE.Models.DTO;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace HangKenhFE.Services
 {
-    public class OrderServices : OrderIServices
+    public class OrderServices : IOrderIServices
     {
-        public Task Create(Orders orders)
+        private readonly HttpClient _client;
+
+        public OrderServices(HttpClient client)
         {
-            throw new NotImplementedException();
+            _client = client;
+        }
+        public async Task Create(Orders order)
+        {
+            await _client.PostAsJsonAsync("https://localhost:7011/api/Orders/Create", order);
         }
 
-        public Task Delete(long id)
+        public async Task Delete(long id)
         {
-            throw new NotImplementedException();
+            await _client.DeleteAsync($"https://localhost:7011/api/Orders/Delete?id={id}");
         }
 
-        public Task<List<Orders>> GetAll()
+        public async Task<List<Orders>> GetAll()
         {
-            throw new NotImplementedException();
+            string requestURL = "https://localhost:7011/api/Orders/All-Orders";
+            var response = await _client.GetStringAsync(requestURL);
+            return JsonConvert.DeserializeObject<List<Orders>>(response);
         }
 
-        public Task<Orders> GetByIdOrders(long id)
+        public async Task<Orders> GetByIdOrders(long id)
         {
-            throw new NotImplementedException();
+            string requestURL = $"https://localhost:7011/api/Orders/OrdersDetails?id={id}";
+            var response = await _client.GetStringAsync(requestURL);
+            return JsonConvert.DeserializeObject<Orders>(response);
         }
 
-        public Task<List<Orders>> Search(string code)
+        public async Task<List<Orders>> GetOrderByIdAdmin(string idAdmin)
         {
-            throw new NotImplementedException();
+            string requestURL = $"https://localhost:7011/api/Orders/GetOrderByIdAdmin?idAdmin={idAdmin}";
+            var response = await _client.GetStringAsync(requestURL);
+            return JsonConvert.DeserializeObject<List<Orders>>(response);
         }
 
-        public Task Update(Orders orders)
+        public async Task<List<Orders>> GetOrderByIdUser(long idUser)
         {
-            throw new NotImplementedException();
+            string requestURL = $"https://localhost:7011/api/Orders/GetOrderByIdUser?idUser={idUser}";
+            var response = await _client.GetStringAsync(requestURL);
+            return JsonConvert.DeserializeObject<List<Orders>>(response);
         }
+
+        public async Task Update(Orders orders, long id)
+        {
+            await _client.PutAsJsonAsync($"https://localhost:7011/api/Orders/Update?id={id}", orders);
+        }
+
+        public async Task<byte[]> ExportInvoice(long orderId)
+        {
+            var response = await _client.GetAsync($"https://localhost:7011/api/PDF/generate?orderId={orderId}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            else
+            {
+                throw new Exception("Không thể xuất hóa đơn.");
+            }
+        }
+
+        // Chức năng gọi API MoMo để lấy URL mã QR
+        public async Task<MomoPaymentResponse> CreateMomoPaymentUrl(string fullName, decimal amount, string orderInfo)
+        {
+            var response = await _client.PostAsJsonAsync("https://localhost:7011/api/payment/create-payment-url", new
+            {
+                FullName = fullName,
+                Amount = amount,
+                OrderInfo = orderInfo
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(responseContent);
+                var payUrl = json["payUrl"]?.ToString();
+
+                if (string.IsNullOrEmpty(payUrl))
+                {
+                    throw new Exception("API MoMo không trả về URL thanh toán.");
+                }
+
+                var qrCodeBase64 = GenerateQrCode(payUrl);
+
+                return new MomoPaymentResponse
+                {
+                    PayUrl = payUrl,
+                    QrCodeBase64 = qrCodeBase64,
+                };
+            }
+            else
+            {
+                throw new Exception("Không thể tạo mã QR thanh toán MoMo.");
+            }
+        }
+
+
+
+        public string GenerateQrCode(string url)
+        {
+            using (var qrGenerator = new QRCodeGenerator())
+            {
+                var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+                var qrCode = new PngByteQRCode(qrCodeData);
+
+                // Tạo hình ảnh QR Code dưới dạng Base64
+                var qrCodeBytes = qrCode.GetGraphic(20);
+                return $"data:image/png;base64,{Convert.ToBase64String(qrCodeBytes)}";
+            }
+        }
+
+        public async Task<MomoPaymentResponse> QueryPaymentStatus(string orderId)
+        {
+            var response = await _client.GetAsync($"https://localhost:7011/api/payment/query-transaction?orderId={orderId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(responseContent);
+
+                var resultCode = json["response"]["resultCode"]?.ToString();
+
+                return new MomoPaymentResponse
+                {
+                    ResultCode = resultCode
+                };
+            }
+            else
+            {
+                throw new Exception("Không thể kiểm tra trạng thái thanh toán.");
+            }
+        }
+
+
     }
 }

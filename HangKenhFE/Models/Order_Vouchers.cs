@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace HangKenhFE.Models
 {
@@ -12,12 +13,14 @@ namespace HangKenhFE.Models
     {
         [Key]
         public long Id { get; set; }
-        public long OrderId { get; set; } 
-        public long VoucherId { get; set; } 
-        public DateTime AppliedAt { get; set; } 
+        public long OrderId { get; set; }
+        public long VoucherId { get; set; }
+        public DateTime AppliedAt { get; set; }
         [ForeignKey("OrderId")]
+        [JsonIgnore]
         public virtual Orders? Orders { get; set; }
         [ForeignKey("VoucherId")]
+        [JsonIgnore]
         public virtual Vouchers? Vouchers { get; set; }
     }
 }
