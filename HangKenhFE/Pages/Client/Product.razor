@@ -17,7 +17,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/"> Trang chủ</a></li>
-                    <li class="breadcrumb-item active"><a href="#"> New Collection</a></li>
+                    <li class="breadcrumb-item"><a href="/category"> Sản phẩm</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@selectedProduct?.Product_Variant.Posts.Title</li>
                 </ol>
             </nav>
         </header>
@@ -64,13 +65,16 @@
                     <div class="row product-color-select">
                         @foreach (var color in productAttributesList.GroupBy(p => p.Color_Id).Select(p => p.FirstOrDefault()).Select(p => p.Color))
                         {
-                            <div class="bg-element-filter bg-element-filter-image"
+
+                            <div class="bg-element-filter bg-element-filter-image @(selectedColorId == color.Id ? "active" : "")"
+                                 style="display: flex; gap: 8px; cursor: pointer;"
                                  @onclick="() => OnColorChanged(color.Id)">
                                 <div class="color-preview"
-                                     style="width: 24px; height: 24px; background-color: @color.Color_code; border-radius: 50%; border: 1px solid #ddd; margin-left: 8px;">
+                                     style="width: 24px; height: 24px; background-color: @color.Color_code; border-radius: 50%; border: 1px solid #ddd;">
                                 </div>
-                                <span>@color.Title</span>
+                                <span style="line-height: 24px; font-size: 14px; text-align: center">@color.Title</span>
                             </div>
+
                         }
                     </div>
                     <p class="payment-info">
@@ -463,7 +467,7 @@
                         <figcaption class="product-info">
                             <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Posts.Title</a>
                             <div class="product-description">
-                                <span class="description">@prod.Posts?.Designer?.Name</span>
+                                <span class="description">@prod.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                             </div>
                             <div class="product-price">
                                 <span class="price">
@@ -588,3 +592,22 @@
         nav.NavigateTo($"/product-detail/{id}");
     }
 }
+<style>
+    .bg-element-filter {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .bg-element-filter:hover {
+            border-color: #007bff;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bg-element-filter.active {
+            border: 1px solid #007bff; 
+            background-color: #e7f1ff; 
+        }
+
+</style>
