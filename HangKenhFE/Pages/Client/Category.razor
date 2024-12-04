@@ -261,13 +261,16 @@
                                 <figcaption class="product-info">
                                     <a @onclick="() => NavDetails(ps.Id)" class="product-name">@ps.Posts.Title</a>
                                     <div class="product-description">
-                                        <span class="description">@ps.Posts?.Designer?.Name</span>
+                                        <span class="description">@ps.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                     </div>
                                     <div class="product-price">
                                         @if (ps.MinPrice.HasValue && ps.MaxPrice.HasValue)
                                         {
                                             <div class="product-price">
-                                                <span class="price">Giá: @ps.MinPrice - @ps.MaxPrice VND</span>
+                                                <span class="price">
+                                                    Giá: @($"{(ps.MinPrice ?? 0 - ps.MaxPrice ?? 0):N0} VND")
+                                                </span>
+
                                             </div>
                                         }
                                         else

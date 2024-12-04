@@ -132,7 +132,7 @@
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/"> Trang chủ</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Article</li>
+                            <li class="breadcrumb-item active" aria-current="page">Blogs</li>
                         </ol>
                     </nav>
                     <div class="row">
@@ -149,20 +149,25 @@
 
                 @if (postsToShow.Any())
                 {
+
                     <div class="row mt-48px">
                         <div class="col-6">
-                            <div class="post-image">
-                                <div class="post-date-tag">
-                                    @postsToShow[0].Created_at
+                            <a @onclick="() => NavDetails(postsToShow[0].Id)" class="w-100">
+                                <div class="post-image">
+                                    <div class="post-date-tag">
+                                        @postsToShow[0].Created_at.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </div>
+                                    <img class="w-100" src="@postsToShow[0].Feature_image" alt="" height="1040px">
                                 </div>
-                                <img class="w-100" src="@postsToShow[0].Feature_image" alt="" height="1040px">
-                            </div>
+                            </a>
                             <div class="post-intro">
                                 <div class="post-category">
                                     <span></span>
                                     @postsToShow[0].Post_categories.FirstOrDefault()?.Categories.Title
                                 </div>
-                                <div class="post-big-title">@postsToShow[0].Title</div>
+                                <a @onclick="() => NavDetails(postsToShow[0].Id)" class="w-100">
+                                    <div class="post-big-title">@postsToShow[0].Title</div>
+                                </a>
                                 <div class="post-author">
                                     By @postsToShow[0].Designer.Name
                                 </div>
@@ -176,18 +181,22 @@
                                 @foreach (var post in postsToShow.Skip(1))
                                 {
                                     <div class="col mt-24px">
-                                        <div class="post-image">
-                                            <div class="post-date-tag">
-                                                @post.Created_at
+                                        <a @onclick="() => NavDetails(post.Id)" class="w-100">
+                                            <div class="post-image">
+                                                <div class="post-date-tag">
+                                                    @post.Created_at
+                                                </div>
+                                                <img class="w-100 " src="@post.Feature_image" height="512px" alt="">
                                             </div>
-                                            <img class="w-100 " src="@post.Feature_image" height="512px" alt="">
-                                        </div>
+                                        </a>
                                         <div class="post-intro">
                                             <div class="post-category">
                                                 <span></span>
                                                 <span>@post.Post_categories.FirstOrDefault()?.Categories.Title</span>
                                             </div>
-                                            <div class="post-title">@post.Title</div>
+                                            <a @onclick="() => NavDetails(post.Id)" class="w-100">
+                                                <div class="post-title">@post.Title</div>
+                                            </a>
                                             <div class="post-author">
                                                 By @post.Designer.Name
                                             </div>
@@ -207,21 +216,23 @@
                     {
                         <div class="col-6 mt-48px">
                             <figure class="card post-card">
-                                <div class="post-card-image">
-                                    <div class="post-card-tag">
-                                        @postlist.Created_at
+                                <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
+                                    <div class="post-card-image">
+                                        <div class="post-card-tag">
+                                            @postlist.Created_at
+                                        </div>
+                                        <a href="">
+                                            <img src="@postlist.Feature_image"
+                                                 class="w-100 h-100 object-fit-cover" alt="@postlist.Title">
+                                        </a>
                                     </div>
-                                    <a href="">
-                                        <img src="@postlist.Feature_image"
-                                             class="w-100 h-100 object-fit-cover" alt="@postlist.Title">
-                                    </a>
-                                </div>
+                                </a>
                                 <figcaption class="post-card-info">
                                     <div href="" class="post-card-category">
                                         <span></span>
                                         <span>@postlist.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                     </div>
-                                    <a href="">
+                                    <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
                                         <h3 class="post-card-title">
                                             @postlist.Title
                                         </h3>
@@ -283,7 +294,10 @@
         search_query = e.Value?.ToString() ?? string.Empty;
         await LoadPosts();
     }
-
+    private void NavDetails(long id)
+    {
+        nav.NavigateTo($"/blogs-details/{id}");
+    }
     private string GetCleanText(string input)
     {
         if (string.IsNullOrEmpty(input))
