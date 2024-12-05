@@ -19,7 +19,7 @@ namespace HangKenhFE.IServices
         // Lấy tổng số bài viết theo type và tìm kiếm
         Task<int> GetTotalCountAsyncProduct(string type, string searchTerm);
         // Lấy tổng số bài viết theo type và id cate
-        Task<string?> GetNameDesigner(long id);
+        Task<string> GetNameDesigner(long id);
         Task<int> GetTotalCountAsyncCate(string type, long categoryId);
  
     }

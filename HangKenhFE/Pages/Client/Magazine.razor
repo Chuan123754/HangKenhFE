@@ -38,7 +38,7 @@
                     <header>
                         <div class="post-image">
                             <div class="post-date-tag">
-                                @posts.Created_at.ToString?("dd/MM/yyyy HH:mm:ss")
+                                @posts.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
                             </div>
                             <img class="w-100" src="@posts.Feature_image" alt="@posts.Title">
                         </div>
@@ -172,11 +172,11 @@
     private List<Product_Posts> list_post = new List<Product_Posts>();
     private List<Product_variants> list_product = new List<Product_variants>();
     private Banner banner = new Banner();
-    private string? abc = "";
+    private string abc = "";
     protected async override Task OnInitializedAsync()
     {
         posts = await sev.GetByIdType(Id, "post");
-        abc = await sev.GetNameDesigner(posts.AuthorId);
+        abc = await sev.GetNameDesigner(posts.AuthorId?? 0);
         banner = await bnser.GetBannerByProductPostId(Id);
         list_post = await sev.GetCountByType("post", Id);
         list_product = await sev.GetAllByClient();

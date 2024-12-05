@@ -37,25 +37,27 @@
         <div class="row">
             @foreach (var pj in Secsion2_project_noibat3.Take(3).ToList())
             {
-                <div class="col-4">
-                    <div class="card border-0">
-                        <div class="post-image">
-                            <div class="post-date-tag">
-                                @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss") ?? "N/A"
-                            </div>
-                            <img style="width: 416px; height: 535px" class="w-100" src="@pj.Feature_image" alt="@pj.Title">
+                <div class="col-md-4 col-12">
+                    <div class="post-image">
+                        <div class="post-date-tag">
+                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
                         </div>
-                        <a href="" v class="post-category">
+                        <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
+                    </div>
+                    <div class="post-intro">
+                        <div class="post-category">
                             <span></span>
                             <span>@pj.Post_categories.FirstOrDefault()?.Categories?.Title</span>
-                        </a>
-                        <h3 class="featured-title">
-                            @pj.Title
-                        </h3>
-                        <span class="featured-author">
+                        </div>
+                        <div class="post-title">@pj.Title</div>
+                        <div class="post-author">
                             @pj.Designer?.Name
-                        </span>
+                        </div>
+                        <div class="post-desc mb-4">
+                            @pj.Short_description
+                        </div>
                     </div>
+
                 </div>
             }
         </div>
@@ -408,7 +410,7 @@
                 <div class="col-md-4 col-12">
                     <div class="post-image">
                         <div class="post-date-tag">
-                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss") ?? "N/A"
+                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss") 
                         </div>
                         <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
                     </div>
@@ -460,7 +462,7 @@
                 }
             </div>
             <div class="col-12 col-md-6 ps-md-0 d-grid">
-                @foreach (var it in Secsion5_post_quytrinh.Take(4).Skip(1).ToList())
+                @foreach (var it in Secsion5_post_quytrinh.Take(5).Skip(1).ToList())
                 {
                     <div class="d-flex align-items-center border-custom">
                         <div class="f-image">
