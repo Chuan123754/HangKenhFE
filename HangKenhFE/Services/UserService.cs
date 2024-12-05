@@ -159,15 +159,32 @@ namespace HangKenhFE.Services
             var rawContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"JSON trả về từ API: {rawContent}");
 
-            // Deserialize JSON trả về
-            var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(rawContent);
-            if (userResponse == null)
+            if (rawContent.StartsWith("\"") && rawContent.EndsWith("\""))
             {
-                throw new Exception("Không thể đọc dữ liệu trả về từ API.");
-            }
+                var jsonString = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(rawContent);
+                var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(jsonString);
+                if (userResponse == null)
+                {
+                    throw new Exception("Không thể đọc dữ liệu trả về từ API.");
+                }
 
-            return userResponse;
+                return userResponse;
+            }
+            else
+            {
+                // Trường hợp bình thường, deserialize trực tiếp
+                var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(rawContent);
+
+                if (userResponse == null)
+                {
+                    throw new Exception("Không thể đọc dữ liệu trả về từ API.");
+                }
+
+                return userResponse;
+            }
         }
+
+
 
         public class ResponseLogin
         {
