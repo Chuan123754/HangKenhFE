@@ -130,11 +130,11 @@
     private Product_Posts posts_project = new Product_Posts();
     private List<Product_Posts> list_post = new List<Product_Posts>();
     private Banner banner = new Banner();
-    private string? abc = "";
+    private string abc = "";
     protected async override Task OnInitializedAsync()
     {
         posts_project = await sev.GetByIdType(Id, "project");
-        abc = await sev.GetNameDesigner(posts_project.AuthorId);
+        abc = await sev.GetNameDesigner(posts_project.AuthorId??0);
         banner = await bnser.GetBannerByProductPostId(Id);
         list_post = await sev.GetCountByType("post", Id);
     }

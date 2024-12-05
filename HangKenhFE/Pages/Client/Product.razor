@@ -491,7 +491,7 @@
     {
         selectedProduct = productAttributes_List.FirstOrDefault(p => p.Id == id);
         StateHasChanged();
-        nav.NavigateTo($"/product-detail/{id}");
+        nav.NavigateTo($"/product-detail/{id}", forceLoad: true);
 
     }
 }
