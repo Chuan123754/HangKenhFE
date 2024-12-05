@@ -7,6 +7,8 @@
 @inject IProductAttributeServies productAttributeServices
 @inject ICartService cartServices
 @inject ICartDetailsService cartDetailServices
+@inject IJSRuntime JS
+@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 
 @inject NavigationManager nav
 <section class="section-banner">
@@ -150,7 +152,7 @@
                     </div>
 
                     <div class="product-actions">
-                        <button class="btn btn-dark btn-add-to-cart">
+                        <button class="btn btn-dark btn-add-to-cart" @onclick="AddToCart">
                             <span class="add-to-cart-text">Thêm vào giỏ hàng</span>
                             <img src="main/assets/images/shop-now.svg" alt="question">
                         </button>
@@ -299,6 +301,7 @@
     private List<Cart_details> lst_CartDetails = new List<Cart_details>();
     private Cart_details cartDetails = new Cart_details();
     private Cart cart = new Cart();
+    private Users user = new Users();
     private long? selectedSizeId;
     private long? selectedColorId;
 
@@ -345,6 +348,23 @@
         await LoadPosts();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Lấy thông tin người dùng từ session
+            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
+            if (!string.IsNullOrEmpty(userInfo))
+            {
+                // Giải mã và Deserialize người dùng từ session
+                var unescapedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(userInfo);
+                user = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(unescapedJson);
+                StateHasChanged();  // Cập nhật UI sau khi lấy thông tin người dùng
+            }
+        }
+    }
+
+
     private void OnColorChanged(long colorId)
     {
         selectedColorId = colorId;
@@ -374,14 +394,57 @@
         }
     }
 
-    private async void AddToCart(long productAttributeId)
+    private async void AddToCart()
     {
-        
+        try
+        {
+            if (user != null && user.Id > 0)
+            {
+                var cart = await cartServices.GetAll();
+                var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
+
+                if (cartUser != null)
+                {
+                    // Check sản phẩm đã tồn tại trong giỏ hàng chưa
+                    var cartDetails = await cartDetailServices.GetAll();
+                    var existingCartDetail = cartDetails.FirstOrDefault(cd => cd.Product_id == selectedProduct.Id && cd.Cart_id == cartUser.Id);
+
+                    if (existingCartDetail != null)
+                    {
+                        // Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng dồn số lượng
+                        existingCartDetail.Quantity += 1;
+                        await cartDetailServices.Update(existingCartDetail);
+                        await JS.InvokeVoidAsync("toastr.success", "Thêm sản phẩm thành công");
+                    }
+                    else
+                    {
+                        var cartDetail = new Cart_details
+                            {
+                                Cart_id = cartUser.Id,
+                                Product_id = selectedProduct.Id,
+                                Quantity = 1,
+                                Status = "ok"
+                            };
+
+                        await cartDetailServices.Create(cartDetail);
+                        await JS.InvokeVoidAsync("toastr.success", "Thêm sản phẩm vào giỏ hàng thành công");
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("toastr.error", "Giỏ hàng không tồn tại");
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Vui lòng đăng nhập trước khi thêm vào giỏ hàng");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Đã có lỗi xảy ra: " + ex.Message);
+        }
     }
-
-
-
-
 
 
 

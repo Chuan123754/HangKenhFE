@@ -1,4 +1,5 @@
-﻿@inject IUserService userService
+﻿@using Newtonsoft.Json
+@inject IUserService userService
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 @inject NavigationManager navigation
 @inject IPostSer sev
@@ -259,7 +260,6 @@
                                 <div>
                                     @if (isLoggedIn)
                                     {
-                                        <p class="message">Đã lưu vào session.</p>
                                         <button class="btn-logout" @onclick="Logout">Đăng xuất</button>
                                     }
                                     else
@@ -430,17 +430,37 @@
     {
         if (firstRender && !isInitialized)
         {
-            // Lấy thông tin từ session
-            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
-            if (!string.IsNullOrEmpty(userInfo))
+            try
             {
-                users = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(userInfo);
-                isLoggedIn = true;
+                // Lấy thông tin từ session
+                var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
+                Console.WriteLine($"Dữ liệu JSON từ session: {userInfo}");
+
+                if (!string.IsNullOrEmpty(userInfo))
+                {
+                    // Bỏ lớp escape bằng cách dùng JsonConvert
+                    var unescapedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(userInfo);
+
+                    // Deserialize thành đối tượng Users
+                    users = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(unescapedJson);
+
+                    if (users != null && !string.IsNullOrEmpty(users.Name))
+                    {
+                        isLoggedIn = true;
+                    }
+                }
+
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy thông tin từ session: {ex.Message}");
+            }
+
             isInitialized = true;
             StateHasChanged(); // Cập nhật giao diện sau khi lấy thông tin
         }
     }
+
     private async Task Logout()
     {
         await SessionStorage.RemoveItemAsync("UserInfo");
