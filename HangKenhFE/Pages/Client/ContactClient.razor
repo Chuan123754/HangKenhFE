@@ -5,7 +5,6 @@
 
 <EditForm Model="contact" OnValidSubmit="SubmitForm" FormName="styleadd">
     <DataAnnotationsValidator></DataAnnotationsValidator>
-    <ValidationSummary></ValidationSummary>
     <section class="section-banner">
         <img src="main/assets/images/banner-category.jpg"
              class="w-100 h-100" alt="banner-image-3">
@@ -58,9 +57,13 @@
                                     <h4 class="contract-form-title">Gửi thắc mắc cho chúng tôi</h4>
                                     <div style="display: flex; flex-direction: column; gap: 20px;">
                                         <input type="text" name="name" class="form-control" @bind-value="contact.FullName" placeholder="Tên của bạn">
+                                        <ValidationMessage For="@(() => contact.FullName)" />
                                         <input type="text" name="email" class="form-control" @bind-value="contact.Email" placeholder="Email của bạn">
+                                        <ValidationMessage For="@(() => contact.Email)" />
                                         <input type="text" name="phone" class="form-control" @bind-value="contact.Phone" placeholder="Số điện thoại của bạn">
+                                        <ValidationMessage For="@(() => contact.Phone)" />
                                         <textarea placeholder="Nội dung" name="content" @bind="contact.Message" class="form-control"></textarea>
+                                        <ValidationMessage For="@(() => contact.Message)" />
                                         <button type="submit" class="btn btn-send-contact">
                                             Gửi cho chúng tôi
                                             <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">

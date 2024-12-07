@@ -1,4 +1,5 @@
 ﻿@page "/cart"
+@using BlazorBootstrap
 @inject ICartDetailsService cartDetailsService
 @inject ICartService cartServices
 @inject IProductAttributeServies productAttributeServices
@@ -115,6 +116,9 @@
         </div>
     </div>
 </section>
+
+
+
 @code
 {
     private Users user = new Users();
@@ -151,5 +155,4 @@
         lst_CartDetails = cartDetails.Where(c => c.Cart_id == cartUser.Id).ToList();
 
     }
-
 }
