@@ -313,7 +313,7 @@
     {
         string searchTerm = string.IsNullOrEmpty(search_query) ? "" : search_query;
         product_list = await sev.GetByTypeAsyncProduct("product", page_number, page_size, searchTerm);
-        totalItems = await sev.GetTotalCountAsync("product", searchTerm);
+        totalItems = await sev.GetTotalCountAsyncProduct("product", searchTerm);
         total_pages = (int)Math.Ceiling((double)totalItems / page_size);
     }
 
