@@ -2,9 +2,58 @@
 @using BlazorBootstrap
 @inject ICartDetailsService cartDetailsService
 @inject ICartService cartServices
+@inject IOrderIServices orderServices
+@inject OrderDetailsIServices orderDetailsServices
 @inject IProductAttributeServies productAttributeServices
 @inject IProductVariantServices productVariantServices
+@inject IAddressServices addressServices
+@inject IUserService userServices
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
+@inject IJSRuntime JS
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<style>
+    .color-preview {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #ccc;
+        color: #555;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+        }
+
+    .table thead {
+        background-color: #f1f1f1;
+    }
+
+    .btn-danger {
+        color: #fff;
+    }
+
+        .btn-danger:hover {
+            background-color: #e74c3c;
+        }
+
+    .card-header {
+        background-color: #ffeb3d;
+    }
+
+    .table td, .table th {
+        text-align: center;
+    }
+
+    .product-img {
+        width: 80px;
+        height: auto;
+    }
+</style>
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
          class="w-100 h-100" alt="banner-image-3">
@@ -15,104 +64,393 @@
     </div>
 </section>
 <section id="collection">
-    <div class="container">
-        <div class="row">         
-            <main class="col-md-9">
-                <div class="row product mt-48px">
-                    <div class="table-responsive">
-                        <table class="table card-table table-vcenter text-nowrap datatable">
-                            <thead>
-                                <tr>
-                                    <th>Hình Ảnh</th>
-                                    <th>Tên sản phẩm</th>
-                                    <th>Màu</th>
-                                    <th>Kích thước</th>
-                                    <th>Số lượng</th>
-                                    <th>Đơn giá</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in lst_CartDetails)
-                                {
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Main Giỏ hàng -->
+            <main class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header text-center">
+                        <h4>Thông tin giỏ hàng</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table card-table table-vcenter text-nowrap">
+                                <thead>
                                     <tr>
-                                        <td><img src="@item.Product_Attributes.Image" alt="Hình ảnh" style="width: 80px; height: auto;" /></td>
-                                        <td>@item.Product_Attributes.SKU </td>
-                                        <td class="sort-city">
-                                            <div class="d-flex align-items-center">
-                                                <span>@item.Product_Attributes.Color.Title</span>
-                                                <div class="color-preview"
-                                                     style="width: 24px; height: 24px; background-color: @item.Product_Attributes.Color.Color_code; border-radius: 50%; border: 1px solid #ddd; margin-left: 8px;">
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>@item.Product_Attributes.Size.Title</td>
-                                        <td>
-@*                                             <button class="btn btn-sm btn-outline-secondary" @onclick="() => UpdateQuantityView(item.Id, item.Quantity - 1)">-</button> *@
-                                            <span class="mx-2">@item.Quantity</span>
-                                           @*  <button class="btn btn-sm btn-outline-secondary" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1)">+</button> *@
-                                        </td>
-                                        <td class="text-start">
-                                            @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
-                                            {
-                                                <div>
-                                                    <span style="text-decoration: line-through; color: gray;">
-                                                        @string.Format("{0:N0}", item.Product_Attributes.Regular_price).Replace(".", ",") VNĐ
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span style="font-weight: bold; color: red;">
-                                                        @string.Format("{0:N0}", item.Product_Attributes.Sale_price).Replace(".", ",") VNĐ
-                                                    </span>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div>
-                                                    <span>
-                                                        @string.Format("{0:N0}", item.Product_Attributes.Regular_price).Replace(".", ",") VNĐ
-                                                    </span>
-                                                </div>
-                                            }
-                                        </td>
-                                        <td class="text-start">
-                                            @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
-                                            {
-                                                <span>
-                                                    @string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Sale_price)).Replace(".", ",") VNĐ
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span>
-                                                    @string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Regular_price)).Replace(".", ",") VNĐ
-                                                </span>
-
-
-                                            }
-                                        </td>
-                                        <td>
-
-                                        @*     <button class="btn btn-danger" @onclick="() => DeleteOrderDetail(item.Id)">
-                                                <i class="bi bi-trash3"></i>
-                                            </button> *@
-                                        </td>
+                                        <th>
+                                            <input type="checkbox" @onchange="ToggleSelectAll" checked="@isAllSelected" />
+                                            <label>All</label>
+                                        </th>
+                                        <th>Hình Ảnh</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Màu</th>
+                                        <th>Kích thước</th>
+                                        <th>Số lượng</th>
+                                        <th>Đơn giá</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Action</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="fs-6">
+                                    @foreach (var item in lst_CartDetails)
+                                    {
+                                        <tr>
+                                            <td class="text-center align-middle">
+                                                <input type="checkbox" @onchange="@(e => OnCheckboxChange(e, item.Id))" checked="@selectedCartDetails.Contains(item.Id)" />
+                                            </td>
+                                            <!-- Ảnh sản phẩm -->
+                                            <td class="text-center align-middle">
+                                                <img src="@item.Product_Attributes.Image" alt="Hình ảnh" class="product-img" style="width: 80px; height: auto;" />
+                                            </td>
+
+                                            <!-- Tên sản phẩm -->
+                                            <td class="text-center align-middle">@item.Product_Attributes.SKU</td>
+
+                                            <!-- Màu sản phẩm -->
+                                            <td class="sort-city text-center align-middle">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <span>@item.Product_Attributes.Color.Title</span>
+                                                    <div class="color-preview"
+                                                         style="background-color: @item.Product_Attributes.Color.Color_code; width: 24px; height: 24px; margin-left: 8px; border: 1px solid #ccc;">
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <!-- Kích thước sản phẩm -->
+                                            <td class="text-center align-middle">@item.Product_Attributes.Size.Title</td>
+
+                                            <!-- Số lượng -->
+                                            <td class="text-center align-middle">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity - 1)">
+                                                        <i class="bi bi-dash"></i> <!-- Sử dụng icon Bootstrap -->
+                                                    </button>
+                                                    <span class="btn btn-light btn-sm mx-2 px-2 py-1">@item.Quantity</span>
+                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1)">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+
+
+                                            <!-- Đơn giá -->
+                                            <td class="text-center align-middle">
+                                                @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
+                                                {
+                                                    <div>
+                                                        <span style="text-decoration: line-through; color: gray;">
+                                                            @string.Format("{0:N0}", item.Product_Attributes.Regular_price) VNĐ
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span style="color: red; font-weight: bold;">
+                                                            @string.Format("{0:N0}", item.Product_Attributes.Sale_price) VNĐ
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span>@string.Format("{0:N0}", item.Product_Attributes.Regular_price) VNĐ</span>
+                                                }
+                                            </td>
+
+                                            <!-- Tổng tiền -->
+                                            <td class="text-center align-middle">
+                                                @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
+                                                {
+                                                    <span>@string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Sale_price)) VNĐ</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Regular_price)) VNĐ</span>
+                                                }
+                                            </td>
+
+                                            <!-- Xóa sản phẩm -->
+                                            <td class="text-center align-middle">
+                                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteCartDetail(item.Id)">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class=" d-flex align-items-center justify-content-between">
+                        <!-- Nút thêm sản phẩm -->
+                        <div class="total">
+                            <span>Tổng thanh toán (2 sản phẩm):</span>
+                            <div class="total-amount">
+                                <span class="currency">đ</span>
+                                <span class="amount">621.500</span>
+                            </div>
+                            <div class="savings">
+                                <span>Tiết kiệm</span>
+                                <span class="savings-amount">đ248,5K</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-success" @onclick="CreateModalOrder">
+                            Đặt hàng
+                        </button>
                     </div>
                 </div>
-                <nav class="mt-48px">
-                    <ul class="pagination bsb-pagination-1 pagination-lg justify-content-center">
-                        <li class="page-item"><a class="page-link" href="#!">1</a></li>
-                        <li class="page-item active"><a class="page-link" href="#!">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#!">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#!">Trang kế tiếp</a></li>
-                    </ul>
-                </nav>
             </main>
+            @if (isModalOrderVisiable)
+            {
+                <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 75%; width: auto;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Thông tin đơn hàng</h5>
+                                <button type="button" class="btn-close" @onclick="CloseModalOrder" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <div class="col-12 mb-3 p-4 border rounded shadow-sm" style="background-color: #f9f9f9;">
+                                        <h5 class="mb-4 text-center">Thông tin khách hàng</h5>
+                                        <div class="mb-2">
+                                            <label class="me-2"><strong>Tên khách hàng:</strong> @user.Name</label>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="me-2"><strong>Số điện thoại:</strong> @user.Phone</label>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="me-2"><strong>Email:</strong> @user.Email</label>
+                                        </div>
+                                        @if (selectedAddress == null)
+                                        {
+                                            <label class="text-warning">Vui lòng chọn địa chỉ</label>
+                                        }
+                                        else
+                                        {
+                                            <div class="mb-2">
+                                                <label class="me-2"><strong>Địa chỉ nhận hàng:</strong> @selectedAddress.Street - @selectedAddress.Ward_commune - @selectedAddress.District - @selectedAddress.Province_city</label>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="me-2"><strong>Ghi chú:</strong> @selectedAddress.Status</label>
+                                            </div>
+                                        }
+                                        <button class="btn btn-outline-primary w-100" @onclick="ChoseAddressModal">Thay đổi địa chỉ</button>
+                                    </div>
+                                </div>
+                                @if (isModalAddressVisiable)
+                                {
+                                    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                                        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 75%; width: auto;">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Danh sách địa chỉ của Khách Hàng</h5>
+                                                    <button type="button" class="btn-close" @onclick="CloseAddressModal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <button class="btn btn-sm btn-outline-success" @onclick="CreateAddressModal">Thêm mới địa chỉ</button>
+                                                    </div>
+                                                    <!-- model create address -->
+                                                    @if (isModalCreateAddress)
+                                                    {
+                                                        <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                                                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 40%; width: auto;">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Thêm mới địa chỉ</h5>
+                                                                    </div>
+                                                                    <form class="p-4 bg-light rounded shadow">
+                                                                        <div class="row mb-3">
+                                                                            <div class="col-md-6">
+                                                                                <label for="name" class="form-label">Tên người nhận </label>
+                                                                                <input type="text" @bind="address.Name" class="form-control" placeholder="Nhập tên người nhận">
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <label for="name" class="form-label">SĐT </label>
+                                                                                <input type="text" @bind="address.Phone" class="form-control" placeholder="Nhập SĐT">
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <div class="row mb-3">
+                                                                            <div class="col-md-4">
+                                                                                <label for="city" class="form-label">Tỉnh/Thành phố</label>
+                                                                                <select id="city" @onchange="OnProvinceChange" class="form-select">
+                                                                                    <option value="">Chọn Tỉnh</option>
+                                                                                    @if (provinces != null && provinces.Count > 0)
+                                                                                    {
+                                                                                        @foreach (var province in provinces)
+                                                                                        {
+                                                                                            <option value="@province.Id">@province.Name</option>
+                                                                                        }
+                                                                                    }
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="district" class="form-label">Quận/Huyện</label>
+                                                                                <select id="district" @onchange="OnDistrictChange" class="form-select" disabled="@(!hasDistricts)">
+                                                                                    <option value="">Chọn Huyện</option>
+                                                                                    @if (districts != null && districts.Count > 0)
+                                                                                    {
+                                                                                        @foreach (var district in districts)
+                                                                                        {
+                                                                                            <option value="@district.Id">@district.Name</option>
+                                                                                        }
+                                                                                    }
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="ward" class="form-label">Xã/Phường/Thị trấn</label>
+                                                                                <select id="ward" @onchange="OnWardChange" class="form-select" disabled="@(!hasWards)">
+                                                                                    <option value="">Chọn Xã</option>
+                                                                                    @if (wards != null && wards.Count > 0)
+                                                                                    {
+                                                                                        @foreach (var ward in wards)
+                                                                                        {
+                                                                                            <option value="@ward.Id">@ward.Name</option>
+                                                                                        }
+                                                                                    }
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row mb-3">
+                                                                            <div class="col-md-8">
+                                                                                <label for="address" class="form-label">Địa chỉ cụ thể</label>
+                                                                                <input type="text" @bind="address.Street" class="form-control" placeholder="Nhập địa chỉ cụ thể">
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="note" class="form-label">Ghi chú</label>
+                                                                                <input type="text" @bind="address.Status" id="note" class="form-control" placeholder="Nhập ghi chú">
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="modal-footer d-flex justify-content-between">
+                                                                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="CreateAddress">Xác nhận</button>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CloseCreateAddress">Hủy</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    @if (lst_Address != null && lst_Address.Any())
+                                                    {
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>STT</th>
+                                                                    <th>Tên người nhận</th>
+                                                                    <th>Số điện thoại</th>
+                                                                    <th>Địa chỉ</th>
+                                                                    <th>Thao tác</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @{
+                                                                    int index = 1;
+                                                                }
+                                                                @foreach (var item in lst_Address)
+                                                                {
+                                                                    <tr>
+                                                                        <td>@index</td>
+                                                                        <td>@item.Name</td>
+                                                                        <td>@item.Phone</td>
+                                                                        <td>@($"{item.Street}, {item.Ward_commune}, {item.District}, {item.Province_city}")</td>
+                                                                        <td>
+                                                                            <button class="btn btn-primary mt-2" @onclick="() => SelectAddress(item)">Chọn</button>
+                                                                        </td>
+                                                                    </tr>
+                                                                    index++;
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    }
+                                                    else
+                                                    {
+                                                        <h1>Khách hàng chưa có thông tin về địa chỉ</h1>
+                                                    }
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="modal-backdrop fade show"></div>
+                                }
+                                <div class="container">
+                                    <div class="row mb-3 text-center fw-bold" style="background-color: #f8f9fa; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                        <div class="col-3 d-flex align-items-center justify-content-center">Ảnh</div>
+                                        <div class="col-3 d-flex align-items-center justify-content-center">Sản phẩm</div>
+                                        <div class="col-2 d-flex align-items-center justify-content-center">Số lượng</div>
+                                        <div class="col-2 d-flex align-items-center justify-content-center">Đơn giá</div>
+                                        <div class="col-2 d-flex align-items-center justify-content-center">Thành tiền</div>
+                                    </div>
+
+                                    @foreach (var item in lst_OrderDetail)
+                                    {
+                                        <div class="row mb-3 align-items-center border-bottom pb-3">
+                                            <div class="col-3 text-center">
+                                                <img src="@item.ProductAttributes.Image" alt="Hình ảnh" class="product-img" style="width: 80px; height: auto;" />
+                                            </div>
+                                            <div class="col-3 text-start">
+                                                <h6 class="mb-0">@item.ProductAttributes.SKU</h6>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="me-2">@item.ProductAttributes.Color.Title</span>
+                                                    <div class="color-preview"
+                                                         style="width: 24px; height: 24px; background-color: @item.ProductAttributes.Color.Color_code; border-radius: 50%; border: 1px solid #ddd;">
+                                                    </div>
+                                                </div>
+                                                <span>@item.ProductAttributes.Size.Title</span>
+                                            </div>
+                                            <div class="col-2 text-center">
+                                                <div class="btn-group" role="group">
+                                                    <span class="btn btn-light btn-sm mx-2 px-2 py-1">@item.Quantity</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-2 text-center">
+                                                @if (item.ProductAttributes.Sale_price != null && item.ProductAttributes.Sale_price > 0)
+                                                {
+                                                    <span style="text-decoration: line-through; color: gray;">
+                                                        @string.Format("{0:N0}", item.ProductAttributes.Regular_price) VNĐ
+                                                    </span>
+
+                                                    <br />
+                                                    <span style="color: red; font-weight: bold;">
+                                                        @string.Format("{0:N0}", item.ProductAttributes.Sale_price) VNĐ
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@string.Format("{0:N0}", item.ProductAttributes.Regular_price) VNĐ</span>
+                                                }
+                                            </div>
+                                            <div class="col-2 text-center">
+                                                @if (item.ProductAttributes.Sale_price != null && item.ProductAttributes.Sale_price > 0)
+                                                {
+                                                    <span>@string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Sale_price)) VNĐ</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Regular_price)) VNĐ</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="d-flex justify-content-center my-3">
+                                    <button class="btn btn-outline-success">
+                                        GIÁ TRỊ ĐƠN HÀNG
+                                        <span>@string.Format("{0:N0}", @totalAmount) VNĐ</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary me-2" @* @onclick="PayByCash" *@>Thanh toán khi nhận hàng</button>
+                                    <button type="button" class="btn btn-outline-success" @* @onclick="PayByMomo" *@>Thanh toán qua MoMo</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-backdrop fade show"></div>
+
+            }
         </div>
     </div>
 </section>
@@ -123,7 +461,24 @@
 {
     private Users user = new Users();
     private List<Cart_details> lst_CartDetails = new List<Cart_details>();
+    private Cart_details cart_Details = new Cart_details();
+    private Orders order = new Orders();
+    private List<Order_details> lst_OrderDetail = new List<Order_details>();
+    private List<Address> lst_Address = new List<Address>();
+    private Address address = new Address();
+    private List<long> selectedCartDetails = new List<long>();
+    private List<long> initialCartDetails = new List<long>();
+    private bool isAllSelected = false;
 
+    private decimal totalAmount = 0; // tổng tiền hàng đã giảm
+    private decimal totalPrincipal = 0; // tổng tiền hàng chưa giảm
+    decimal discountAmount = 0; // tiền được giảm
+    private int totalQuantity = 0;
+    private decimal feeShipping = 0; // phí ship
+    private decimal totalMoney = 0; // cần thanh toán
+    private bool isModalOrderVisiable = false;
+    private bool isModalAddressVisiable = false;
+    private bool isModalCreateAddress = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -139,20 +494,402 @@
                 StateHasChanged();  // Cập nhật UI sau khi lấy thông tin người dùng
             }
         }
+        CalculateTotalMoney();
     }
 
     protected override async Task OnInitializedAsync()
     {
+        provinces = await address_Service.GetProvincesAsync();
         await LoadCartDetails();
+        await LoadOrderDetails();
+        CalculateTotalMoney();
 
     } 
+
+    private async Task ToggleSelectAll()
+    {
+        isAllSelected = !isAllSelected;
+        selectedCartDetails.Clear();
+
+        if (isAllSelected)
+        {
+            // Add all product IDs to selectedProductIds
+            foreach (var item in lst_CartDetails)
+            {
+                selectedCartDetails.Add(item.Id);
+            }
+        }
+        CalculateTotalMoney();
+        StateHasChanged(); 
+    }
+
+    private void OnCheckboxChange(ChangeEventArgs e, long cartDetailId)
+    {
+        bool isChecked = e.Value is bool && (bool)e.Value;
+
+        if (isChecked)
+        {
+            if (!selectedCartDetails.Contains(cartDetailId))
+            {
+                selectedCartDetails.Add(cartDetailId);
+            }
+        }
+        else
+        {
+            if (selectedCartDetails.Contains(cartDetailId))
+            {
+                selectedCartDetails.Remove(cartDetailId);
+            }
+        }
+        isAllSelected = lst_CartDetails.All(item => selectedCartDetails.Contains(item.Id));
+        CalculateTotalMoney();
+    }
 
     private async Task LoadCartDetails()
     {
         var cartDetails = await cartDetailsService.GetAll();
         var cart = await cartServices.GetAll();
         var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
+        if(cartUser == null)
+        {
+            return;
+        }
         lst_CartDetails = cartDetails.Where(c => c.Cart_id == cartUser.Id).ToList();
+        CalculateTotalMoney();
+    }
 
+    private async Task UpdateQuantityView(long itemId, int newQuantity)
+    {
+        if (newQuantity < 1) return; // Tránh việc số lượng nhỏ hơn 1
+
+        var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Id == itemId);
+        if (cartDetail != null)
+        {
+            var productVariant = cartDetail.Product_Attributes;
+            var stock = productVariant.Stock;
+            if (newQuantity > stock)
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Số lượng trong kho không đủ");
+                return;
+            }
+            // Cập nhật số lượng
+            cartDetail.Quantity = newQuantity;
+            CalculateTotalMoney();
+            await UpdateCartDetail(cartDetail);
+            // Cập nhật lại giao diện
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateCartDetail(Cart_details cartDetail)
+    {
+        await cartDetailsService.Update(cartDetail);
+    }
+
+    private async Task DeleteCartDetail(long id)
+    {
+        await cartDetailsService.Delete(id);
+        await LoadCartDetails();
+    }
+    private async void CalculateTotalMoney()
+    {
+        totalAmount = lst_OrderDetail.Sum(item =>
+        {
+            decimal price = (item.ProductAttributes.Sale_price != null && item.ProductAttributes.Sale_price > 0)
+                ? (decimal)item.ProductAttributes.Sale_price.Value
+                : (decimal)(item.ProductAttributes.Regular_price ?? 0);
+
+            return item.Quantity * price;
+        });
+
+        totalPrincipal = lst_OrderDetail.Sum(item =>
+        {
+            return item.Quantity * (item.ProductAttributes.Regular_price ?? 0);
+        });
+
+        discountAmount = totalPrincipal - totalAmount;
+
+        totalQuantity = lst_OrderDetail.Sum(item => item.Quantity);
+        feeShipping = CalculateShippingFee();
+
+        totalMoney = (feeShipping + totalAmount);
+    }
+
+    private decimal CalculateShippingFee()
+    {
+        const decimal baseShippingFee = 38000m;
+        feeShipping = baseShippingFee;
+
+        if (totalQuantity > 10 && totalQuantity <= 20)
+        {
+            feeShipping += (totalQuantity - 10) * 5000m;
+        }
+        else if (totalQuantity > 20 && totalQuantity <= 30)
+        {
+            feeShipping += (totalQuantity - 10) * 5000m;
+            feeShipping -= feeShipping * 0.30m;
+        }
+        else if (totalQuantity > 30 && totalQuantity <= 50)
+        {
+            feeShipping += (totalQuantity - 10) * 5000m;
+            feeShipping -= feeShipping * 0.50m;
+        }
+        else if (totalQuantity > 50)
+        {
+            feeShipping += (totalQuantity - 10) * 5000m;
+            feeShipping -= feeShipping * 0.70m;
+        }
+
+        return feeShipping;
+    }
+
+    private async Task CreateModalOrder()
+    {
+        isModalOrderVisiable = true;
+        try
+        {
+            // Lấy danh sách đơn hàng của người dùng
+            var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
+            var existingOrderPending = ordersUser.FirstOrDefault(o => o.Status == "Pending");
+
+            // Nếu tồn tại đơn hàng "Pending", sử dụng lại
+            if (existingOrderPending != null)
+            {
+                order = existingOrderPending;
+            }
+            else
+            {
+                if (user == null)
+                {
+                    await JS.InvokeVoidAsync("toastr.warning", "Người dùng không hợp lệ!");
+                    return;
+                }
+
+                var newOrder = new Orders
+                    {
+                        User_id = user?.Id,
+                        Created_at = DateTime.Now,
+                        Note = "Giao hàng",
+                        Status = "Pending"
+                    };
+
+                var createdOrder = await orderServices.Create(newOrder);
+                if (createdOrder != null)
+                {
+                    order = createdOrder;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
+                    return;
+                }
+            }
+
+            if (order != null)
+            {
+                long orderId = order.Id;
+
+                if (lst_OrderDetail == null)
+                {
+                    lst_OrderDetail = new List<Order_details>();
+                }
+
+                foreach (var cartDetailId in selectedCartDetails)
+                {
+                    // Lấy thông tin CartDetail từ lst_CartDetails
+                    var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+
+                    if (cartDetail == null)
+                    {
+                        Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
+                        continue;
+                    }
+                    // check xem trong cái order đấy có chưa
+                    var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(orderId, cartDetail.Product_Attributes.Id);
+                    if (existingDetail == null)
+                    {
+                        var newOrderDetail = new Order_details
+                            {
+                                OrderId = orderId,
+                                Product_Attribute_Id = cartDetail.Product_Attributes.Id,
+                                Quantity = cartDetail.Quantity
+                            };
+                        await orderDetailsServices.Create(newOrderDetail);
+                    }
+                }
+
+                var selectedProductAttributeIds = lst_OrderDetail // danh sách sản phẩm có cả trong orderdetails và selectedCartDetail
+                 .Where(item => selectedCartDetails.Contains(item.Id)) 
+                 .Select(item => item.ProductAttributes.Id)
+                 .ToList();
+
+                var allOrderDetails = await orderDetailsServices.GetOrderDetailsByOrderId(orderId); // danh sách orderdetails của order hiện tại
+
+                foreach (var detail in allOrderDetails)
+                {
+                    // nếu sản phẩm có cả trong lst_CartDetails và selectedCartDetails thì ko xóa 
+                    bool shouldDelete = !lst_CartDetails // đấu !
+                        .Where(item => selectedCartDetails.Contains(item.Id)) 
+                        .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
+
+                    if (shouldDelete)
+                    {
+                        await orderDetailsServices.Delete(detail.Id);
+                    }
+                }
+                await LoadOrderDetails();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("toastr.error", $"Đã xảy ra lỗi: {ex.Message}");
+        }
+        CalculateTotalMoney();
+    }
+
+    private async Task CloseModalOrder()
+    {
+        isModalOrderVisiable = false;
+    }
+
+    private async Task LoadOrderDetails()
+    {
+        lst_OrderDetail = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
+        CalculateTotalMoney();
+    }
+
+    private async Task ChoseAddressModal()
+    {
+        isModalAddressVisiable = true;
+        lst_Address = await addressServices.GetAddressByUserId(user.Id);
+        StateHasChanged();
+    }
+
+    private async Task CloseAddressModal()
+    {
+        isModalAddressVisiable = false;
+    }
+
+    private async Task CreateAddressModal()
+    {
+        isModalCreateAddress = true;
+    }
+
+    private async Task CreateAddress()
+    {
+        if (string.IsNullOrEmpty(address.Ward_commune) || string.IsNullOrEmpty(address.Province_city) || string.IsNullOrEmpty(address.District))
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Vui lòng nhập đầy đủ thông tin địa chỉ.");
+            return;
+        }
+        var orderUser = await orderServices.GetByIdOrders(order.Id);
+        if (order?.User_id.HasValue == true)
+        {
+            address.User_Id = order.User_id.Value; // Gắn User_Id từ Order
+            if (address.Type == null) address.Type = "";
+            if (address.Status == null) address.Status = "";
+
+            address.Name = address?.Name ?? "";
+            address.Phone = address?.Phone ?? "";
+            address.Email = user?.Email ?? "";
+            var province = provinces.FirstOrDefault(p => p.Id == address.Province_city);
+            var district = districts.FirstOrDefault(d => d.Id == address.District);
+            var ward = wards.FirstOrDefault(w => w.Id == address.Ward_commune);
+            address.Province_city = province.Name;
+            address.District = district?.Name;
+            address.Ward_commune = ward?.Name;
+            var result = await addressServices.CreateAddress(address);
+
+            if (result)
+            {
+                await JS.InvokeVoidAsync("toastr.success", "Địa chỉ đã được tạo thành công.");
+                isModalCreateAddress = false;
+                lst_Address = await addressServices.GetAddressByUserId(order.User_id.Value);
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy người dùng liên kết với đơn hàng.");
+        }
+    }
+
+    private void CloseCreateAddress()
+    {
+        isModalCreateAddress = false;
+    }
+
+    // tách được đoạn code này ra chỗ khác thì càng tốt
+    private List<Province> provinces = new List<Province>();
+    private List<Districted> districts = new List<Districted>();
+    private List<Ward> wards = new List<Ward>();
+    private bool hasDistricts = false;
+    private bool hasWards = false;
+    [Inject] private AddressService address_Service { get; set; }
+    private async Task OnProvinceChange(ChangeEventArgs e)
+    {
+        var selectedProvinceId = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedProvinceId))
+        {
+            // Thiết lập tỉnh hiện tại và xóa các quận huyện, xã
+            address.Province_city = selectedProvinceId;
+            districts = await address_Service.GetDistrictsAsync(int.Parse(selectedProvinceId));
+            hasDistricts = districts.Count > 0;
+            wards.Clear();
+            hasWards = false;
+        }
+    }
+    private async Task OnDistrictChange(ChangeEventArgs e)
+    {
+        var selectedDistrictId = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedDistrictId))
+        {
+            address.District = selectedDistrictId;
+            wards = await address_Service.GetWardsAsync(int.Parse(selectedDistrictId));
+            hasWards = wards.Count > 0;
+        }
+    }
+    private async Task OnWardChange(ChangeEventArgs e)
+    {
+        var selectedWardId = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedWardId))
+        {
+            address.Ward_commune = selectedWardId;
+        }
+    }
+    // Các biến để bind vào form
+    private string city;
+    private string district;
+    private string ward;
+    private string street;
+    private string phone;
+    private Address selectedAddress;
+
+    private void SelectAddress(Address address)
+    {
+        ClearInfoAddress();
+        if (address != null)
+        {
+            selectedAddress = address;
+            city = address.Province_city;
+            district = address.District;
+            ward = address.Ward_commune;
+            street = address.Street;
+            phone = address.User?.Phone;
+        }
+        isModalAddressVisiable = false;
+    }
+    private void ClearInfoAddress()
+    {
+        selectedAddress = null;
+        city = string.Empty;
+        district = string.Empty;
+        ward = string.Empty;
+        street = string.Empty;
+        phone = string.Empty;
     }
 }

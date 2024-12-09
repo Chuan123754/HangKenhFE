@@ -165,11 +165,11 @@
             else
             {
                 await JS.InvokeVoidAsync("toastr.success", "Đăng nhập thành công");
+
+                // Lưu thông tin người dùng vào SessionStorage
                 var serializedUser = Newtonsoft.Json.JsonConvert.SerializeObject(result);
                 await SessionStorage.SetItemAsync("UserInfo", serializedUser);
-
-
-                navigationManager.NavigateTo("/introduce");
+                navigationManager.NavigateTo("/");
             }
         }
         catch (Exception ex)
@@ -178,6 +178,7 @@
             await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
         }
     }
+
     private async Task HandleRegisterAsync()
     {
     }

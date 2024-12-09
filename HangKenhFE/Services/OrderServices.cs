@@ -15,9 +15,18 @@ namespace HangKenhFE.Services
         {
             _client = client;
         }
-        public async Task Create(Orders order)
+        public async Task<Orders> Create(Orders order)
         {
-            await _client.PostAsJsonAsync("https://localhost:7011/api/Orders/Create", order);
+            var response = await _client.PostAsJsonAsync("https://localhost:7011/api/Orders/Create", order);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<Orders>();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task Delete(long id)
