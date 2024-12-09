@@ -1,35 +1,48 @@
 ﻿@page "/"
+@using BlazorBootstrap
 @inject IPostSer sev
-
 @if (Secsion1_post_banner5?.Any() == true)
 {
-    <section class="section-banner m-0">
-        <div class="banner home pc">
-            @foreach (var banner in Secsion1_post_banner5.Take(5).ToList())
+    <section>
+        <Carousel ShowIndicators="true">
+            @foreach (var banner in Secsion1_post_banner5.Take(1).ToList())
             {
-                <div class="banner-item">
-                    <div class="banner-image w-100">
-                        <img src="@banner.Feature_image" />
-                    </div>
-                    <div class="banner-box">
-                        <h2 class="banner-title wow" data-wow-delay=".1s">
-                            @banner.Title
-                        </h2>
-                        <p class="banner-description wow" data-wow-delay=".2s">
-                            @GetCleanText(banner.Description)
-                        </p>
-                        <a class="shop-link wow" href="#" data-wow-delay=".3s">
-                            <span>SHOP NOW</span>
-                            <svg width="23" height="21" viewBox="0 0 23 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M0.0895996 10.5H21.9103M21.9103 10.5C21.9103 10.5 17.704 9.34615 15.1802 6.65385C12.6564 3.96154 12.6564 0.5 12.6564 0.5M21.9103 10.5C21.9103 10.5 17.7437 11.6538 15.2437 14.3462C12.7437 17.0385 12.7437 20.5 12.7437 20.5"
-                                      stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                <CarouselItem Active="true">
+                    <img src="@banner.Feature_image" />
+                    <CarouselCaption>
+                        <h2 class="banner-title " style="color:white">@banner.Title</h2>
+                        <p class="banner-description " style="color:white">@banner.Short_description</p>
+                        <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
+                            <span>Xem thêm</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                                 fill="none">
+                                <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                      stroke="#ffffff" stroke-width="2.2" stroke-linejoin="bevel" />
                             </svg>
-                        </a>
-                    </div>
-                    <p class="banner-title-preview">@banner.Title</p>
-                </div>
+                        </button>
+                    </CarouselCaption>
+                </CarouselItem>
             }
-        </div>
+            @foreach (var bannersk1 in Secsion1_post_banner5.Take(5).Skip(1).ToList())
+            {
+                <CarouselItem>
+                    <img src="@bannersk1.Feature_image" />
+                    <CarouselCaption>
+                        <h2 class="banner-title" style="color:white; ">@bannersk1.Title</h2>
+                        <p class="banner-description" style="color:white">@bannersk1.Short_description</p>
+                        <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
+                            <span>Xem thêm</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                                 fill="none">
+                                <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                      stroke="#ffffff" stroke-width="2.2" stroke-linejoin="bevel" />
+                            </svg>
+                        </button>
+                    </CarouselCaption>
+                </CarouselItem>
+            }
+        </Carousel>
+      
     </section>
 }
 <section class="featured-post">
@@ -94,17 +107,17 @@
             {
                 <div class="tblock-right">
                     <img src="@sp1.Feature_image"
-                     alt="@sp1.Title">
-                <div class="img-desc">
-                    <h2>@sp1.Title</h2>
-                    <div class="decoration-title d-flex align-center">
-                        <div></div>
+                         alt="@sp1.Title">
+                    <div class="img-desc">
+                        <h2>@sp1.Title</h2>
+                        <div class="decoration-title d-flex align-center">
+                            <div></div>
+                        </div>
+                        <p>
+                            @sp1.Short_description
+                        </p>
                     </div>
-                    <p>
-                        @sp1.Short_description
-                    </p>
                 </div>
-            </div>
             }
         </div>
         <div class="trending-box trending-box-item mt-24px">
@@ -112,14 +125,14 @@
             {
                 <div class="flex-item">
                     <div class="position-relative">
-                    <img src="@sp3.Feature_image" alt="Ảnh 3" class="img-fluid">
-                    <div class="img-title">
-                        <h2>@sp3.Title</h2>
+                        <img src="@sp3.Feature_image" alt="Ảnh 3" class="img-fluid">
+                        <div class="img-title">
+                            <h2>@sp3.Title</h2>
+                        </div>
                     </div>
                 </div>
-            </div>
             }
-           
+
         </div>
     </div>
 </section>
@@ -206,80 +219,81 @@
         </div>
     </div>
 </section>
-
-@if (product4?.Any() == true)
-{
+<div>
+    @*
+    @if (product4?.Any() == true)
+    {
     <!-- Swiper CSS -->
     <link href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" rel="stylesheet" />
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <section class="section-5">
-        <!-- Slider for PC -->
-        <div class="swiper trending-slide pc">
-            <div class="swiper-wrapper">
-                @foreach (var product in product4)
-                {
-                    <div class="swiper-slide ms-2">
-                        <div class="swiper-wrapper">
-                            <div class="row">
-                                <div class="col-9">
-                                    <video id="content_video_@product.Id" class="video-js vjs-default-skin video-js-pc"
-                                           controls preload="auto" poster="main/assets/images/introduce-video.png">
-                                        <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
-                                                type="video/youtube" />
-                                    </video>
-                                </div>
-                                <div class="col-3">
-                                    <div class="position-relative">
-                                        <img style="height: 700px" src="@product.Posts.Feature_image"
-                                             alt="@product.Posts.Title">
-                                        <div class="img-title d-flex flex-column" style="gap: 8px">
-                                            <a href="#">
-                                                <h4 class="title">@product.Posts.Title</h4>
-                                            </a>
-                                            <p class="desc">@product.Posts.Post_categories?.FirstOrDefault()?.Categories?.Title</p>
-                                            <p class="price">@product.MinPrice VND</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-            <!-- Pagination and Navigation -->
-            <div class="swiper-pagination pc"></div>
-            <div class="swiper-button-prev pc"></div>
-            <div class="swiper-button-next pc"></div>
-        </div>
+    <!-- Slider for PC -->
+    <div class="swiper trending-slide pc">
+    <div class="swiper-wrapper">
+    @foreach (var product in product4)
+    {
+    <div class="swiper-slide ms-2">
+    <div class="swiper-wrapper">
+    <div class="row">
+    <div class="col-9">
+    <video id="content_video_@product.Id" class="video-js vjs-default-skin video-js-pc"
+    controls preload="auto" poster="main/assets/images/introduce-video.png">
+    <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
+    type="video/youtube" />
+    </video>
+    </div>
+    <div class="col-3">
+    <div class="position-relative">
+    <img style="height: 700px" src="@product.Posts.Feature_image"
+    alt="@product.Posts.Title">
+    <div class="img-title d-flex flex-column" style="gap: 8px">
+    <a href="#">
+    <h4 class="title">@product.Posts.Title</h4>
+    </a>
+    <p class="desc">@product.Posts.Post_categories?.FirstOrDefault()?.Categories?.Title</p>
+    <p class="price">@product.MinPrice VND</p>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    }
+    </div>
+    <!-- Pagination and Navigation -->
+    <div class="swiper-pagination pc"></div>
+    <div class="swiper-button-prev pc"></div>
+    <div class="swiper-button-next pc"></div>
+    </div>
 
-        <!-- Slider for Phone -->
-        <div class="trending-slide-phone phone">
-            @foreach (var product in product4)
-            {
-                <div class="trending-item">
-                    <div class="trending-item-image">
-                        <video id="content_video_m@product.Id" class="video-js vjs-default-skin video-js-mobile"
-                               controls preload="auto" poster="@("/main/assets/images/introduce-video.png")">
-                            <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
-                                    type="video/youtube" />
-                        </video>
-                    </div>
-                    <div class="trending-item-content">
-                        <div class="position-relative">
-                            <img src="@product.Posts.Feature_image" alt="@product.Posts.Title">
-                            <div class="img-title d-flex flex-column" style="gap: 8px">
-                                <a href="#">
-                                    <h4 class="title">@product.Posts.Title</h4>
-                                </a>
-                                <p class="desc">@product.Posts.Post_categories?.FirstOrDefault()?.Categories?.Title</p>
-                                <p class="price">@product.MinPrice VND</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
+    <!-- Slider for Phone -->
+    <div class="trending-slide-phone phone">
+    @foreach (var product in product4)
+    {
+    <div class="trending-item">
+    <div class="trending-item-image">
+    <video id="content_video_m@product.Id" class="video-js vjs-default-skin video-js-mobile"
+    controls preload="auto" poster="@("/main/assets/images/introduce-video.png")">
+    <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
+    type="video/youtube" />
+    </video>
+    </div>
+    <div class="trending-item-content">
+    <div class="position-relative">
+    <img src="@product.Posts.Feature_image" alt="@product.Posts.Title">
+    <div class="img-title d-flex flex-column" style="gap: 8px">
+    <a href="#">
+    <h4 class="title">@product.Posts.Title</h4>
+    </a>
+    <p class="desc">@product.Posts.Post_categories?.FirstOrDefault()?.Categories?.Title</p>
+    <p class="price">@product.MinPrice VND</p>
+    </div>
+    </div>
+    </div>
+    </div>
+    }
+    </div>
     </section>
     <!-- Video.js and Swiper.js Scripts -->
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
@@ -287,41 +301,42 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
     <script>
-        // Initialize Video.js for PC
-        var videos = document.getElementsByClassName('video-js-pc');
-        for (var i = 0; i < videos.length; i++) {
-            videojs(videos[i].id, { autoplay: false });
-        }
+    // Initialize Video.js for PC
+    var videos = document.getElementsByClassName('video-js-pc');
+    for (var i = 0; i < videos.length; i++) {
+    videojs(videos[i].id, { autoplay: false });
+    }
 
-        // Initialize Video.js for Mobile
-        var mobileVideos = document.getElementsByClassName('video-js-mobile');
-        for (var i = 0; i < mobileVideos.length; i++) {
-            videojs(mobileVideos[i].id, { autoplay: false });
-        }
+    // Initialize Video.js for Mobile
+    var mobileVideos = document.getElementsByClassName('video-js-mobile');
+    for (var i = 0; i < mobileVideos.length; i++) {
+    videojs(mobileVideos[i].id, { autoplay: false });
+    }
 
-        // Initialize Swiper.js for PC
-        var swiperPC = new Swiper('.trending-slide.pc', {
-            loop: true,
-            pagination: {
-                el: '.swiper-pagination.pc',
-                clickable: true,
-            },
-            navigation: {
-                nextEl: '.swiper-button-next.pc',
-                prevEl: '.swiper-button-prev.pc',
-            },
-        });
+    // Initialize Swiper.js for PC
+    var swiperPC = new Swiper('.trending-slide.pc', {
+    loop: true,
+    pagination: {
+    el: '.swiper-pagination.pc',
+    clickable: true,
+    },
+    navigation: {
+    nextEl: '.swiper-button-next.pc',
+    prevEl: '.swiper-button-prev.pc',
+    },
+    });
 
-        // Initialize Swiper.js for Mobile
-        var swiperPhone = new Swiper('.trending-slide-phone.phone', {
-            loop: true,
-            pagination: {
-                el: '.swiper-pagination.phone',
-                clickable: true,
-            },
-        });
+    // Initialize Swiper.js for Mobile
+    var swiperPhone = new Swiper('.trending-slide-phone.phone', {
+    loop: true,
+    pagination: {
+    el: '.swiper-pagination.phone',
+    clickable: true,
+    },
+    });
     </script>
-}
+    } *@
+</div>
 <section class="library">
     <div class="container">
         <div class="row">
@@ -332,7 +347,7 @@
                     <div class="article">
                         <h3 class="article-heading">@item1.Title</h3>
                         <div class="article-description">
-                           @item1.Short_description
+                            @item1.Short_description
                         </div>
                         <button class="btn-more">
                             <span>Xem thêm</span>
@@ -410,7 +425,7 @@
                 <div class="col-md-4 col-12">
                     <div class="post-image">
                         <div class="post-date-tag">
-                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss") 
+                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
                         </div>
                         <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
                     </div>
@@ -535,16 +550,3 @@
         return System.Net.WebUtility.HtmlDecode(textWithoutHtml);
     }
 }
-<script>
-    function showBanner(id) {
-        $(".banner-show").find(".d-block").removeClass("d-block").addClass('d-none');
-        $(".banner-show").find('.banner-' + id).addClass('d-block').removeClass('d-none');
-
-        $(".banner-show-content").find(".banner-content").removeClass("banner-content");
-        $(".banner-show-content").find('.banner-' + id).addClass('banner-content');
-
-
-        $(".banner-gid").find('.d-none').removeClass('d-none').addClass('d-flex');
-        $(".banner-gid-" + id).addClass('d-none');
-    }
-</script>

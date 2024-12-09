@@ -16,6 +16,7 @@ builder.Services.AddDbContext<APP_DATA_DATN>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddSingleton<WeatherForecastService>();
 // Thêm CORS nếu cần
 builder.Services.AddCors(options =>
@@ -74,8 +75,13 @@ builder.Services.AddServerSideBlazor(options => options.DetailedErrors = true);
 builder.Services.AddScoped<IContacServices, ContacServices>();
 
 
-
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
+    var response = await httpClient.GetAsync("https://localhost:7011/api/Accsess/GetAll");
+}
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
