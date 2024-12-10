@@ -67,7 +67,7 @@ namespace HangKenhFE.Models
         public static readonly Dictionary<string, string> STATUSES = new Dictionary<string, string>
         {
             { STATUS_DRAFT, "Nháp" },
-            { STATUS_PENDING, "Chờ duyệt" },
+            { STATUS_PENDING, "Hạ xuống" },
              { STATUS_PUBLISH, "Công khai" }
         };
 

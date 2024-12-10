@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using BlazorBootstrap
 @inject IPostSer sev
+@inject NavigationManager nav
 @if (Secsion1_post_banner5?.Any() == true)
 {
     <section>
@@ -12,14 +13,16 @@
                     <CarouselCaption>
                         <h2 class="banner-title " style="color:white">@banner.Title</h2>
                         <p class="banner-description " style="color:white">@banner.Short_description</p>
-                        <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
-                            <span>Xem thêm</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
-                                 fill="none">
-                                <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
-                                      stroke="#ffffff" stroke-width="2.2" stroke-linejoin="bevel" />
-                            </svg>
-                        </button>
+                        <a @onclick="() => NavDetailsPost(banner.Id)">
+                            <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
+                                <span>Xem thêm</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                                     fill="none">
+                                    <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                          stroke="#ffffff" stroke-width="2.2" stroke-linejoin="bevel" />
+                                </svg>
+                            </button>
+                        </a>
                     </CarouselCaption>
                 </CarouselItem>
             }
@@ -30,19 +33,20 @@
                     <CarouselCaption>
                         <h2 class="banner-title" style="color:white; ">@bannersk1.Title</h2>
                         <p class="banner-description" style="color:white">@bannersk1.Short_description</p>
-                        <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
-                            <span>Xem thêm</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
-                                 fill="none">
-                                <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
-                                      stroke="#ffffff" stroke-width="2.2" stroke-linejoin="bevel" />
-                            </svg>
-                        </button>
+                        <a @onclick="() => NavDetailsPost(bannersk1.Id)">
+                            <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
+                                <span>Xem thêm</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                                     fill="none">
+                                    <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                          stroke="#ffffff" stroke-width="2.2" stroke-linejoin="bevel" />
+                                </svg>
+                            </button>
+                        </a>
                     </CarouselCaption>
                 </CarouselItem>
             }
         </Carousel>
-      
     </section>
 }
 <section class="featured-post">
@@ -51,18 +55,24 @@
             @foreach (var pj in Secsion2_project_noibat3.Take(3).ToList())
             {
                 <div class="col-md-4 col-12">
-                    <div class="post-image">
-                        <div class="post-date-tag">
-                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
+                    <a @onclick="() => NavDetailsProject(pj.Id)">
+                        <div class="post-image">
+                            <div class="post-date-tag">
+                                @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
+                            </div>
+
+                            <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
+
                         </div>
-                        <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
-                    </div>
+                    </a>
                     <div class="post-intro">
                         <div class="post-category">
                             <span></span>
                             <span>@pj.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                         </div>
-                        <div class="post-title">@pj.Title</div>
+                        <a @onclick="() => NavDetailsProject(pj.Id)">
+                            <div class="post-title">@pj.Title</div>
+                        </a>
                         <div class="post-author">
                             @pj.Designer?.Name
                         </div>
@@ -94,30 +104,34 @@
                         2024
                     </h2>
                 </div>
-                <button class="btn-more">
-                    <span>Liên hệ</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
-                         fill="none">
-                        <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
-                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                    </svg>
-                </button>
+                <a href="/contact">
+                    <button class="btn-more">
+                        <span>Liên hệ</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                             fill="none">
+                            <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                        </svg>
+                    </button>
+                </a>
             </div>
             @foreach (var sp1 in Secsion3_product_trendy4.Take(1).ToList())
             {
-                <div class="tblock-right">
-                    <img src="@sp1.Feature_image"
-                         alt="@sp1.Title">
-                    <div class="img-desc">
-                        <h2>@sp1.Title</h2>
-                        <div class="decoration-title d-flex align-center">
-                            <div></div>
+                <a @onclick="() => NavDetailsProduct(sp1.Id)">
+                    <div class="tblock-right">
+                        <img src="@sp1.Feature_image"
+                             alt="@sp1.Title">
+                        <div class="img-desc">
+                            <h2>@sp1.Title</h2>
+                            <div class="decoration-title d-flex align-center">
+                                <div></div>
+                            </div>
+                            <p>
+                                @sp1.Short_description
+                            </p>
                         </div>
-                        <p>
-                            @sp1.Short_description
-                        </p>
                     </div>
-                </div>
+                </a>
             }
         </div>
         <div class="trending-box trending-box-item mt-24px">
@@ -155,16 +169,18 @@
                     <div class="col-12 col-lg-3 col-md-3 product">
                         <figure class="card product-card">
                             <div class="product-image">
-                                <div class="img-wrap">
-                                    <img src="@item.Posts?.Feature_image"
-                                         class="w-100 h-100 object-fit-cover"
-                                         alt="">
-                                </div>
-                                <div class="img-wrap-hide">
-                                    <img src="@GetFirstImageUrl(item.Posts.Image_library)"
-                                         class="w-100 h-100 object-fit-cover"
-                                         alt="">
-                                </div>
+                                <a @onclick="() => NavDetailsProduct(item.Id)">
+                                    <div class="img-wrap">
+                                        <img src="@item.Posts?.Feature_image"
+                                             class="w-100 h-100 object-fit-cover"
+                                             alt="">
+                                    </div>
+                                    <div class="img-wrap-hide">
+                                        <img src="@GetFirstImageUrl(item.Posts.Image_library)"
+                                             class="w-100 h-100 object-fit-cover"
+                                             alt="">
+                                    </div>
+                                </a>
                                 <div class="product-action">
                                     <a href="javascript:void(0)">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
@@ -193,7 +209,9 @@
                                 </div>
                             </div>
                             <figcaption class="product-info">
-                                <a href="" class="product-name">@item.Posts.Title</a>
+                                <a @onclick="() => NavDetailsProduct(item.Id)">
+                                    <a href="" class="product-name">@item.Posts.Title</a>
+                                </a>
                                 <div class="product-description">
                                     <span class="description">@item.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                 </div>
@@ -343,20 +361,23 @@
             @foreach (var item1 in Secsion4_project_antuong.Take(1).ToList())
             {
                 <div class="col-md-6 col-12">
+
                     <img class="w-100" src="@item1.Feature_image" alt="@item1.Title">
                     <div class="article">
                         <h3 class="article-heading">@item1.Title</h3>
                         <div class="article-description">
                             @item1.Short_description
                         </div>
-                        <button class="btn-more">
-                            <span>Xem thêm</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
-                                 fill="none">
-                                <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
-                                      stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                            </svg>
-                        </button>
+                        <a @onclick="() => NavDetailsProject(item1.Id)">
+                            <button class="btn-more">
+                                <span>Xem thêm</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
+                                     fill="none">
+                                    <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
+                                          stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                </svg>
+                            </button>
+                        </a>
                     </div>
                 </div>
             }
@@ -371,14 +392,16 @@
                                 <div class="article-description">
                                     @item2.Short_description
                                 </div>
-                                <button class="btn-more">
-                                    <span>Xem thêm</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
-                                         fill="none">
-                                        <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
-                                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                                    </svg>
-                                </button>
+                                <a @onclick="() => NavDetailsProject(item2.Id)">
+                                    <button class="btn-more">
+                                        <span>Xem thêm</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
+                                             fill="none">
+                                            <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
+                                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                        </svg>
+                                    </button>
+                                </a>
                             </div>
                         </div>
                     }
@@ -391,15 +414,16 @@
                                 <div class="article-description">
                                     @item3.Short_description
                                 </div>
-                                <button class="btn-more">
-                                    <span>Xem thêm</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
-                                         fill="none">
-                                        <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
-                                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                                    </svg>
-                                </button>
-
+                                <a @onclick="() => NavDetailsProject(item3.Id)">
+                                    <button class="btn-more">
+                                        <span>Xem thêm</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
+                                             fill="none">
+                                            <path d="M0 10.5H21.8207M21.8207 10.5C21.8207 10.5 17.6144 9.34615 15.0906 6.65385C12.5668 3.96154 12.5668 0.5 12.5668 0.5M21.8207 10.5C21.8207 10.5 17.6541 11.6538 15.1541 14.3462C12.6541 17.0385 12.6541 20.5 12.6541 20.5"
+                                                  stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                        </svg>
+                                    </button>
+                                </a>
                             </div>
                         </div>
                     }
@@ -423,18 +447,22 @@
             @foreach (var pj in product_posts_list.Take(3).ToList())
             {
                 <div class="col-md-4 col-12">
-                    <div class="post-image">
-                        <div class="post-date-tag">
-                            @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
+                    <a @onclick="() => NavDetailsProject(pj.Id)">
+                        <div class="post-image">
+                            <div class="post-date-tag">
+                                @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
+                            </div>
+                            <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
                         </div>
-                        <img class="w-100" style="width: 416px; height: 535px" src="@pj.Feature_image" alt="">
-                    </div>
+                    </a>
                     <div class="post-intro">
                         <div class="post-category">
                             <span></span>
                             <span>@pj.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                         </div>
-                        <div class="post-title">@pj.Title</div>
+                        <a @onclick="() => NavDetailsProject(pj.Id)">
+                            <div class="post-title">@pj.Title</div>
+                        </a>
                         <div class="post-author">
                             @pj.Designer?.Name
                         </div>
@@ -464,14 +492,16 @@
                             <div class="post-big-short-desc">
                                 @item.Short_description
                             </div>
-                            <button class="btn-more mx-auto mt-12px">
-                                <span>Xem thêm</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
-                                     fill="none">
-                                    <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
-                                          stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
-                                </svg>
-                            </button>
+                            <a @onclick="() => NavDetailsPost(item.Id)">
+                                <button class="btn-more mx-auto mt-12px">
+                                    <span>Xem thêm</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
+                                         fill="none">
+                                        <path d="M0 10H21.8207M21.8207 10C21.8207 10 17.6144 8.84615 15.0906 6.15385C12.5668 3.46154 12.5668 0 12.5668 0M21.8207 10C21.8207 10 17.6541 11.1538 15.1541 13.8462C12.6541 16.5385 12.6541 20 12.6541 20"
+                                              stroke="#242424" stroke-width="2.2" stroke-linejoin="bevel" />
+                                    </svg>
+                                </button>
+                            </a>
                         </div>
                     </div>
                 }
@@ -480,13 +510,17 @@
                 @foreach (var it in Secsion5_post_quytrinh.Take(5).Skip(1).ToList())
                 {
                     <div class="d-flex align-items-center border-custom">
-                        <div class="f-image">
-                            <img src="@it.Feature_image"
-                                 class="w-100 h-100"
-                                 alt="">
-                        </div>
+                        <a @onclick="() => NavDetailsPost(it.Id)">
+                            <div class="f-image">
+                                <img src="@it.Feature_image"
+                                     class="w-100 h-100"
+                                     alt="">
+                            </div>
+                        </a>
                         <div class="px-4">
-                            <h4 class="post-right-title">@it.Title</h4>
+                            <a @onclick="() => NavDetailsPost(it.Id)">
+                                <h4 class="post-right-title">@it.Title</h4>
+                            </a>
                             <p class="post-right-desc">
                                 @it.Short_description
                             </p>
@@ -548,5 +582,17 @@
 
         // Giải mã các ký tự HTML
         return System.Net.WebUtility.HtmlDecode(textWithoutHtml);
+    }
+    private void NavDetailsProduct(long id)
+    {
+        nav.NavigateTo($"/product-detail/{id}");
+    }
+    private void NavDetailsPost(long id)
+    {
+        nav.NavigateTo($"/blogs-details/{id}");
+    }
+    private void NavDetailsProject(long id)
+    {
+        nav.NavigateTo($"/project-detail/{id}");
     }
 }
