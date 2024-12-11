@@ -28,11 +28,11 @@
                             <li class="breadcrumb-item active" aria-current="page">@posts.Title</li>
                         </ol>
                     </nav>
-                    <div class="row">
+                   @*  <div class="row">
                         <div class="col-12">
                             <h2 class="category-font-header">@posts.Title</h2>
                         </div>
-                    </div>
+                    </div> *@
                 </header>
                 <article class="mt-48px">
                     <header>
@@ -47,10 +47,7 @@
                                 <span></span>
                                 <span>@posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                             </div>
-                            <div class="post-big-title">Thảm không gian ngoài trời</div>
-                            <div class="post-author">
-                                @abc
-                            </div>
+                            <div class="post-big-title">@posts.Title</div>                      
                             <div class="post-big-desc">
                                 @GetCleanText(posts.Description)
                             </div>
