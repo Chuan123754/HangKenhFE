@@ -22,7 +22,7 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
-        policy =>
+        policy => 
         {
             policy.AllowAnyOrigin()
                    .AllowAnyMethod()
@@ -68,6 +68,7 @@ builder.Services.AddScoped<IProductAttributeServies, ProductAttributeServices>()
 builder.Services.AddScoped<IProductVariantServices, ProductVariantServices>();
 builder.Services.AddScoped<OrderDetailsIServices, OrderDetailsServices>();
 builder.Services.AddScoped<IOrderIServices, OrderServices>();
+builder.Services.AddScoped<IOrderTrackingServices, OrderTrackingService>();
 builder.Services.AddScoped<IBannerServices, BannerServices>();
 builder.Services.AddScoped<IDiscountServices, DiscountServices>();
 builder.Services.AddHttpContextAccessor();

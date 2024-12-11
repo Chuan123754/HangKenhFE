@@ -4,6 +4,7 @@
 @inject ICartService cartServices
 @inject IOrderIServices orderServices
 @inject OrderDetailsIServices orderDetailsServices
+@inject IOrderTrackingServices orderTrackingServices
 @inject IProductAttributeServies productAttributeServices
 @inject IProductVariantServices productVariantServices
 @inject IAddressServices addressServices
@@ -132,7 +133,6 @@
                                                 </div>
                                             </td>
 
-
                                             <!-- Đơn giá -->
                                             <td class="text-center align-middle">
                                                 @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
@@ -158,7 +158,16 @@
                                             <td class="text-center align-middle">
                                                 @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
                                                 {
-                                                    <span>@string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Sale_price)) VNĐ</span>
+                                                    <div>
+                                                        <span style="text-decoration: line-through; color: gray;">
+                                                            @string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Regular_price)) VNĐ
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span style="color: red; font-weight: bold;">
+                                                            @string.Format("{0:N0}", (item.Quantity * item.Product_Attributes.Sale_price)) VNĐ
+                                                        </span>
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -173,27 +182,17 @@
                                                 </button>
                                             </td>
                                         </tr>
+
                                     }
                                 </tbody>
 
                             </table>
                         </div>
                     </div>
-                    <div class=" d-flex align-items-center justify-content-between">
-                        <!-- Nút thêm sản phẩm -->
-                        <div class="total">
-                            <span>Tổng thanh toán (2 sản phẩm):</span>
-                            <div class="total-amount">
-                                <span class="currency">đ</span>
-                                <span class="amount">621.500</span>
-                            </div>
-                            <div class="savings">
-                                <span>Tiết kiệm</span>
-                                <span class="savings-amount">đ248,5K</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-outline-success" @onclick="CreateModalOrder">
-                            Đặt hàng
+                    <div class="d-flex align-items-center justify-content-center flex-column">
+             
+                        <button class="btn btn-outline-success btn-lg" @onclick="CreateModalOrder">
+                            Thanh toán 
                         </button>
                     </div>
                 </div>
@@ -394,9 +393,7 @@
                                                 <h6 class="mb-0">@item.ProductAttributes.SKU</h6>
                                                 <div class="d-flex align-items-center">
                                                     <span class="me-2">@item.ProductAttributes.Color.Title</span>
-                                                    <div class="color-preview"
-                                                         style="width: 24px; height: 24px; background-color: @item.ProductAttributes.Color.Color_code; border-radius: 50%; border: 1px solid #ddd;">
-                                                    </div>
+                                                    <div class="color-preview" style="width: 24px; height: 24px; background-color: @item.ProductAttributes.Color.Color_code; border-radius: 50%; border: 1px solid #ddd;"></div>
                                                 </div>
                                                 <span>@item.ProductAttributes.Size.Title</span>
                                             </div>
@@ -408,14 +405,15 @@
                                             <div class="col-2 text-center">
                                                 @if (item.ProductAttributes.Sale_price != null && item.ProductAttributes.Sale_price > 0)
                                                 {
-                                                    <span style="text-decoration: line-through; color: gray;">
-                                                        @string.Format("{0:N0}", item.ProductAttributes.Regular_price) VNĐ
-                                                    </span>
-
-                                                    <br />
-                                                    <span style="color: red; font-weight: bold;">
-                                                        @string.Format("{0:N0}", item.ProductAttributes.Sale_price) VNĐ
-                                                    </span>
+                                                    <div>
+                                                        <span style="text-decoration: line-through; color: gray;">
+                                                            @string.Format("{0:N0}", item.ProductAttributes.Regular_price) VNĐ
+                                                        </span>
+                                                        <br />
+                                                        <span style="color: red; font-weight: bold;">
+                                                            @string.Format("{0:N0}", item.ProductAttributes.Sale_price) VNĐ
+                                                        </span>
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -425,7 +423,15 @@
                                             <div class="col-2 text-center">
                                                 @if (item.ProductAttributes.Sale_price != null && item.ProductAttributes.Sale_price > 0)
                                                 {
-                                                    <span>@string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Sale_price)) VNĐ</span>
+                                                    <div>
+                                                        <span style="text-decoration: line-through; color: gray;">
+                                                            @string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Regular_price)) VNĐ
+                                                        </span>
+                                                        <br />
+                                                        <span style="color: red; font-weight: bold;">
+                                                            @string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Sale_price)) VNĐ
+                                                        </span>
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -435,13 +441,66 @@
                                         </div>
                                     }
                                 </div>
-                                <div class="d-flex justify-content-center my-3">
-                                    <button class="btn btn-outline-success">
-                                        GIÁ TRỊ ĐƠN HÀNG
-                                        <span>@string.Format("{0:N0}", @totalAmount) VNĐ</span>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-primary me-2" @* @onclick="PayByCash" *@>Thanh toán khi nhận hàng</button>
-                                    <button type="button" class="btn btn-outline-success" @* @onclick="PayByMomo" *@>Thanh toán qua MoMo</button>
+                                <div class="container my-4">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h5>Thông tin Voucher</h5>
+                                            <!-- Thông tin voucher thêm vào đây -->
+                                            <input type="text" class="form-control" placeholder="Nhập mã voucher" />
+                                            <button class="btn btn-primary mt-2">Áp dụng</button>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <h5>Thông tin thanh toán</h5>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Tổng tiền hàng:</span>
+                                                <span>@string.Format("{0:N0}", totalPrincipal) VNĐ</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Tổng tiền chiết khấu:</span>
+                                                <span style="color: red;">- @string.Format("{0:N0}", discountAmount) VNĐ</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Phí giao hàng:</span>
+                                                <span>@string.Format("{0:N0}", feeShipping) VNĐ</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between fw-bold">
+                                                <span>Tổng tiền thanh toán:</span>
+                                                <span style="color: green;">@string.Format("{0:N0}", totalMoney) VNĐ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-center my-3">
+                                        <button type="button" class="btn btn-outline-primary me-2"  @onclick="PayByCash" >Thanh toán khi nhận hàng</button>
+                                        <button type="button" class="btn btn-outline-success" @onclick="PayByMomo" >Thanh toán qua MoMo</button>
+                                    </div>
+                                    @if (isMomoModalVisible)
+                                    {
+                                        <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0, 0, 0, 0.5);">
+                                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Thanh toán qua MoMo</h5>
+                                                        <button type="button" class="btn-close" @onclick="CancelMomoPayment" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <iframe src="@payUrl" style="width: 100%; height: 600px; border: none;" allowfullscreen></iframe>
+                                                    </div>
+                                                    <div class="modal-footer d-flex justify-content-between">
+                                                        <div>
+                                                            <button type="button" class="btn btn-secondary" @onclick="CancelMomoPayment">Hủy</button>
+                                                        </div>
+                                                        <div>
+                                                            <button type="button" class="btn btn-primary" @onclick="ConfirmMomoPayment">Hoàn thành</button>
+                                                            <button class="btn btn-outline-primary" style="margin-left: 10px;" @onclick="() => DownloadInvoice(order.Id)">Xuất hóa đơn</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-backdrop fade show"></div>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -510,28 +569,39 @@
     {
         isAllSelected = !isAllSelected;
         selectedCartDetails.Clear();
+        totalAmount = 0;  
+        totalPrincipal = 0;
 
         if (isAllSelected)
         {
-            // Add all product IDs to selectedProductIds
             foreach (var item in lst_CartDetails)
             {
                 selectedCartDetails.Add(item.Id);
+                totalAmount += item.Quantity * (decimal)(item.Product_Attributes.Sale_price ?? item.Product_Attributes.Regular_price ?? 0);
+                totalPrincipal += item.Quantity * (decimal)(item.Product_Attributes.Regular_price ?? 0);
             }
         }
         CalculateTotalMoney();
-        StateHasChanged(); 
+        StateHasChanged();
     }
 
     private void OnCheckboxChange(ChangeEventArgs e, long cartDetailId)
     {
         bool isChecked = e.Value is bool && (bool)e.Value;
 
+        var selectedItem = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+
         if (isChecked)
         {
             if (!selectedCartDetails.Contains(cartDetailId))
             {
                 selectedCartDetails.Add(cartDetailId);
+                if (selectedItem != null)
+                {
+                    // Cập nhật tổng tiền hàng đã giảm và chưa giảm
+                    totalAmount += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Sale_price ?? selectedItem.Product_Attributes.Regular_price ?? 0);
+                    totalPrincipal += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Regular_price ?? 0);
+                }
             }
         }
         else
@@ -539,10 +609,17 @@
             if (selectedCartDetails.Contains(cartDetailId))
             {
                 selectedCartDetails.Remove(cartDetailId);
+                if (selectedItem != null)
+                {
+                    // Giảm tổng tiền hàng đã giảm và chưa giảm
+                    totalAmount += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Sale_price ?? selectedItem.Product_Attributes.Regular_price ?? 0);
+                    totalPrincipal += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Regular_price ?? 0);
+                }
             }
         }
         isAllSelected = lst_CartDetails.All(item => selectedCartDetails.Contains(item.Id));
         CalculateTotalMoney();
+        StateHasChanged();
     }
 
     private async Task LoadCartDetails()
@@ -567,16 +644,28 @@
         {
             var productVariant = cartDetail.Product_Attributes;
             var stock = productVariant.Stock;
+
             if (newQuantity > stock)
             {
                 await JS.InvokeVoidAsync("toastr.error", "Số lượng trong kho không đủ");
                 return;
             }
-            // Cập nhật số lượng
+
+            // Cập nhật số lượng trong giỏ hàng
             cartDetail.Quantity = newQuantity;
+
+            // Cập nhật số lượng trong lst_OrderDetail
+            var orderDetail = lst_OrderDetail.FirstOrDefault(od => od.Product_Attribute_Id == productVariant.Id);
+            if (orderDetail != null)
+            {
+                orderDetail.Quantity = newQuantity; // Cập nhật số lượng trong order details
+                await orderDetailsServices.Update(orderDetail, orderDetail.Id); // Gọi dịch vụ để cập nhật thông tin
+            }
+
             CalculateTotalMoney();
             await UpdateCartDetail(cartDetail);
             // Cập nhật lại giao diện
+            await LoadOrderDetails();
             StateHasChanged();
         }
     }
@@ -618,26 +707,29 @@
     private decimal CalculateShippingFee()
     {
         const decimal baseShippingFee = 38000m;
-        feeShipping = baseShippingFee;
+        decimal feeShipping = baseShippingFee;
 
-        if (totalQuantity > 10 && totalQuantity <= 20)
+        if (totalQuantity > 10)
         {
-            feeShipping += (totalQuantity - 10) * 5000m;
+            feeShipping += (Math.Min(totalQuantity, 20) - 10) * 3000m; // Phí cho từ 11 đến 20 sản phẩm
         }
-        else if (totalQuantity > 20 && totalQuantity <= 30)
+
+        if (totalQuantity > 20)
         {
-            feeShipping += (totalQuantity - 10) * 5000m;
-            feeShipping -= feeShipping * 0.30m;
+            feeShipping += (Math.Min(totalQuantity, 30) - 20) * 3000m;
+            feeShipping *= 0.70m; 
         }
-        else if (totalQuantity > 30 && totalQuantity <= 50)
+
+        if (totalQuantity > 30)
         {
-            feeShipping += (totalQuantity - 10) * 5000m;
-            feeShipping -= feeShipping * 0.50m;
+            feeShipping += (Math.Min(totalQuantity, 50) - 30) * 3000m;
+            feeShipping *= 0.50m; 
         }
-        else if (totalQuantity > 50)
+
+        if (totalQuantity > 40)
         {
-            feeShipping += (totalQuantity - 10) * 5000m;
-            feeShipping -= feeShipping * 0.70m;
+            feeShipping += (totalQuantity - 50) * 3000m;
+            feeShipping *= 0.30m; 
         }
 
         return feeShipping;
@@ -696,15 +788,14 @@
 
                 foreach (var cartDetailId in selectedCartDetails)
                 {
-                    // Lấy thông tin CartDetail từ lst_CartDetails
                     var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-
                     if (cartDetail == null)
                     {
                         Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
                         continue;
                     }
-                    // check xem trong cái order đấy có chưa
+
+                    // Kiểm tra xem sản phẩm đã có trong order details chưa
                     var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(orderId, cartDetail.Product_Attributes.Id);
                     if (existingDetail == null)
                     {
@@ -715,6 +806,12 @@
                                 Quantity = cartDetail.Quantity
                             };
                         await orderDetailsServices.Create(newOrderDetail);
+                    }
+                    else
+                    {
+                        // Cập nhật số lượng nếu sản phẩm đã tồn tại trong order details
+                        existingDetail.Quantity = cartDetail.Quantity;
+                        await orderDetailsServices.Update(existingDetail,existingDetail.Id);
                     }
                 }
 
@@ -883,6 +980,7 @@
         }
         isModalAddressVisiable = false;
     }
+
     private void ClearInfoAddress()
     {
         selectedAddress = null;
@@ -891,5 +989,179 @@
         ward = string.Empty;
         street = string.Empty;
         phone = string.Empty;
+    }
+    private async Task ResetViewState()
+    {
+        totalAmount = 0;
+        totalQuantity = 0;
+        totalMoney = 0;
+        feeShipping = 0;
+        totalPrincipal = 0;
+        discountAmount = 0;
+        lst_OrderDetail.Clear();
+        isModalOrderVisiable = false;
+        ClearInfoAddress();
+
+        await LoadOrderDetails();
+        await LoadCartDetails();
+        StateHasChanged();
+    }
+    private async Task CancelMomoPayment()
+    {
+        isMomoModalVisible = false;
+        await LoadOrderDetails();
+        await LoadCartDetails();
+        StateHasChanged();
+    }
+
+    // Xử lý khi nhấn nút "Xác nhận thanh toán"
+    private async Task ConfirmMomoPayment()
+    {
+        var updateitem = await orderServices.GetByIdOrders(order.Id);
+        if (updateitem.Status == "Đã xác nhận ")
+        {
+            var orderDetailsCopy = lst_OrderDetail.ToList();
+            foreach (var item in orderDetailsCopy)
+            {
+                var product = await productAttributeServices.GetProductAttributesById(item.Product_Attribute_Id);
+                if (product != null)
+                {
+                    if (item.Quantity > product.Stock || product.Stock == 0)
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm {product.SKU} trong kho không đủ.");
+                        return;
+                    }
+                    product.Stock -= item.Quantity; // trừ số lượng trong kho
+                    await productAttributeServices.Update(product, product.Id);
+                    await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
+                    isMomoModalVisible = false;
+                    await ResetViewState();
+                }
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng chưa được thanh toán");
+        }
+
+    }
+    private async void PayByCash()
+    {
+        CheckOut("cash");
+        await LoadOrderDetails();
+        await LoadCartDetails();
+    }
+
+    private async void PayByMomo()
+    {
+        CheckOut("momo");
+        await LoadOrderDetails();
+        await LoadCartDetails();
+    }
+
+    private string momoError = null; 
+    private string? ErrorCode;
+    private string payUrl { get; set; }
+    private bool isMomoModalVisible = false;
+
+    private void ShowMomoModal(string momoUrl)
+    {
+        payUrl = momoUrl;
+
+        isMomoModalVisible = true;
+        StateHasChanged();
+    }
+    private async Task CheckOut(string paymentMethod)
+    {
+        if(selectedAddress == null )
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
+            return;
+        }
+        if (lst_OrderDetail.Count == 0 || !lst_OrderDetail.Any() || lst_OrderDetail == null )
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Đơn hàng chưa có sản phẩm nào!");
+            return;
+        }
+        var orderUpdate = await orderServices.GetByIdOrders(order.Id);
+
+        if(orderUpdate != null )
+        {
+            CalculateTotalMoney();
+            orderUpdate.TotalAmount = totalAmount; // tiền hàng đã giảm
+            orderUpdate.TotalPrincipal = totalPrincipal; // Tổng tiền hàng chưa giảm
+            orderUpdate.Totalmoney = totalMoney; // tổng cần thanh toán ( nếu có ship )
+            orderUpdate.Status = "Chờ xác nhận";
+            orderUpdate.FeeShipping = feeShipping;
+
+
+            string typePay = "";
+            if(paymentMethod == "momo")
+            {
+                try
+                {
+                    // Tạo giao dịch MoMo
+                    var momoResponse = await orderServices.CreateMomoPaymentUrl(user.Name, orderUpdate.Totalmoney ?? 0, $"Thanh toán hóa đơn {order.Id}");
+                    if (!string.IsNullOrEmpty(momoResponse.PayUrl))
+                    {
+                        // Hiển thị modal QR code MoMo
+                        orderUpdate.TypePayment = "Chuyển khoản MoMo";
+                        typePay = "Đã thanh toán";
+                        ShowMomoModal(momoResponse.PayUrl);
+                        await orderServices.Update(orderUpdate, orderUpdate.Id);
+
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Không thể tạo giao dịch MoMo.");
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await JS.InvokeVoidAsync("toastr.error", $"Lỗi khi xử lý thanh toán MoMo: {ex.Message}");
+                    return;
+                }
+            }
+            else
+            {
+                orderUpdate.TypePayment = "Thanh toán khi nhận hàng";
+                orderUpdate.Address_Id = selectedAddress.Id;
+                typePay = "Chờ xác nhận";
+                await orderServices.Update(orderUpdate, orderUpdate.Id);
+                await JS.InvokeVoidAsync("toastr.success", "Đơn hàng đã được thanh toán thành công!");
+                await ResetViewState();
+            }
+            var newOrderTracking = new order_trackings
+                {
+                    OrderId = orderUpdate.Id,
+                    Note = "",
+                    Status = typePay,
+                    Created_at = DateTime.Now,
+                    Created_by = 1 // ID tạm
+                };
+            await orderTrackingServices.AddOrderTracking(newOrderTracking);
+
+
+        }
+        StateHasChanged();
+        LoadOrderDetails();
+        LoadCartDetails();
+    }
+    private async Task DownloadInvoice(long orderId)
+    {
+        try
+        {
+            var fileBytes = await orderServices.ExportInvoice(orderId);
+            var fileName = $"hoa_don_{orderId}.pdf";
+
+            // Sử dụng JavaScript để tải về file PDF
+            using var streamRef = new DotNetStreamReference(stream: new MemoryStream(fileBytes));
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Lỗi khi xuất hóa đơn: {ex.Message}");
+        }
     }
 }
