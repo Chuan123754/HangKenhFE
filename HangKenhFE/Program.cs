@@ -73,7 +73,7 @@ builder.Services.AddScoped<IDiscountServices, DiscountServices>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddServerSideBlazor(options => options.DetailedErrors = true);
 builder.Services.AddScoped<IContacServices, ContacServices>();
-
+builder.Services.AddScoped<IQaService, QaService>();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())

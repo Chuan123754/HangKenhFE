@@ -1,6 +1,13 @@
 ﻿@page "/category"
 @inject NavigationManager nav
 @inject IPostSer sev
+@inject ICategoriesServices cate
+@inject IDesignerServices desi
+@inject IColorServices colo
+@inject IMaterialServices mate
+@inject IStyleServices sty
+@inject ISizeServices sizeS
+@inject ITextile_technologyServices textte
 @inject IJSRuntime JS
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
@@ -39,153 +46,175 @@
                         </div>
                     </div>
                     <div class="filter-group">
-                        <header class="accordion-header" id="panelsStayOpen-headingOne">
-                            <button class="accordion-button filter-product-title" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                                KHỔ THẢM
+                        <header class="accordion-header" id="panelsStayOpen-headingSeven">
+                            <button class="accordion-button filter-product-title collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSeven"
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseSeven">
+                                KÍCH THƯỚC
                             </button>
                         </header>
-                        <div class="filter-content collapse show accordion-collapse" id="panelsStayOpen-collapseOne"
-                             aria-labelledby="panelsStayOpen-headingOne">
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseSeven"
+                             aria-labelledby="panelsStayOpen-headingSeven">
                             <div class="card-body accordion-body">
                                 <div class="row">
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>10 x 10</span>
-                                        </label>
-                                    </div>
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>20 x 10</span>
-                                        </label>
-                                    </div>
+                                    @foreach (var item in sizesList)
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedSize.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnSizeSelected(item.Id)">
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Title</span>
+                                        </div>
+                                    }
+
                                 </div>
                             </div>
                         </div>
                     </div>
+                
                     <div class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingTwo">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo">
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
                                 MÀU SẮC
                             </button>
                         </header>
-                        <div class="filter-content collapse accordion-collapse show" id="panelsStayOpen-collapseTwo"
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseTwo"
                              aria-labelledby="panelsStayOpen-headingTwo">
                             <div class="card-body accordion-body">
                                 <div class="row">
-                                    @*  @for($i = 0; $i < 10; $i++) *@
-                                    <div class="bg-element-filter">
-                                        <div class="text-center color-pick-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20"
-                                                 viewBox="0 0 21 20" fill="none">
-                                                <path d="M10.5 17.5C14.6421 17.5 18 14.1421 18 10C18 5.85786 14.6421 2.5 10.5 2.5C6.35786 2.5 3 5.85786 3 10C3 14.1421 6.35786 17.5 10.5 17.5Z"
-                                                      fill="#1F97A8" />
-                                            </svg>
+                                    @foreach (var item in colorsList)
+                                    {                                     
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedColor.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnColorSelected(item.Id)">
+                                            <div class="color-preview"
+                                                 style="width: 24px; height: 24px; background-color: @item.Color_code; border-radius: 50%; border: 1px solid #ddd;">
+                                            </div>
+                                            <span style="line-height: 24px; font-size: 14px; text-align: center">@item.Title</span>
                                         </div>
-                                        <div class="text-center title-filter-select">Xanh</div>
-                                    </div>
-                                    @*  @endfor *@
+                                    }
+
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingThree">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseThree">
-                                CÔNG NGHỆ
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                                CÔNG NGHỆ DỆT
                             </button>
                         </header>
-                        <div class="filter-content collapse accordion-collapse show" id="panelsStayOpen-collapseThree">
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseThree">
                             <div class="card-body accordion-body">
                                 <div class="row">
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>Mỹ</span>
-                                        </label>
-                                    </div>
+                                    @foreach (var item in textile_TechnologiesList)
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedTextile.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnTextile_TechnologiesSelected(item.Id)">                                       
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Title</span>
+                                        </div>                               
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingFour">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseFour">
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
                                 CHẤT LIỆU
                             </button>
                         </header>
-                        <div class="filter-content collapse show accordion-collapse" id="panelsStayOpen-collapseFour"
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseFour"
                              aria-labelledby="panelsStayOpen-headingFour">
                             <div class="card-body accordion-body">
                                 <div class="row">
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>Bamboo silk</span>
-                                        </label>
-                                    </div>
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>Acrylic</span>
-                                        </label>
-                                    </div>
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>Nylon</span>
-                                        </label>
-                                    </div>
+                                    @foreach (var item in materialsList)
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedMaterial.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnMaterialSelected(item.Id)">
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Title</span>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingFive">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseFive">
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
                                 PHONG CÁCH
                             </button>
                         </header>
-                        <div class="filter-content collapse show accordion-collapse" id="panelsStayOpen-collapseFive"
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseFive"
                              aria-labelledby="panelsStayOpen-headingFive">
                             <div class="card-body accordion-body">
                                 <div class="row">
-                                    <div class="bg-element-filter">
-                                        <label class="checkbox-btn">
-                                            <input type="checkbox">
-                                            <span>Cổ điển</span>
-                                        </label>
-                                    </div>
+                                    @foreach (var item in stylesList.Take(15).ToList())
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedStyle.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnStyleSelected(item.Id)">
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Title</span>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingSix">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseSix">
-                                KHỔ THẢM
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
+                                NHÀ THIẾT KẾ
                             </button>
                         </header>
-                        <div class="filter-content collapse show accordion-collapse" id="panelsStayOpen-collapseSix"
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseSix"
                              aria-labelledby="panelsStayOpen-headingSix">
                             <div class="card-body accordion-body">
                                 <div class="row">
-                                    <span class="bg-element-filter title-filter-select">Thảm khách sạn</span>
-                                    <span class="bg-element-filter title-filter-select">Văn phòng</span>
-                                    <span class="bg-element-filter title-filter-select">Nhà hàng</span>
+                                    @foreach (var item in designersList.Take(15).ToList())
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedDesigner.Contains(item.id_Designer) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnDesignerSelected(item.id_Designer)">
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Name</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <header class="accordion-header" id="panelsStayOpen-headingOne">
+                            <button class="accordion-button filter-product-title collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne"
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                               DANH MỤC SẢN PHẨM
+                            </button>
+                        </header>
+                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseOne"
+                             aria-labelledby="panelsStayOpen-headingOne">
+                            <div class="card-body accordion-body">
+                                <div class="row">
+                                    @foreach (var item in categoriesList)
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedCategories.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnCategorySelected(item.Id)">
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Title</span>
+                                        </div>
+                                    }
+                                 
                                 </div>
                             </div>
                         </div>
@@ -203,14 +232,7 @@
                     <div class="row">
                         <div class="col-8">
                             <h2 class="category-font-header">Danh sách sản phẩm</h2>
-                        </div>
-                        <div class="col-4 filter-basic">
-                            <label>Hiển thị</label>
-                            <img src="main/assets/images/candle.svg"
-                                 class="candle" alt="candle">
-                            <img src="main/assets/images/category.svg"
-                                 class="category" alt="category">
-                        </div>
+                        </div>                     
                     </div>
                 </header>
                 <div class="row product mt-48px">
@@ -275,10 +297,10 @@
                                             <div>Chưa có giá</div>
                                         }
                                     </div>
-@*                                     <a onclick="showSidebar('sidebar-filter-category')"
-                                       class="btn-white btn-contract btn-contract-mobile">
-                                        <div>Liên hệ</div>
-                                    </a> *@
+                                    @*                                     <a onclick="showSidebar('sidebar-filter-category')"
+                                class="btn-white btn-contract btn-contract-mobile">
+                                <div>Liên hệ</div>
+                                </a> *@
                                 </figcaption>
                             </figure>
                         </div>
@@ -294,11 +316,26 @@
 </section>
 @code {
     private List<Product_variants> product_list = new List<Product_variants>();
+    private List<Categories> categoriesList = new List<Categories>();
+    private List<Color> colorsList = new List<Color>();
+    private List<Material> materialsList = new List<Material>();
+    private List<Style> stylesList = new List<Style>();
+    private List<Size> sizesList = new List<Size>();
+    private List<Textile_technology> textile_TechnologiesList = new List<Textile_technology>();
+    private List<Designer> designersList = new List<Designer>();
     private string search_query = string.Empty;
     private int page_number = 1;
     private int total_pages = 1;
     private int page_size = 9;
     private int totalItems;
+
+    private List<long?> SelectedCategories = new List<long?>();
+    private List<long?> SelectedColor = new List<long?>();
+    private List<long?> SelectedSize = new List<long?>();
+    private List<long?> SelectedStyle = new List<long?>();
+    private List<long?> SelectedMaterial = new List<long?>();
+    private List<long?> SelectedTextile = new List<long?>();
+    private List<long?> SelectedDesigner = new List<long?>();
     protected override async Task OnInitializedAsync()
     {
         await LoadPosts();
@@ -312,11 +349,119 @@
     private async Task LoadPosts()
     {
         string searchTerm = string.IsNullOrEmpty(search_query) ? "" : search_query;
-        product_list = await sev.GetByTypeAsyncProduct("product", page_number, page_size, searchTerm);
-        totalItems = await sev.GetTotalCountAsyncProduct("product", searchTerm);
+        product_list = await sev.GetByTypeAsyncFilter(SelectedDesigner, SelectedColor, SelectedMaterial, SelectedTextile, SelectedStyle, SelectedSize, SelectedCategories, page_number, page_size, searchTerm);
+        totalItems = await sev.GetTotalCountAsyncFilter(SelectedDesigner, SelectedColor, SelectedMaterial, SelectedTextile, SelectedStyle, SelectedSize, SelectedCategories, searchTerm);
         total_pages = (int)Math.Ceiling((double)totalItems / page_size);
-    }
 
+
+        categoriesList = await cate.GetAllType("product");
+        colorsList = await colo.GetAll();
+        materialsList = await mate.GetAll();
+        stylesList = await sty.GetAll();
+        sizesList = await sizeS.GetAll();
+        textile_TechnologiesList = await textte.GetAll();
+        designersList = await desi.GetAll();
+        StateHasChanged();
+
+    }
+    private async Task OnSizeSelected(long? sizeId)
+    {
+        if (SelectedSize.Contains(sizeId))
+        {
+            SelectedSize.Remove(sizeId);
+        }
+        else
+        {
+            SelectedSize.Add(sizeId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnColorSelected(long? colorId)
+    {
+        if (SelectedColor.Contains(colorId))
+        {
+            SelectedColor.Remove(colorId);
+        }
+        else
+        {
+            SelectedColor.Add(colorId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnTextile_TechnologiesSelected(long? textileId)
+    {
+        if (SelectedTextile.Contains(textileId))
+        {
+            SelectedTextile.Remove(textileId);
+        }
+        else
+        {
+            SelectedTextile.Add(textileId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnMaterialSelected(long? materialId)
+    {
+        if (SelectedMaterial.Contains(materialId))
+        {
+            SelectedMaterial.Remove(materialId);
+        }
+        else
+        {
+            SelectedMaterial.Add(materialId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnStyleSelected(long? styleId)
+    {
+        if (SelectedStyle.Contains(styleId))
+        {
+            SelectedStyle.Remove(styleId);
+        }
+        else
+        {
+            SelectedStyle.Add(styleId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnDesignerSelected(long? designerId)
+    {
+        if (SelectedDesigner.Contains(designerId))
+        {
+            SelectedDesigner.Remove(designerId);
+        }
+        else
+        {
+            SelectedDesigner.Add(designerId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnCategorySelected(long? categoryId)
+    {
+        if (SelectedCategories.Contains(categoryId))
+        {
+            SelectedCategories.Remove(categoryId);
+        }
+        else
+        {
+            SelectedCategories.Add(categoryId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
     private async Task OnPageSizeChanged(int newPageSize)
     {
         page_size = newPageSize;
@@ -345,3 +490,16 @@
         return urls.FirstOrDefault() ?? string.Empty;
     }
 }
+
+<style>
+    .bg-element-filter {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        transition: all 0.3s ease;
+    }
+        .bg-element-filter.active {
+            border: 1px solid #007bff;
+            background-color: #e7f1ff;
+        }
+</style>

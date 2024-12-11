@@ -1,6 +1,9 @@
 ﻿using HangKenhFE.IServices;
 using HangKenhFE.Models;
+using HangKenhFE.Pages.Client;
 using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Drawing;
 
 namespace HangKenhFE.Services
 {
@@ -113,6 +116,170 @@ namespace HangKenhFE.Services
         public async Task<List<Product_variants>> GetCountByTypeDesigner(long designerId)
         {
             return await _client.GetFromJsonAsync<List<Product_variants>>($"{_baseUrl}/api/Product_Post/GetCountByTypeDesigner?designerId={designerId}");
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProductColor(long idColor, int pageNumber, int pageSize)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-color?idColor={idColor}&pageNumber={pageNumber}&pageSize={pageSize}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProductColor(long idColor)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Color?idColor={idColor}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProductSize(long idSize, int pageNumber, int pageSize)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-size?idSize={idSize}&pageNumber={pageNumber}&pageSize={pageSize}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProductSize(long idSize)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Size?idSize={idSize}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProductStyle(long idStyle, int pageNumber, int pageSize)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-style?idStyle={idStyle}&pageNumber={pageNumber}&pageSize={pageSize}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProductStyle(long idStyle)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Style?idStyle={idStyle}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProductMaterial(long idMaterial, int pageNumber, int pageSize)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post//get-by-product-material?idMaterial={idMaterial}&pageNumber={pageNumber}&pageSize={pageSize}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProductMaterial(long idMaterial)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Material?idMaterial={idMaterial}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProductTextile_technology(long idTextile_technology, int pageNumber, int pageSize)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-textile_technology?idTextile_technology={idTextile_technology}&pageNumber={pageNumber}&pageSize={pageSize}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProductTextile_technology(long idTextile_technology)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Textile_technology?idTextile_technology={idTextile_technology}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncProductDesigner(long idDesigner, int pageNumber, int pageSize)
+        {
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-designer?idDesigner={idDesigner}&pageNumber={pageNumber}&pageSize={pageSize}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncProductDesigner(long idDesigner)
+        {
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Designer?idDesigner={idDesigner}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+        public async Task<List<Product_variants>> GetByTypeAsyncFilter(List<long?> idDesigner, List<long?> idColor, List<long?> idMaterial, List<long?> idTextile_technology, List<long?> idStyle, List<long?> idSize, List<long?> idCategory, int pageNumber, int pageSize, string searchTerm)
+        {
+            var categoriesString = string.Join("&", idCategory.Select(c => $"idCategory={c}"));
+            var colorString = string.Join("&", idColor.Select(c => $"idColor={c}"));
+            var sizeString = string.Join("&", idSize.Select(c => $"idSize={c}"));
+            var styleString = string.Join("&", idStyle.Select(c => $"idStyle={c}"));
+            var materialString = string.Join("&", idMaterial.Select(c => $"idMaterial={c}"));
+            var textileString = string.Join("&", idTextile_technology.Select(c => $"idTextile_technology={c}"));
+            var designerString = string.Join("&", idDesigner.Select(c => $"idDesigner={c}"));
+      
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-filter?{designerString}&{colorString}&{materialString}&{textileString}&{styleString}&{sizeString}&{categoriesString}&pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+        }
+
+        public async Task<int> GetTotalCountAsyncFilter(List<long?> idDesigner, List<long?> idColor, List<long?> idMaterial, List<long?> idTextile_technology, List<long?> idStyle, List<long?> idSize, List<long?> idCategory, string searchTerm)
+        {
+            var categoriesString = string.Join("&", idCategory.Select(c => $"idCategory={c}"));
+            var colorString = string.Join("&", idColor.Select(c => $"idColor={c}"));
+            var sizeString = string.Join("&", idSize.Select(c => $"idSize={c}"));
+            var styleString = string.Join("&", idStyle.Select(c => $"idStyle={c}"));
+            var materialString = string.Join("&", idMaterial.Select(c => $"idMaterial={c}"));
+            var textileString = string.Join("&", idTextile_technology.Select(c => $"idTextile_technology={c}"));
+            var designerString = string.Join("&", idDesigner.Select(c => $"idDesigner={c}"));
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Filter?{designerString}&{colorString}&{materialString}&{textileString}&{styleString}&{sizeString}&{categoriesString}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
+        }
+
+        public async Task<List<Product_Posts>> GetByTypeAsyncFilter2(string type, List<long?> idDesigner, List<long?> idCategory, int pageNumber, int pageSize, string searchTerm)
+        {
+            var categoriesString = string.Join("&", idCategory.Select(c => $"idCategory={c}"));
+            var designerString = string.Join("&", idDesigner.Select(c => $"idDesigner={c}"));
+            var uri = $"{_baseUrl}/api/Product_Post/get-by-product-filter2?type={type}&{designerString}&{categoriesString}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+            return await _client.GetFromJsonAsync<List<Product_Posts>>(uri);     
+        }
+
+        public async Task<int> GetTotalCountAsyncFilter2(string type, List<long?> idDesigner, List<long?> idCategory, string searchTerm)
+        {
+            var categoriesString = string.Join("&", idCategory.Select(c => $"idCategory={c}"));         
+            var designerString = string.Join("&", idDesigner.Select(c => $"idDesigner={c}"));
+            var url = $"{_baseUrl}/api/Product_Post/Get-Total-Count-Product-Filter2?type={type}&{designerString}&{categoriesString}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+
+            // Gọi API và nhận tổng số lượng bài viết
+            var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Kiểm tra xem phản hồi có thành công hay không
+
+            var count = await response.Content.ReadFromJsonAsync<int>();
+            return count;
         }
     }
 }

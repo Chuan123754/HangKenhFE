@@ -1,6 +1,8 @@
 ﻿@page "/blogs"
 @inject NavigationManager nav
 @inject IPostSer sev
+@inject ICategoriesServices cate
+@inject IDesignerServices desi
 @inject IJSRuntime JS
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
@@ -26,67 +28,42 @@
                             <img src="main/assets/images/search.svg">
                         </button>
                     </div>
-                    <article class="filter-group">
+                    <div class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingOne">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                                GIỚI THIỆU
+                                    aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                                DANH MỤC SẢN PHẨM
                             </button>
                         </header>
                         <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseOne"
                              aria-labelledby="panelsStayOpen-headingOne">
-                            <div class="card-body accordion-body"></div>
+                            <div class="card-body accordion-body">
+                                <div class="row">
+                                    @foreach (var item in categoriesList)
+                                    {
+                                        <div class="bg-element-filter bg-element-filter-image @(SelectedCategories.Contains(item.Id) ? "active" : "")"
+                                             style="display: flex; gap: 8px; cursor: pointer;"
+                                             @onclick="() => OnCategorySelected(item.Id)">
+                                            <span style="line-height: 20px; font-size: 14px; text-align: center">@item.Title</span>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
                         </div>
-                    </article>
-                    <article class="filter-group">
-                        <header class="accordion-header" id="panelsStayOpen-headingTwo">
-                            <button class="accordion-button filter-product-title" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo">
-                                Nhà thiết kế
-                            </button>
-                        </header>
-                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseTwo"
-                             aria-labelledby="panelsStayOpen-headingTwo">
-                            <div class="card-body accordion-body"></div>
-                        </div>
-                    </article>
-                    <article class="filter-group">
-                        <header class="accordion-header" id="panelsStayOpen-headingThree">
-                            <button class="accordion-button filter-product-title" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseThree">
-                                Catalogue
-                            </button>
-                        </header>
-                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseThree">
-                            <div class="card-body accordion-body"></div>
-                        </div>
-                    </article>
-                    <article class="filter-group">
-                        <header class="accordion-header" id="panelsStayOpen-headingFour">
-                            <button class="accordion-button filter-product-title" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseFour">
-                                Ấn phẩm/tạp chí
-                            </button>
-                        </header>
-                        <div class="filter-content collapse accordion-collapse" id="panelsStayOpen-collapseFour"
-                             aria-labelledby="panelsStayOpen-headingFour">
-                            <div class="card-body accordion-body"></div>
-                        </div>
-                    </article>
+                    </div>
                     <article class="filter-group">
                         <header class="accordion-header" id="panelsStayOpen-headingFive">
-                            <button class="accordion-button filter-product-title" type="button"
+                            <button class="accordion-button filter-product-title collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive"
-                                    aria-expanded="true" aria-controls="panelsStayOpen-collapseFive">
+                                    aria-expanded="false">
                                 E-Magazine
                             </button>
                         </header>
-                        <div class="filter-content collapse show accordion-collapse"
+                        <div class="filter-content collapse accordion-collapse"
                              id="panelsStayOpen-collapseFive"
+                             aria-controls="panelsStayOpen-collapseFive"
                              aria-labelledby="panelsStayOpen-headingFive">
                             <ul class="filter-collection">
                                 <li class="filter-item active">
@@ -99,27 +76,6 @@
                                     <span class="icon-filter"></span><a href="#">
                                         Không gian
                                         nội thất
-                                    </a>
-                                </li>
-                                <li class="filter-item">
-                                    <span class="icon-filter"></span><a href="#">
-                                        Thế giới
-                                        thảm
-                                    </a>
-                                </li>
-                                <li class="filter-item">
-                                    <span class="icon-filter"></span><a href="#">Nhà đẹp</a>
-                                </li>
-                                <li class="filter-item">
-                                    <span class="icon-filter"></span><a href="#">
-                                        Dự án/Công
-                                        trình đẹp
-                                    </a>
-                                </li>
-                                <li class="filter-item">
-                                    <span class="icon-filter"></span><a href="#">
-                                        Những cảm
-                                        hứng cho bộ sưu tập
                                     </a>
                                 </li>
                             </ul>
@@ -141,8 +97,6 @@
                         </div>
                     </div>
                 </header>
-
-
                 @{
                     var postsToShow = Posts_list.Take(3).ToList();
                 }
@@ -168,9 +122,6 @@
                                 <a @onclick="() => NavDetails(postsToShow[0].Id)" class="w-100">
                                     <div class="post-big-title">@postsToShow[0].Title</div>
                                 </a>
-                                <div class="post-author">
-                                    By @postsToShow[0].Designer.Name
-                                </div>
                                 <div class="post-big-desc">
                                     @GetCleanText(postsToShow[0].Description)
                                 </div>
@@ -184,7 +135,7 @@
                                         <a @onclick="() => NavDetails(post.Id)" class="w-100">
                                             <div class="post-image">
                                                 <div class="post-date-tag">
-                                                    @post.Created_at
+                                                    @post.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
                                                 </div>
                                                 <img class="w-100 " src="@post.Feature_image" height="512px" alt="">
                                             </div>
@@ -197,10 +148,7 @@
                                             <a @onclick="() => NavDetails(post.Id)" class="w-100">
                                                 <div class="post-title">@post.Title</div>
                                             </a>
-                                            <div class="post-author">
-                                                By @post.Designer.Name
-                                            </div>
-                                            <div class="post-desc">
+                                            <div class="post-big-desc">
                                                 @GetCleanText(post.Description)
                                             </div>
                                         </div>
@@ -215,36 +163,29 @@
                     @foreach (var postlist in Posts_list.Skip(3))
                     {
                         <div class="col-6 mt-48px">
-                            <figure class="card post-card">
+                            <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
+                                <div class="post-image">
+                                    <div class="post-date-tag">
+                                        @postlist.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </div>
+
+                                    <img class="w-100" style="height: 471px" src="@postlist.Feature_image" alt="">
+
+                                </div>
+                            </a>
+                            <div class="post-intro">
+                                <div class="post-category">
+                                    <span></span>
+                                    <span>@postlist.Post_categories.FirstOrDefault()?.Categories?.Title</span>
+                                </div>
                                 <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
-                                    <div class="post-card-image">
-                                        <div class="post-card-tag">
-                                            @postlist.Created_at
-                                        </div>
-                                        <a href="">
-                                            <img src="@postlist.Feature_image"
-                                                 class="w-100 h-100 object-fit-cover" alt="@postlist.Title">
-                                        </a>
-                                    </div>
+                                    <div class="post-title">@postlist.Title</div>
                                 </a>
-                                <figcaption class="post-card-info">
-                                    <div href="" class="post-card-category">
-                                        <span></span>
-                                        <span>@postlist.Post_categories.FirstOrDefault()?.Categories?.Title</span>
-                                    </div>
-                                    <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
-                                        <h3 class="post-card-title">
-                                            @postlist.Title
-                                        </h3>
-                                    </a>
-                                    <span class="post-card-author">
-                                        @postlist.Designer?.Name
-                                    </span>
-                                    <div class="post-desc">
-                                        @GetCleanText(postlist.Description)
-                                    </div>
-                                </figcaption>
-                            </figure>
+                                <div class="post-desc mb-4">
+                                    @postlist.Short_description
+                                </div>
+                            </div>
+
                         </div>
                     }
                 </div>
@@ -257,6 +198,10 @@
 </section>
 @code {
     private List<Product_Posts> Posts_list = new();
+    private List<Designer> designersList = new List<Designer>();
+    private List<Categories> categoriesList = new List<Categories>();
+    private List<long?> SelectedCategories = new List<long?>();
+    private List<long?> SelectedDesigner = new List<long?>();
     private string search_query = string.Empty;
     private int page_number = 1;
     private int total_pages = 1;
@@ -283,11 +228,41 @@
     private async Task LoadPosts()
     {
         string searchTerm = string.IsNullOrEmpty(search_query) ? "" : search_query;
-        Posts_list = await sev.GetByTypeAsync("post", page_number, page_size, searchTerm);
-        totalItems = await sev.GetTotalCountAsync("post", searchTerm);
+        Posts_list = await sev.GetByTypeAsyncFilter2("post", SelectedDesigner, SelectedCategories, page_number, page_size, searchTerm);
+        totalItems = await sev.GetTotalCountAsyncFilter2("post", SelectedDesigner, SelectedCategories, searchTerm);
         total_pages = (int)Math.Ceiling((double)totalItems / page_size);
+        categoriesList = await cate.GetAllType("post");
+        designersList = await desi.GetAll();
+        StateHasChanged();
     }
+    private async Task OnDesignerSelected(long? designerId)
+    {
+        if (SelectedDesigner.Contains(designerId))
+        {
+            SelectedDesigner.Remove(designerId);
+        }
+        else
+        {
+            SelectedDesigner.Add(designerId);
+        }
 
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
+    private async Task OnCategorySelected(long? categoryId)
+    {
+        if (SelectedCategories.Contains(categoryId))
+        {
+            SelectedCategories.Remove(categoryId);
+        }
+        else
+        {
+            SelectedCategories.Add(categoryId);
+        }
+
+        await LoadPosts(); // Load lại danh sách sản phẩm
+        StateHasChanged(); // Cập nhật lại giao diện
+    }
     private async Task OnSearch(ChangeEventArgs e)
     {
         page_number = 1; // Đặt lại trang đầu tiên khi tìm kiếm
@@ -312,3 +287,17 @@
         return System.Net.WebUtility.HtmlDecode(textWithoutHtml);
     }
 }
+
+<style>
+    .bg-element-filter {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .bg-element-filter.active {
+            border: 1px solid #007bff;
+            background-color: #e7f1ff;
+        }
+</style>

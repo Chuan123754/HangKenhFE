@@ -1,0 +1,72 @@
+﻿@page "/faq"
+@inject IQaService qa
+<section class="section-banner">
+    <img src="main/assets/images/banner-category.jpg"
+         class="w-100 h-100" alt="banner-image-3">
+    <div class="title-banner">
+        <h1>
+            FAQ
+        </h1>
+    </div>
+</section>
+<section id="trending">
+    <div class="container">
+        <div class="row">
+            <header>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/"> Trang chủ</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">FAQ - Câu hỏi và câu trả lời về thảm trải sàn</li>
+                    </ol>
+                </nav>
+                <div class="row">
+                    <div class="col-12">
+                        <h2 class="category-font-header">FAQ</h2>
+                    </div>
+                </div>
+            </header>
+            <div class="row mt-48px">
+                <aside class="col-md-12">
+                    <div class="card border-0 accordion" id="accordion_filter">
+                        @foreach (var item in listqa)
+                        {
+                            var collapseId = $"collapse-{item.Id}";
+                            var headingId = $"heading-{item.Id}";
+                            <article class="filter-group">
+                                <header class="accordion-header" id="@headingId">
+                                    <button class="accordion-button filter-product-title collapsed"
+                                            style="font-family: 'Prata', sans-serif !important; font-weight: 400 !important; font-size: 18px; text-transform: none !important;"
+                                            type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#@collapseId"
+                                            aria-expanded="false" aria-controls="@collapseId">
+                                        @item.Question
+                                    </button>
+
+                                </header>
+                                <div class="filter-content collapse accordion-collapse"
+                                     id="@collapseId"
+                                     aria-labelledby="@headingId">
+                                    <span style="font-family: 'Prata', sans-serif !important; line-height: 20px; font-size: 14px;">@item.Answer</span>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                </aside>
+            </div>
+
+        </div>
+    </div>
+</section>
+@code {
+    private List<Q_A> listqa = new List<Q_A>();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPosts();
+    }
+    private async Task LoadPosts()
+    {
+        listqa = await qa.GetAll();
+        StateHasChanged();
+    }
+}
+
