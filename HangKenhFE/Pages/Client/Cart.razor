@@ -58,7 +58,7 @@
          class="w-100 h-100" alt="banner-image-3">
     <div class="title-banner">
         <h1>
-            GIỎ HÀNG CỦA BẠN 
+            GIỎ HÀNG CỦA BẠN
         </h1>
     </div>
 </section>
@@ -188,9 +188,9 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-center justify-content-center flex-column">
-             
+
                         <button class="btn btn-outline-success btn-lg" @onclick="CreateModalOrder">
-                            Thanh toán 
+                            Thanh toán
                         </button>
                     </div>
                 </div>
@@ -469,8 +469,8 @@
                                     </div>
 
                                     <div class="d-flex justify-content-center my-3">
-                                        <button type="button" class="btn btn-outline-primary me-2"  @onclick="PayByCash" >Thanh toán khi nhận hàng</button>
-                                        <button type="button" class="btn btn-outline-success" @onclick="PayByMomo" >Thanh toán qua MoMo</button>
+                                        <button type="button" class="btn btn-outline-primary me-2" @onclick="PayByCash">Thanh toán khi nhận hàng</button>
+                                        <button type="button" class="btn btn-outline-success" @onclick="PayByMomo">Thanh toán qua MoMo</button>
                                     </div>
                                     @if (isMomoModalVisible)
                                     {
@@ -511,8 +511,6 @@
         </div>
     </div>
 </section>
-
-
 
 @code
 {
@@ -561,13 +559,13 @@
         await LoadOrderDetails();
         CalculateTotalMoney();
 
-    } 
+    }
 
     private async Task ToggleSelectAll()
     {
         isAllSelected = !isAllSelected;
         selectedCartDetails.Clear();
-        totalAmount = 0;  
+        totalAmount = 0;
         totalPrincipal = 0;
 
         if (isAllSelected)
@@ -625,7 +623,7 @@
         var cartDetails = await cartDetailsService.GetAll();
         var cart = await cartServices.GetAll();
         var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
-        if(cartUser == null)
+        if (cartUser == null)
         {
             return;
         }
@@ -715,19 +713,19 @@
         if (totalQuantity > 20)
         {
             feeShipping += (Math.Min(totalQuantity, 30) - 20) * 3000m;
-            feeShipping *= 0.70m; 
+            feeShipping *= 0.70m;
         }
 
         if (totalQuantity > 30)
         {
             feeShipping += (Math.Min(totalQuantity, 50) - 30) * 3000m;
-            feeShipping *= 0.50m; 
+            feeShipping *= 0.50m;
         }
 
         if (totalQuantity > 40)
         {
             feeShipping += (totalQuantity - 50) * 3000m;
-            feeShipping *= 0.30m; 
+            feeShipping *= 0.30m;
         }
 
         return feeShipping;
@@ -809,12 +807,12 @@
                     {
                         // Cập nhật số lượng nếu sản phẩm đã tồn tại trong order details
                         existingDetail.Quantity = cartDetail.Quantity;
-                        await orderDetailsServices.Update(existingDetail,existingDetail.Id);
+                        await orderDetailsServices.Update(existingDetail, existingDetail.Id);
                     }
                 }
 
                 var selectedProductAttributeIds = lst_OrderDetail // danh sách sản phẩm có cả trong orderdetails và selectedCartDetail
-                 .Where(item => selectedCartDetails.Contains(item.Id)) 
+                 .Where(item => selectedCartDetails.Contains(item.Id))
                  .Select(item => item.ProductAttributes.Id)
                  .ToList();
 
@@ -822,9 +820,9 @@
 
                 foreach (var detail in allOrderDetails)
                 {
-                    // nếu sản phẩm có cả trong lst_CartDetails và selectedCartDetails thì ko xóa 
+                    // nếu sản phẩm có cả trong lst_CartDetails và selectedCartDetails thì ko xóa
                     bool shouldDelete = !lst_CartDetails // đấu !
-                        .Where(item => selectedCartDetails.Contains(item.Id)) 
+                        .Where(item => selectedCartDetails.Contains(item.Id))
                         .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
 
                     if (shouldDelete)
@@ -1057,7 +1055,7 @@
         await LoadCartDetails();
     }
 
-    private string momoError = null; 
+    private string momoError = null;
     private string? ErrorCode;
     private string payUrl { get; set; }
     private bool isMomoModalVisible = false;
@@ -1071,19 +1069,19 @@
     }
     private async Task CheckOut(string paymentMethod)
     {
-        if(selectedAddress == null )
+        if (selectedAddress == null)
         {
             await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
             return;
         }
-        if (lst_OrderDetail.Count == 0 || !lst_OrderDetail.Any() || lst_OrderDetail == null )
+        if (lst_OrderDetail.Count == 0 || !lst_OrderDetail.Any() || lst_OrderDetail == null)
         {
             await JS.InvokeVoidAsync("toastr.error", "Đơn hàng chưa có sản phẩm nào!");
             return;
         }
         var orderUpdate = await orderServices.GetByIdOrders(order.Id);
 
-        if(orderUpdate != null )
+        if (orderUpdate != null)
         {
             CalculateTotalMoney();
             orderUpdate.TotalAmount = totalAmount; // tiền hàng đã giảm
@@ -1094,7 +1092,7 @@
 
 
             string typePay = "";
-            if(paymentMethod == "momo")
+            if (paymentMethod == "momo")
             {
                 try
                 {

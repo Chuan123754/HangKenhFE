@@ -510,33 +510,11 @@
                         <div class="col">
                             <ul>
                                 <li>
-                                    <span class="title-sub-menu">@item.Title</span>
                                     <a href="@item.Slug" class="title-sub-menu">@item.Title</a>
                                 </li>
                             </ul>
                         </div>
-                    }
-                    @*   @foreach($secondMenu as $item)
-
-                    <div class="col">
-                    <ul>
-                    <li>
-                    @if(!empty($item['child']))
-                    <span class="title-sub-menu">{{ $item['label'] }}</span>
-                    @else
-                    <a href="{{ $item['link'] }}" class="title-sub-menu">{{ $item['label'] }}</a>
-                    @endif
-                    </li>
-                    @if(!empty($item['child']))
-                    @foreach($item['child'] as $child)
-                    <li><a href="{{ $child['link'] }}">{{ $child['label'] }}</a></li>
-                    @endforeach
-                    @endif
-
-                    </ul>
-                    </div>
-                    @endforeach
-                    *@
+                    }                  
                     <div class="col">
                         <ul>
                             <li>
@@ -812,6 +790,7 @@
     protected override async Task OnInitializedAsync()
     {
         await CheckUserLoggedInAsync();
+        await LoadPosts();
     }
 
     private async Task CheckUserLoggedInAsync()
