@@ -540,7 +540,7 @@
         if (firstRender)
         {
             // Lấy thông tin người dùng từ session
-            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
+            var userInfo = await SessionStorage.GetItemAsStringAsync("user");
             if (!string.IsNullOrEmpty(userInfo))
             {
                 // Giải mã và Deserialize người dùng từ session

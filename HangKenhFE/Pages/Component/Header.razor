@@ -381,7 +381,6 @@
 
 
 
-
 <header class="header">
     <div class="logo middle-header border-bottom pc">
         <a href="/">
@@ -466,7 +465,7 @@
                                         <span>Khách</span>
                                     }
                                 </li>
-                                <li><a href="#">Đơn hàng của bạn</a></li>
+                                <li><a href="/user/orders">Đơn hàng của bạn</a></li>
                                 <div>
                                     @if (isLoggedIn)
                                     {
@@ -601,7 +600,6 @@
 
 
 @code {
-    private Modal xlModal = default!;
     private bool isLoggedIn = false;
     private bool IsMenuOpen { get; set; } = false;
     private Users users = new Users();
@@ -625,10 +623,21 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        var tokenAuto = await SessionStorage.GetItemAsStringAsync("RememberToken");
+        if (!string.IsNullOrEmpty(tokenAuto))
+        {
+            var loggedInUser = await userService.AutoLogin(tokenAuto);
+            if (loggedInUser != null)
+            {
+                isLoggedIn = true;
+                // Tạo phiên người dùng
+            }
+        }
+
         if (firstRender)
         {
             // Kiểm tra xem SessionStorage có chứa token không
-            var token = await SessionStorage.GetItemAsStringAsync("token");
+            var token = await SessionStorage.GetItemAsStringAsync("user");
             if (!string.IsNullOrEmpty(token))
             {
                 isLoggedIn = true;
@@ -657,21 +666,20 @@
     {
         try
         {
-            var signInModel = new SignInModel
+            var loginRequest = new Users
                 {
                     Email = loginModel.Username,
-                    Password = loginModel.Password,
+                    Password = loginModel.Password
                 };
 
-            var token = await LoginServices.Login(signInModel);
+            var loggedInUser = await userService.Login(loginRequest, loginModel.RememberMe);
 
-            if (!string.IsNullOrEmpty(token))
+            if (loggedInUser != null)
             {
                 loginMessage = "Đăng nhập thành công!";
-
-                await SessionStorage.SetItemAsStringAsync("token", token);
+                await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(loggedInUser));
                 isLoggedIn = true;
-                navigation.NavigateTo("/admin/Loginclient", forceLoad: true);
+                CloseModal();
             }
             else
             {
@@ -684,78 +692,67 @@
         }
     }
 
+
+
     private async Task HandleRegisterAsync()
     {
         try
         {
-            var signUpModel = new SignUpModel
+            // Tạo đối tượng người dùng mới dựa trên dữ liệu từ giao diện
+            var newUser = new Users
                 {
-                    FirstName = registerModel.Username,
-                    LastName = registerModel.Username,
+                    Name = registerModel.Username,
+                    Phone = "0123456789",
                     Email = registerModel.Email,
                     Password = registerModel.Password,
-                    ConfirmPassword = registerModel.ConfirmPassword,
-                    Role = "Customer"
+                    Address = "Nothing",
+                    RememberToken = "Nothing",
+                    Created_at = DateTime.Now,
+                    Updated_at = DateTime.Now
                 };
 
-            var signUpSuccess = await LoginServices.SignUp(signUpModel);
-
-            if (signUpSuccess.Contains("thành công"))
+            if (await userService.IsEmailExists(newUser.Email))
             {
-                // Tạo PasswordHash
-                var passwordHasher = new PasswordHasher<object>();
-                var passwordHash = passwordHasher.HashPassword(null, registerModel.Password);
+                registerMessage = "Email đã tồn tại.";
+                return;
+            }
+
+            var passwordHasher = new PasswordHasher<object>();
+            newUser.Password = passwordHasher.HashPassword(null, newUser.Password);
+
+            // Gửi yêu cầu đăng ký đến API
+            var createdUser = await userService.Create(newUser);
+
+            if (createdUser != null && createdUser.Id > 0)
+            {
+                registerMessage = "Đăng ký thành công! Đang tự động đăng nhập...";
 
                 // Đăng nhập tự động
-                var signInModel = new SignInModel
-                    {
-                        Email = registerModel.Email,
-                        Password = registerModel.Password
-                    };
-
-                var token = await LoginServices.Login(signInModel);
-
-                if (!string.IsNullOrEmpty(token))
+                var loginUser = new Users
                 {
-                    registerMessage = "Đăng ký và đăng nhập thành công! Vui lòng đợi một chút.";
+                    Email = registerModel.Email,
+                    Password = registerModel.Password
+                };
 
-                    await SessionStorage.SetItemAsStringAsync("token", token);
+                var loggedInUser = await userService.Login(loginUser, loginModel.RememberMe);
 
-                    // Tạo đối tượng người dùng mới
-                    var newUser = new Users
-                        {
-                            Name = registerModel.Username,
-                            Phone = "0123456789",
-                            Email = registerModel.Email,
-                            // EmailVerifiedAt = DateTime.Now,
-                            Password = passwordHash, // Lưu PasswordHash thay vì plain text
-                            Address = "Nothing",
-                            RememberToken = "Nothing",
-                        };
+                if (loggedInUser != null)
+                {
+                    await SessionStorage.SetItemAsStringAsync("user", Newtonsoft.Json.JsonConvert.SerializeObject(loggedInUser));
 
-                    var createdUser = await userService.Create(newUser);
-
-                    if (createdUser != null && createdUser.Id > 0)
-                    {
-                        StateHasChanged();
-                        await Task.Delay(2000);
-
-                        // Điều hướng sang UserDetails
-                        navigation.NavigateTo($"/admin/UserDetails/{createdUser.Id}");
-                    }
-                    else
-                    {
-                        registerMessage = "Không thể tạo người dùng.";
-                    }
+                    StateHasChanged();
+                    await Task.Delay(2000);
+                    CloseModal();
+                    navigation.NavigateTo($"/user/UserDetails/{loggedInUser.Id}");
                 }
                 else
                 {
-                    registerMessage = "Lỗi: Đăng ký thành công nhưng đăng nhập thất bại.";
+                    registerMessage = "Đăng ký thành công nhưng đăng nhập thất bại.";
                 }
             }
             else
             {
-                registerMessage = "Lỗi: Đăng ký không thành công!";
+                registerMessage = "Không thể tạo người dùng.";
             }
         }
         catch (Exception ex)
@@ -764,9 +761,10 @@
         }
     }
 
+
     private async Task HandleLogout()
     {
-        await SessionStorage.RemoveItemAsync("token");
+        await SessionStorage.RemoveItemAsync("user");
         isLoggedIn = false;
         loginMessage = "Bạn đã đăng xuất thành công!";
     }
@@ -775,6 +773,8 @@
     {
         public string Username { get; set; }
         public string Password { get; set; }
+        public bool RememberMe { get; set; }
+
     }
 
     public class RegisterModel
@@ -784,7 +784,6 @@
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
     }
-
 
 
     protected override async Task OnInitializedAsync()
@@ -797,14 +796,23 @@
     {
         try
         {
-            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
+            var userInfo = await SessionStorage.GetItemAsStringAsync("User");
 
             if (!string.IsNullOrEmpty(userInfo))
             {
+                // Deserialize JSON thành đối tượng Users
                 users = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(userInfo);
-                if (users != null && !string.IsNullOrEmpty(users.Name))
+
+                if (users != null)
                 {
-                    isLoggedIn = true;
+                    isLoggedIn = !string.IsNullOrEmpty(users.Name);
+
+                    // Kiểm tra vai trò của người dùng
+                    if (users.Roles != null && users.Roles.Contains("Admin"))
+                    {
+                        navigation.NavigateTo("https://localhost:7277/", forceLoad: true);
+                        return; 
+                    }
                 }
             }
         }
@@ -814,15 +822,6 @@
         }
     }
 
-
-
-
-
-
-    // private void NavigateToLogin()
-    // {
-    //     navigation.NavigateTo("/login");
-    // }
 
     private async Task LoadPosts()
     {
@@ -850,43 +849,11 @@
 
     private async Task Logout()
     {
-        await SessionStorage.RemoveItemAsync("UserInfo");
+        await SessionStorage.RemoveItemAsync("User");
         isLoggedIn = false;
         users = new Users();
-        navigation.NavigateTo("/user/login");
+        navigation.NavigateTo("/");
     }
-
-
-    // private async Task HandleLoginAsync()
-    // {
-    //     try
-    //     {
-    //         var result = await userService.Login(users);
-
-    //         if (result == null)
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
-    //         }
-    //         else
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.success", "Đăng nhập thành công");
-
-    //             // Lưu thông tin người dùng vào SessionStorage
-    //             var serializedUser = Newtonsoft.Json.JsonConvert.SerializeObject(result);
-    //             await SessionStorage.SetItemAsync("UserInfo", serializedUser);
-    //             navigation.NavigateTo("/");
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Lỗi: {ex.Message}");
-    //         await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
-    //     }
-    // }
-    // private async Task HandleRegisterAsync()
-    // {
-    }
-
 
 
 
