@@ -836,7 +836,7 @@
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("toastr.error", $"Đã xảy ra lỗi: {ex.Message}");
+
         }
         CalculateTotalMoney();
     }
@@ -1002,19 +1002,41 @@
         await LoadCartDetails();
         StateHasChanged();
     }
-    private async Task CancelMomoPayment()
+
+    private async void PayByCash()
     {
-        isMomoModalVisible = false;
-        await LoadOrderDetails();
-        await LoadCartDetails();
-        StateHasChanged();
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thanh toán khi nhận hàng ?");
+        if (confirmed)
+        {
+            CheckOut("cash");
+            await LoadOrderDetails();
+            await LoadCartDetails();
+        }
+
     }
 
-    // Xử lý khi nhấn nút "Xác nhận thanh toán"
+    private async void PayByMomo()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thanh toán bằng hình thức chuyển khoản MOMO ?");
+        if (confirmed)
+        {
+            CheckOut("momo");
+            await LoadOrderDetails();
+            await LoadCartDetails();
+        }
+
+
+    }
+    private bool isPaymentConfirmed = false;
+    private string momoError = null; 
+    private string? ErrorCode;
+    private string payUrl { get; set; }
+    private bool isMomoModalVisible = false;
+
     private async Task ConfirmMomoPayment()
     {
         var updateitem = await orderServices.GetByIdOrders(order.Id);
-        if (updateitem.Status == "Đã xác nhận ")
+        if (updateitem.Status == "Chờ xác nhận ")
         {
             var orderDetailsCopy = lst_OrderDetail.ToList();
             foreach (var item in orderDetailsCopy)
@@ -1027,32 +1049,32 @@
                         await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm {product.SKU} trong kho không đủ.");
                         return;
                     }
-                    product.Stock -= item.Quantity; // trừ số lượng trong kho
+                    product.Stock -= item.Quantity; // Trừ số lượng trong kho
                     await productAttributeServices.Update(product, product.Id);
-                    await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
-                    isMomoModalVisible = false;
-                    await ResetViewState();
                 }
             }
+
+            // Đánh dấu thanh toán đã được xác nhận
+            isPaymentConfirmed = true;
+            await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
+            isMomoModalVisible = false;
+            await ResetViewState();
         }
         else
         {
             await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng chưa được thanh toán");
         }
-
-    }
-    private async void PayByCash()
-    {
-        CheckOut("cash");
-        await LoadOrderDetails();
-        await LoadCartDetails();
     }
 
-    private async void PayByMomo()
+    private async Task CancelMomoPayment()
     {
-        CheckOut("momo");
+        isMomoModalVisible = false;
         await LoadOrderDetails();
         await LoadCartDetails();
+
+        // Đặt lại biến trạng thái thanh toán
+        isPaymentConfirmed = false;
+        StateHasChanged();
     }
 
     private string momoError = null;
@@ -1084,12 +1106,10 @@
         if (orderUpdate != null)
         {
             CalculateTotalMoney();
-            orderUpdate.TotalAmount = totalAmount; // tiền hàng đã giảm
+            orderUpdate.TotalAmount = totalAmount; // Tiền hàng đã giảm
             orderUpdate.TotalPrincipal = totalPrincipal; // Tổng tiền hàng chưa giảm
-            orderUpdate.Totalmoney = totalMoney; // tổng cần thanh toán ( nếu có ship )
-            orderUpdate.Status = "Chờ xác nhận";
+            orderUpdate.Totalmoney = totalMoney; // Tổng cần thanh toán (nếu có ship)
             orderUpdate.FeeShipping = feeShipping;
-
 
             string typePay = "";
             if (paymentMethod == "momo")
@@ -1105,7 +1125,6 @@
                         typePay = "Đã thanh toán";
                         ShowMomoModal(momoResponse.PayUrl);
                         await orderServices.Update(orderUpdate, orderUpdate.Id);
-
                     }
                     else
                     {
@@ -1127,22 +1146,36 @@
                 await orderServices.Update(orderUpdate, orderUpdate.Id);
                 await JS.InvokeVoidAsync("toastr.success", "Đơn hàng đã được thanh toán thành công!");
                 await ResetViewState();
+
+                var newOrderTracking = new order_trackings
+                    {
+                        OrderId = orderUpdate.Id,
+                        Note = "",
+                        Status = typePay,
+                        Created_at = DateTime.Now,
+                        Created_by = 1 // ID tạm
+                    };
+                await orderTrackingServices.AddOrderTracking(newOrderTracking);
             }
-            var newOrderTracking = new order_trackings
-                {
-                    OrderId = orderUpdate.Id,
-                    Note = "",
-                    Status = typePay,
-                    Created_at = DateTime.Now,
-                    Created_by = 1 // ID tạm
-                };
-            await orderTrackingServices.AddOrderTracking(newOrderTracking);
 
-
+            // Chỉ thêm bản ghi vào order_trackings nếu thanh toán đã được xác nhận
+            if (isPaymentConfirmed)
+            {
+                var newOrderTracking = new order_trackings
+                    {
+                        OrderId = orderUpdate.Id,
+                        Note = "",
+                        Status = typePay,
+                        Created_at = DateTime.Now,
+                        Created_by = 1 // ID tạm
+                    };
+                await orderTrackingServices.AddOrderTracking(newOrderTracking);
+            }
         }
+
         StateHasChanged();
-        LoadOrderDetails();
-        LoadCartDetails();
+        await LoadOrderDetails();
+        await LoadCartDetails();
     }
     private async Task DownloadInvoice(long orderId)
     {

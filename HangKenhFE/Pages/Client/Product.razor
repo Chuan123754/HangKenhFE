@@ -396,18 +396,21 @@
         }
     }
 
-    private async void AddToCart()
+    private async Task AddToCart()
     {
         try
         {
+            // Kiểm tra xem người dùng đã đăng nhập hay chưa
             if (user != null && user.Id > 0)
             {
+                // Lấy tất cả các giỏ hàng
                 var cart = await cartServices.GetAll();
-                var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
+                // Kiểm tra giỏ hàng của người dùng
+                var cartUser = cart.FirstOrDefault(c => c.UserId == user.Id);
 
                 if (cartUser != null)
                 {
-                    // Check sản phẩm đã tồn tại trong giỏ hàng chưa
+                    // Giỏ hàng đã tồn tại
                     var cartDetails = await cartDetailServices.GetAll();
                     var existingCartDetail = cartDetails.FirstOrDefault(cd => cd.Product_id == selectedProduct.Id && cd.Cart_id == cartUser.Id);
 
@@ -416,7 +419,7 @@
                         // Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng dồn số lượng
                         existingCartDetail.Quantity += 1;
                         await cartDetailServices.Update(existingCartDetail);
-                        await JS.InvokeVoidAsync("toastr.success", "Thêm sản phẩm thành công");
+                        await JS.InvokeVoidAsync("toastr.success", "Cập nhật số lượng sản phẩm thành công");
                     }
                     else
                     {
@@ -434,7 +437,25 @@
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("toastr.error", "Giỏ hàng không tồn tại");
+                    var newCart = new Carts
+                        {
+                            UserId = user.Id,
+                        };
+
+                    // Tạo giỏ hàng mới
+                    await cartServices.Create(newCart);
+
+                    // Sau khi tạo giỏ hàng, thêm sản phẩm vào giỏ hàng
+                    var newCartDetail = new Cart_details
+                        {
+                            Cart_id = newCart.Id, // Sử dụng Id được gán sau khi tạo giỏ hàng
+                            Product_id = selectedProduct.Id,
+                            Quantity = 1,
+                            Status = "ok"
+                        };
+
+                    await cartDetailServices.Create(newCartDetail);
+                    await JS.InvokeVoidAsync("toastr.success", " Sản phẩm đã được thêm thành công");
                 }
             }
             else
