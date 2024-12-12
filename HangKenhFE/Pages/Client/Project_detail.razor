@@ -49,7 +49,7 @@
                         </div>
                     </div>
                     <div class="project-detail-article-content">
-                        @GetCleanText(posts_project.Description)
+                        @((MarkupString)posts_project.Description)
                     </div>
                     <a href="/contact">
                         <button class="project-article-contract">
@@ -149,17 +149,5 @@
         var urls = imageUrls.Split(',');
         return urls.FirstOrDefault() ?? string.Empty;
     }
-    private string GetCleanText(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return string.Empty;
-        }
-
-        // Loại bỏ thẻ HTML
-        string textWithoutHtml = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
-
-        // Giải mã các ký tự HTML
-        return System.Net.WebUtility.HtmlDecode(textWithoutHtml);
-    }
+  
 }

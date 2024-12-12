@@ -53,7 +53,7 @@
             <div class="tblock-left position-relative">
                 <article class="tblock-information d-flex flex-column">
                     <div class="tblock-description">
-                        @GetCleanText(designer?.description)
+                        @((MarkupString)designer?.description)
                     </div>
                     <p class="author text-uppercase">
                         @designer?.ShortName
@@ -219,19 +219,5 @@
     private void NavDetails(long id)
     {
         nav.NavigateTo($"/product-detail/{id}");
-    }
-
-    private string GetCleanText(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return string.Empty;
-        }
-
-        // Loại bỏ thẻ HTML
-        string textWithoutHtml = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
-
-        // Giải mã các ký tự HTML
-        return System.Net.WebUtility.HtmlDecode(textWithoutHtml);
     }
 }

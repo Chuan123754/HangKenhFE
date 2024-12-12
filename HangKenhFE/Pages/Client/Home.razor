@@ -9,7 +9,7 @@
             @foreach (var banner in Secsion1_post_banner5.Take(1).ToList())
             {
                 <CarouselItem Active="true">
-                    <img src="@banner.Feature_image" />
+                    <img src="@banner.Feature_image" style="height: 680px !important" />
                     <CarouselCaption>
                         <h2 class="banner-title " style="color:white">@banner.Title</h2>
                         <p class="banner-description " style="color:white">@banner.Short_description</p>
@@ -29,7 +29,7 @@
             @foreach (var bannersk1 in Secsion1_post_banner5.Take(5).Skip(1).ToList())
             {
                 <CarouselItem>
-                    <img src="@bannersk1.Feature_image" />
+                    <img src="@bannersk1.Feature_image" class="w-100" style="height: 680px !important" />
                     <CarouselCaption>
                         <h2 class="banner-title" style="color:white; ">@bannersk1.Title</h2>
                         <p class="banner-description" style="color:white">@bannersk1.Short_description</p>

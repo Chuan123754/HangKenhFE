@@ -5,6 +5,7 @@
 @inject NavigationManager navigation
 @inject IPostSer sev
 @inject IJSRuntime JS
+@using BlazorBootstrap
 
 @using HangKenhFE.Models
 @inject ILoginService LoginServices
@@ -427,7 +428,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="javascript:void(0)">
+                            <a href="/wishlist">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <g clip-path="url(#clip0_1223_8762)">
@@ -442,7 +443,7 @@
                                 </svg>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a href="javascript:void(0)">
                                 <svg width="16" height="16" viewBox="0 0 17 18" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -451,7 +452,7 @@
                                     <path d="M11.1249 12.5L15.7499 17.125" stroke="#242424" stroke-width="0.9" />
                                 </svg>
                             </a>
-                        </li>
+                        </li> *@
                         <li class="dropdown">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle" @onclick="ToggleDropdown"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" /></svg>
                             <ul class="dropdown-menu" style="@MenuStyle">
@@ -493,10 +494,7 @@
 
                         <li>
                             <a @onclick="NavToCart" class="cart-link" style="text-decoration: none; color: inherit;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-check" viewBox="0 0 16 16">
-                                    <path d="M11.354 6.354a.5.5 0 0 0-.708-.708L8 8.293 6.854 7.146a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z" />
-                                    <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 17h-11v-14h-2" /><path d="M6 5l14 1l-1 7h-13" /></svg>
                             </a>
                         </li>
                     </ul>
@@ -618,58 +616,7 @@
             </div>
         </div>
     </div>
-    <Modal @ref="xlModal" title="HangKenh"  Size="ModalSize.ExtraLarge">
-        <BodyTemplate>
-            <div class="account-container">
-                <div class="col2-set" id="customer_login">
-                    <!-- Form Đăng nhập -->
-                    <div class="col-1">
-                        <h3  style="font-family: 'Prata', sans-serif !important; font-size: 35px;">Đăng nhập</h3>
-                        <form @onsubmit="HandleLoginAsync">
-                            <label for="username">Tên đăng nhập hoặc email *</label>
-                            <input type="text" @bind="users.Email" id="username" placeholder="Email" required>
 
-                            <label for="password">Mật khẩu *</label>
-                            <input type="password" @bind="users.Password" id="password" placeholder="Mật khẩu" required>
-
-                            <div class="form-options">
-                                <label>
-                                    <input type="checkbox" id="rememberme"> Ghi nhớ mật khẩu
-                                </label>
-                                <a href="#" class="forgot-password">Quên mật khẩu?</a>
-                            </div>
-
-                            <button type="submit" class="btn-login">Đăng nhập</button>
-
-                            <img src="https://thamlenhangkenh.com/wp-content/uploads/2024/06/login-banner.png" alt="Banner" class="login-banner">
-                        </form>
-                    </div>
-
-                    <!-- Form Đăng ký -->
-                    <div class="col-2">
-                        <h3  style="font-family: 'Prata', sans-serif !important; font-size: 35px;">Đăng ký</h3>
-                        <form @onsubmit="HandleRegisterAsync">
-                            <label for="reg_uname">Tên đăng nhập *</label>
-                            <input type="text" @bind="users.Email" id="reg_uname" placeholder="Nhập tên đăng nhập" required>
-
-                            <label for="reg_email">Email *</label>
-                            <input type="email" @bind="users.Email" id="reg_email" placeholder="Nhập e-mail" required>
-
-                            <label for="reg_password">Mật khẩu *</label>
-                            <input type="password" @bind="users.Password" id="reg_password" placeholder="Nhập mật khẩu" required>
-                            <p class="privacy-notice">
-                                Dữ liệu cá nhân của bạn sẽ được sử dụng để hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này.
-                                Để quản lý quyền truy cập vào tài khoản và cho các mục đích khác được mô tả trong privacy policy.
-                            </p>
-
-                            <button type="submit" class="btn-register">Đăng ký</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        </BodyTemplate>
-    </Modal>
 
 </header>
 
@@ -931,36 +878,36 @@
     }
 
 
-    private async Task HandleLoginAsync()
-    {
-        try
-        {
-            var result = await userService.Login(users);
+    // private async Task HandleLoginAsync()
+    // {
+    //     try
+    //     {
+    //         var result = await userService.Login(users);
 
-            if (result == null)
-            {
-                await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("toastr.success", "Đăng nhập thành công");
+    //         if (result == null)
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
+    //         }
+    //         else
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.success", "Đăng nhập thành công");
 
-                // Lưu thông tin người dùng vào SessionStorage
-                var serializedUser = Newtonsoft.Json.JsonConvert.SerializeObject(result);
-                await SessionStorage.SetItemAsync("UserInfo", serializedUser);
-                navigation.NavigateTo("/");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Lỗi: {ex.Message}");
-            await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
-        }
+    //             // Lưu thông tin người dùng vào SessionStorage
+    //             var serializedUser = Newtonsoft.Json.JsonConvert.SerializeObject(result);
+    //             await SessionStorage.SetItemAsync("UserInfo", serializedUser);
+    //             navigation.NavigateTo("/");
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Lỗi: {ex.Message}");
+    //         await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
+    //     }
+    // }
+    // private async Task HandleRegisterAsync()
+    // {
     }
-    private async Task HandleRegisterAsync()
-    {
-    }
 
-}
+
 
 
