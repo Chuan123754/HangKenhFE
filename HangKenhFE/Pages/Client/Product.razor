@@ -1,4 +1,4 @@
-﻿@page "/product-detail/{Id:long}"
+﻿@page "/product-detail/{id:long}"
 @inject IPostSer postServices
 @inject IUserService userServices
 @inject IBannerServices bannerServices
@@ -6,6 +6,8 @@
 @inject IColorServices colorServices
 @inject IProductAttributeServies productAttributeServices
 @inject ICartService cartServices
+@inject IWishlistServices wishlistServices
+@inject IProduct_variants_wishlist_Services productvariantswishlist
 @inject ICartDetailsService cartDetailServices
 @inject IJSRuntime JS
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
@@ -156,7 +158,7 @@
                             <span class="add-to-cart-text">Thêm vào giỏ hàng</span>
                             <img src="main/assets/images/shop-now.svg" alt="question">
                         </button>
-                        <span class="product-detail-btn-like">
+                        <span class="product-detail-btn-like" @onclick="AddToWishlist">
                             <img src="main/assets/images/like.svg"
                                  class="like">
                         </span>
@@ -304,7 +306,7 @@
     private Users user = new Users();
     private long? selectedSizeId;
     private long? selectedColorId;
-
+    // private Product_variants? selectPWL;
     private Product_Attributes? selectedProduct;
     private Banner banner = new Banner();
 
@@ -447,6 +449,54 @@
     }
 
 
+    private async void AddToWishlist()
+    {
+        try
+        {
+            if (user != null && user.Id > 0)
+            {
+                var wishlistss = await wishlistServices.GetAll();
+                var wishlistUser = wishlistss.Where(c => c.User_id == user.Id).FirstOrDefault();
+
+                if (wishlistUser != null)
+                {
+                    // Check sản phẩm đã tồn tại trong wishlist chưa
+                    var WLP = await productvariantswishlist.GetAllPW();
+                    var existingWLP = WLP.FirstOrDefault(cd => cd.Product_variants_id == Id && cd.Wishlist_id == wishlistUser.Id);
+
+                    if (existingWLP != null)
+                    {
+                        // Nếu sản phẩm đã tồn tại trong wishlist, thông báo đã tồn tại trong wishlist
+                        await JS.InvokeVoidAsync("toastr.error", "Sản phẩm đẫ tồn tại trong wishlist");
+                        return;
+                    }
+                    else
+                    {
+                        var wislisdetail = new Product_variants_wishlist
+                            {
+                                Wishlist_id = wishlistUser.Id,
+                                Product_variants_id = Id,
+                            };
+
+                        await productvariantswishlist.Create(wislisdetail);
+                        await JS.InvokeVoidAsync("toastr.success", "Thêm sản phẩm vào wishlist thành công");
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("toastr.error", "Wishlist không tồn tại");
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Vui lòng đăng nhập trước khi thêm vào wishlist");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Đã có lỗi xảy ra: " + ex.Message);
+        }
+    }
 
     private async Task GoToPage(int page)
     {

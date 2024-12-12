@@ -53,34 +53,6 @@
                             </div>
                         </div>
                     </div>
-                    <article class="filter-group">
-                        <header class="accordion-header" id="panelsStayOpen-headingFive">
-                            <button class="accordion-button filter-product-title collapsed" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive"
-                                    aria-expanded="false">
-                                E-Magazine
-                            </button>
-                        </header>
-                        <div class="filter-content collapse accordion-collapse"
-                             id="panelsStayOpen-collapseFive"
-                             aria-controls="panelsStayOpen-collapseFive"
-                             aria-labelledby="panelsStayOpen-headingFive">
-                            <ul class="filter-collection">
-                                <li class="filter-item active">
-                                    <span class="icon-filter"></span><a href="#">
-                                        Hàng
-                                        Kênh Collection
-                                    </a>
-                                </li>
-                                <li class="filter-item">
-                                    <span class="icon-filter"></span><a href="#">
-                                        Không gian
-                                        nội thất
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </article>
                 </div>
             </aside>
             <main class="col-md-9">
@@ -167,6 +139,7 @@
                                 <div class="post-image">
                                     <div class="post-date-tag">
                                         @postlist.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
+                                  
                                     </div>
 
                                     <img class="w-100" style="height: 471px" src="@postlist.Feature_image" alt="">

@@ -37,12 +37,12 @@ namespace HangKenhFE.Services
         public async Task Create(Cart_details cartDetails)
         {
            
-            await _httpClient.PostAsJsonAsync("https://localhost:7011/api/CartDetails/cartdetails-post", cartDetails);
+            await _httpClient.PostAsJsonAsync("{_baseUrl}/api/CartDetails/cartdetails-post", cartDetails);
         }
 
         public async Task Update(Cart_details cartDetails)
         {
-            await _httpClient.PutAsJsonAsync($"https://localhost:7011/api/CartDetails/cartdetails-put", cartDetails);
+            await _httpClient.PutAsJsonAsync($"{_baseUrl}/api/CartDetails/cartdetails-put", cartDetails);
         }
 
         public async Task Delete(long id)

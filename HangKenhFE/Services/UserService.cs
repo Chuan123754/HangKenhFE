@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Net.Http.Json;
 using System.Text.Json;
+using static System.Net.WebRequestMethods;
 
 namespace HangKenhFE.Services
 {
@@ -47,7 +48,7 @@ namespace HangKenhFE.Services
             {
                 throw new Exception("Email đã tồn tại.");
             }
-            string userRequestURL = "https://localhost:7011/api/Users/Users-post";
+            string userRequestURL = $"https://localhost:7011/api/Users/Users-post";
             var userJsonContent = JsonConvert.SerializeObject(user);
             var userContent = new StringContent(userJsonContent, Encoding.UTF8, "application/json");
             var userResponse = await _httpClient.PostAsync(userRequestURL, userContent);
@@ -75,7 +76,7 @@ namespace HangKenhFE.Services
                 Description = "Giỏ hàng mặc định"
             };
 
-            string cartRequestURL = "https://localhost:7011/api/Carts/carts-post";
+            string cartRequestURL = $"https://localhost:7011/api/Carts/carts-post";
             var cartJsonContent = JsonConvert.SerializeObject(cart);
             var cartContent = new StringContent(cartJsonContent, Encoding.UTF8, "application/json");
             var cartResponse = await _httpClient.PostAsync(cartRequestURL, cartContent);
@@ -84,6 +85,26 @@ namespace HangKenhFE.Services
             {
                 var errorContent = await cartResponse.Content.ReadAsStringAsync();
                 throw new Exception($"API call failed with status code {cartResponse.StatusCode} and message: {errorContent}");
+            }
+
+            // Tạo wishlist cho người dùng mới
+            var wishlist = new Wishlist
+            {
+                Id = 0,
+                User_id = createdUser.Id,
+                Create_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            };
+
+            string wishlistRequestURL = $"https://localhost:7011/api/Wishlist/wishlist-post";
+            var wishlistJsonContent = JsonConvert.SerializeObject(wishlist);
+            var wishlistContent = new StringContent(wishlistJsonContent, Encoding.UTF8, "application/json");
+            var wishlistResponse = await _httpClient.PostAsync(wishlistRequestURL, wishlistContent);
+
+            if (!wishlistResponse.IsSuccessStatusCode)
+            {
+                var errorContent = await wishlistResponse.Content.ReadAsStringAsync();
+                throw new Exception($"API call failed with status code {wishlistResponse.StatusCode} and message: {errorContent}");
             }
 
             // Trả về đối tượng người dùng vừa được tạo
@@ -146,9 +167,10 @@ namespace HangKenhFE.Services
             }
         }
 
-        public async Task<Users> Login(Users user)
+        public async Task<Users> Login(Users user, bool rememberMe)
         {
-            var response = await _httpClient.PostAsJsonAsync("https://localhost:7011/api/Users/login", user);
+            var requestPayload = new { user.Email, user.Password, RememberMe = rememberMe };
+            var response = await _httpClient.PostAsJsonAsync($"https://localhost:7011/api/Users/login", requestPayload);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -156,31 +178,25 @@ namespace HangKenhFE.Services
                 throw new Exception($"Đăng nhập thất bại: {errorMessage}");
             }
 
-            var rawContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"JSON trả về từ API: {rawContent}");
+            var result = await response.Content.ReadFromJsonAsync<Users>();
+            return result;
+        }
 
-            if (rawContent.StartsWith("\"") && rawContent.EndsWith("\""))
+
+        public async Task<Users> AutoLogin(string rememberToken)
+        {
+            string requestURL = $"https://localhost:7011/api/Users/auto-login?rememberToken={rememberToken}";
+            var response = await _httpClient.GetAsync(requestURL);
+
+            if (response.IsSuccessStatusCode)
             {
-                var jsonString = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(rawContent);
-                var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(jsonString);
-                if (userResponse == null)
-                {
-                    throw new Exception("Không thể đọc dữ liệu trả về từ API.");
-                }
-
-                return userResponse;
+                var user = await response.Content.ReadFromJsonAsync<Users>();
+                return user;
             }
             else
             {
-                // Trường hợp bình thường, deserialize trực tiếp
-                var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(rawContent);
-
-                if (userResponse == null)
-                {
-                    throw new Exception("Không thể đọc dữ liệu trả về từ API.");
-                }
-
-                return userResponse;
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Đăng nhập tự động thất bại: {errorMessage}");
             }
         }
 

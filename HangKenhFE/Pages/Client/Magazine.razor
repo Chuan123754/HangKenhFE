@@ -5,8 +5,6 @@
 @inject IJSRuntime JS
 @inject NavigationManager nav
 
-
-
 <section class="section-banner">
     <img src="@banner.Meta_data"
          class="w-100 h-100" alt="banner-image-3">
@@ -48,8 +46,8 @@
                                 <span>@posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                             </div>
                             <div class="post-big-title">@posts.Title</div>                      
-                            <div class="post-big-desc">
-                                @GetCleanText(posts.Description)
+                            <div class="post-big">
+                                @((MarkupString)posts.Description)
                             </div>
                         </div>
                     </header>
@@ -193,17 +191,5 @@
     {
         nav.NavigateTo($"/product-detail/{id}");
     }
-    private string GetCleanText(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return string.Empty;
-        }
-
-        // Loại bỏ thẻ HTML
-        string textWithoutHtml = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
-
-        // Giải mã các ký tự HTML
-        return System.Net.WebUtility.HtmlDecode(textWithoutHtml);
-    }
+ 
 }

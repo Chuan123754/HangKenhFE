@@ -1,13 +1,15 @@
-﻿@using Newtonsoft.Json
+﻿@using Microsoft.AspNetCore.Identity
+@using Newtonsoft.Json
 @inject IUserService userService
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 @inject NavigationManager navigation
 @inject IPostSer sev
 @inject IJSRuntime JS
-@using Blazored.SessionStorage
-@using System.Text.Json
-@inject IUserService userService
 @using BlazorBootstrap
+
+@using HangKenhFE.Models
+@inject ILoginService LoginServices
+
 <style>
     .modal {
         position: fixed;
@@ -157,22 +159,227 @@
         z-index: 1000;
     }
 
-        .dropdown-menu li {
-            padding: 8px 12px;
-            cursor: pointer;
+    .dropdown-menu li {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .dropdown-menu li a {
+        text-decoration: none;
+        color: black;
+        display: block;
+    }
+
+    .dropdown-menu li:hover {
+        background-color: #f1f1f1;
+    }
+
+
+
+    /*Model Login*/
+    
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: none;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 900px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .close:hover, .close:focus {
+            color: #000;
+            text-decoration: none;
         }
 
-            .dropdown-menu li a {
-                text-decoration: none;
-                color: black;
-                display: block;
-            }
+    /* Layout Styles */
+    .account-container {
+        display: flex;
+        gap: 20px;
+    }
 
-            .dropdown-menu li:hover {
-                background-color: #f1f1f1;
-            }
+    .col2-set {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .col-1, .col-2 {
+        flex: 1;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    h3 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* Form Styles */
+    form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .forgot-password {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+    .btn-login, .btn-register {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #000;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .btn-login:hover, .btn-register:hover {
+            background-color: #333;
+        }
+
+    .login-banner {
+        margin-top: 20px;
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0px 2px 7px rgba(0, 0, 0, 0.25);
+    }
+
+    .privacy-notice {
+        background: #eee;
+        border: 1px solid #ccc;
+        padding: 10px;
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 15px;
+        border-radius: 4px;
+    }
 
 </style>
+
+
+
+
+
+
+<div class="modal" style="@(isModalOpen ? "display: block;" : "display: none;")">
+    <div class="modal-content">
+        <span class="close" @onclick="CloseModal">&times;</span>
+        <!-- Form Đăng nhập và Đăng ký -->
+        <div class="account-container">
+            <div class="col2-set" id="customer_login">
+                <!-- Form Đăng nhập -->
+                <div class="col-1">
+                    <h3>Đăng nhập</h3>
+                    <form @onsubmit="HandleLoginAsync">
+                        <p class="message">@loginMessage</p> <!-- Thông báo đăng nhập -->
+                        <label for="username">Tên đăng nhập hoặc email *</label>
+                        <input type="text" @bind="loginModel.Username" id="username" placeholder="Tên đăng nhập hoặc email" required>
+
+                        <label for="password">Mật khẩu *</label>
+                        <input type="password" @bind="loginModel.Password" id="password" placeholder="Mật khẩu" required>
+
+                        <div class="form-options">
+                            <label>
+                                <input type="checkbox" id="rememberme"> Ghi nhớ mật khẩu
+                            </label>
+                            <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                        </div>
+
+                        <button type="submit" class="btn-login">Đăng nhập</button>
+
+                        <img src="https://thamlenhangkenh.com/wp-content/uploads/2024/06/login-banner.png" alt="Banner" class="login-banner">
+                    </form>
+                </div>
+
+                <!-- Form Đăng ký -->
+                <div class="col-2">
+                    <h3>Đăng ký</h3>
+                    <form @onsubmit="HandleRegisterAsync">
+                        <p class="message">@registerMessage</p> <!-- Thông báo đăng ký -->
+                        <label for="reg_uname">Tên đăng nhập *</label>
+                        <input type="text" @bind="registerModel.Username" id="reg_uname" placeholder="Nhập tên đăng nhập" required>
+
+                        <label for="reg_email">Email *</label>
+                        <input type="email" @bind="registerModel.Email" id="reg_email" placeholder="Nhập e-mail" required>
+
+                        <label for="reg_password">Mật khẩu *</label>
+                        <input type="password" @bind="registerModel.Password" id="reg_password" placeholder="Nhập mật khẩu" required>
+
+                        <input type="password" @bind="registerModel.ConfirmPassword" placeholder="Nhập lại mật khẩu" required>
+
+                        <p class="privacy-notice">
+                            Dữ liệu cá nhân của bạn sẽ được sử dụng để hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này.
+                            Để quản lý quyền truy cập vào tài khoản và cho các mục đích khác được mô tả trong privacy policy.
+                        </p>
+
+                        <button type="submit" class="btn-register">Đăng ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
 
 <header class="header">
     <div class="logo middle-header border-bottom pc">
@@ -220,7 +427,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="javascript:void(0)">
+                            <a href="/wishlist">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <g clip-path="url(#clip0_1223_8762)">
@@ -235,7 +442,7 @@
                                 </svg>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a href="javascript:void(0)">
                                 <svg width="16" height="16" viewBox="0 0 17 18" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -244,7 +451,7 @@
                                     <path d="M11.1249 12.5L15.7499 17.125" stroke="#242424" stroke-width="0.9" />
                                 </svg>
                             </a>
-                        </li>
+                        </li> *@
                         <li class="dropdown">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle" @onclick="ToggleDropdown"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" /></svg>
                             <ul class="dropdown-menu" style="@MenuStyle">
@@ -258,7 +465,7 @@
                                         <span>Khách</span>
                                     }
                                 </li>
-                                <li><a href="#">Đơn hàng của bạn</a></li>
+                                <li><a href="/user/orders">Đơn hàng của bạn</a></li>
                                 <div>
                                     @if (isLoggedIn)
                                     {
@@ -266,7 +473,17 @@
                                     }
                                     else
                                     {
-                                        <button class="btn-login-register" @onclick="() => xlModal.ShowAsync()">Đăng nhập / Đăng ký</button>
+                                        <div>
+                                            @if (isLoggedIn)
+                                            {
+                                                <p class="message">Đã lưu vào session.</p>
+                                                <button @onclick="HandleLogout" class="btn-logout">Đăng xuất</button>
+                                            }
+                                            else
+                                            {
+                                                <button @onclick="OpenModal">Đăng nhập / Đăng ký</button>
+                                            }
+                                        </div>
                                     }
                                 </div>
                                 <li><a href="#">Thông tin cá nhân</a></li>
@@ -276,10 +493,7 @@
 
                         <li>
                             <a @onclick="NavToCart" class="cart-link" style="text-decoration: none; color: inherit;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-check" viewBox="0 0 16 16">
-                                    <path d="M11.354 6.354a.5.5 0 0 0-.708-.708L8 8.293 6.854 7.146a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z" />
-                                    <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 17h-11v-14h-2" /><path d="M6 5l14 1l-1 7h-13" /></svg>
                             </a>
                         </li>
                     </ul>
@@ -295,33 +509,11 @@
                         <div class="col">
                             <ul>
                                 <li>
-                                    <span class="title-sub-menu">@item.Title</span>
                                     <a href="@item.Slug" class="title-sub-menu">@item.Title</a>
                                 </li>
                             </ul>
                         </div>
-                    }
-                    @*   @foreach($secondMenu as $item)
-
-                    <div class="col">
-                    <ul>
-                    <li>
-                    @if(!empty($item['child']))
-                    <span class="title-sub-menu">{{ $item['label'] }}</span>
-                    @else
-                    <a href="{{ $item['link'] }}" class="title-sub-menu">{{ $item['label'] }}</a>
-                    @endif
-                    </li>
-                    @if(!empty($item['child']))
-                    @foreach($item['child'] as $child)
-                    <li><a href="{{ $child['link'] }}">{{ $child['label'] }}</a></li>
-                    @endforeach
-                    @endif
-
-                    </ul>
-                    </div>
-                    @endforeach
-                    *@
+                    }                  
                     <div class="col">
                         <ul>
                             <li>
@@ -401,65 +593,13 @@
             </div>
         </div>
     </div>
-    <Modal @ref="xlModal" title="HangKenh"  Size="ModalSize.ExtraLarge">
-        <BodyTemplate>
-            <div class="account-container">
-                <div class="col2-set" id="customer_login">
-                    <!-- Form Đăng nhập -->
-                    <div class="col-1">
-                        <h3  style="font-family: 'Prata', sans-serif !important; font-size: 35px;">Đăng nhập</h3>
-                        <form @onsubmit="HandleLoginAsync">
-                            <label for="username">Tên đăng nhập hoặc email *</label>
-                            <input type="text" @bind="users.Email" id="username" placeholder="Email" required>
 
-                            <label for="password">Mật khẩu *</label>
-                            <input type="password" @bind="users.Password" id="password" placeholder="Mật khẩu" required>
-
-                            <div class="form-options">
-                                <label>
-                                    <input type="checkbox" id="rememberme"> Ghi nhớ mật khẩu
-                                </label>
-                                <a href="#" class="forgot-password">Quên mật khẩu?</a>
-                            </div>
-
-                            <button type="submit" class="btn-login">Đăng nhập</button>
-
-                            <img src="https://thamlenhangkenh.com/wp-content/uploads/2024/06/login-banner.png" alt="Banner" class="login-banner">
-                        </form>
-                    </div>
-
-                    <!-- Form Đăng ký -->
-                    <div class="col-2">
-                        <h3  style="font-family: 'Prata', sans-serif !important; font-size: 35px;">Đăng ký</h3>
-                        <form @onsubmit="HandleRegisterAsync">
-                            <label for="reg_uname">Tên đăng nhập *</label>
-                            <input type="text" @bind="users.Email" id="reg_uname" placeholder="Nhập tên đăng nhập" required>
-
-                            <label for="reg_email">Email *</label>
-                            <input type="email" @bind="users.Email" id="reg_email" placeholder="Nhập e-mail" required>
-
-                            <label for="reg_password">Mật khẩu *</label>
-                            <input type="password" @bind="users.Password" id="reg_password" placeholder="Nhập mật khẩu" required>
-                            <p class="privacy-notice">
-                                Dữ liệu cá nhân của bạn sẽ được sử dụng để hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này.
-                                Để quản lý quyền truy cập vào tài khoản và cho các mục đích khác được mô tả trong privacy policy.
-                            </p>
-
-                            <button type="submit" class="btn-register">Đăng ký</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        </BodyTemplate>
-    </Modal>
 
 </header>
 
 
 
 @code {
-    private Modal xlModal = default!;
     private bool isLoggedIn = false;
     private bool IsMenuOpen { get; set; } = false;
     private Users users = new Users();
@@ -469,23 +609,210 @@
     private bool isPrerendering = true;
     private bool showError = false;
 
+
+
+    private bool isModalOpen = false;
+
+    private LoginModel loginModel = new LoginModel();
+    private RegisterModel registerModel = new RegisterModel();
+
+    private string loginMessage = string.Empty;
+    private string registerMessage = string.Empty;
+    private bool firstRender = true;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var tokenAuto = await SessionStorage.GetItemAsStringAsync("RememberToken");
+        if (!string.IsNullOrEmpty(tokenAuto))
+        {
+            var loggedInUser = await userService.AutoLogin(tokenAuto);
+            if (loggedInUser != null)
+            {
+                isLoggedIn = true;
+                // Tạo phiên người dùng
+            }
+        }
+
+        if (firstRender)
+        {
+            // Kiểm tra xem SessionStorage có chứa token không
+            var token = await SessionStorage.GetItemAsStringAsync("user");
+            if (!string.IsNullOrEmpty(token))
+            {
+                isLoggedIn = true;
+                loginMessage = "Đã lưu vào SessionStorage.";
+            }
+
+            // Cập nhật trạng thái để không chạy lại trong các lần render sau
+            this.firstRender = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenModal()
+    {
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+        loginMessage = string.Empty;
+        registerMessage = string.Empty;
+    }
+
+    private async Task HandleLoginAsync()
+    {
+        try
+        {
+            var loginRequest = new Users
+                {
+                    Email = loginModel.Username,
+                    Password = loginModel.Password
+                };
+
+            var loggedInUser = await userService.Login(loginRequest, loginModel.RememberMe);
+
+            if (loggedInUser != null)
+            {
+                loginMessage = "Đăng nhập thành công!";
+                await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(loggedInUser));
+                isLoggedIn = true;
+                CloseModal();
+            }
+            else
+            {
+                loginMessage = "Tên đăng nhập hoặc mật khẩu không đúng!";
+            }
+        }
+        catch (Exception ex)
+        {
+            loginMessage = $"Lỗi: {ex.Message}";
+        }
+    }
+
+
+
+    private async Task HandleRegisterAsync()
+    {
+        try
+        {
+            // Tạo đối tượng người dùng mới dựa trên dữ liệu từ giao diện
+            var newUser = new Users
+                {
+                    Name = registerModel.Username,
+                    Phone = "0123456789",
+                    Email = registerModel.Email,
+                    Password = registerModel.Password,
+                    Address = "Nothing",
+                    RememberToken = "Nothing",
+                    Created_at = DateTime.Now,
+                    Updated_at = DateTime.Now
+                };
+
+            if (await userService.IsEmailExists(newUser.Email))
+            {
+                registerMessage = "Email đã tồn tại.";
+                return;
+            }
+
+            var passwordHasher = new PasswordHasher<object>();
+            newUser.Password = passwordHasher.HashPassword(null, newUser.Password);
+
+            // Gửi yêu cầu đăng ký đến API
+            var createdUser = await userService.Create(newUser);
+
+            if (createdUser != null && createdUser.Id > 0)
+            {
+                registerMessage = "Đăng ký thành công! Đang tự động đăng nhập...";
+
+                // Đăng nhập tự động
+                var loginUser = new Users
+                {
+                    Email = registerModel.Email,
+                    Password = registerModel.Password
+                };
+
+                var loggedInUser = await userService.Login(loginUser, loginModel.RememberMe);
+
+                if (loggedInUser != null)
+                {
+                    await SessionStorage.SetItemAsStringAsync("user", Newtonsoft.Json.JsonConvert.SerializeObject(loggedInUser));
+
+                    StateHasChanged();
+                    await Task.Delay(2000);
+                    CloseModal();
+                    navigation.NavigateTo($"/user/UserDetails/{loggedInUser.Id}");
+                }
+                else
+                {
+                    registerMessage = "Đăng ký thành công nhưng đăng nhập thất bại.";
+                }
+            }
+            else
+            {
+                registerMessage = "Không thể tạo người dùng.";
+            }
+        }
+        catch (Exception ex)
+        {
+            registerMessage = $"Lỗi: {ex.Message}";
+        }
+    }
+
+
+    private async Task HandleLogout()
+    {
+        await SessionStorage.RemoveItemAsync("user");
+        isLoggedIn = false;
+        loginMessage = "Bạn đã đăng xuất thành công!";
+    }
+
+    public class LoginModel
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public bool RememberMe { get; set; }
+
+    }
+
+    public class RegisterModel
+    {
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string ConfirmPassword { get; set; }
+    }
+
+
     protected override async Task OnInitializedAsync()
     {
         await CheckUserLoggedInAsync();
+        await LoadPosts();
     }
 
     private async Task CheckUserLoggedInAsync()
     {
         try
         {
-            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
+            var userInfo = await SessionStorage.GetItemAsStringAsync("User");
 
             if (!string.IsNullOrEmpty(userInfo))
             {
+                // Deserialize JSON thành đối tượng Users
                 users = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(userInfo);
-                if (users != null && !string.IsNullOrEmpty(users.Name))
+
+                if (users != null)
                 {
-                    isLoggedIn = true;
+                    isLoggedIn = !string.IsNullOrEmpty(users.Name);
+
+                    // Kiểm tra vai trò của người dùng
+                    if (users.Roles != null && users.Roles.Contains("Admin"))
+                    {
+                        navigation.NavigateTo("https://localhost:7277/", forceLoad: true);
+                        return; 
+                    }
                 }
             }
         }
@@ -495,10 +822,6 @@
         }
     }
 
-    private void NavigateToLogin()
-    {
-        navigation.NavigateTo("/login");
-    }
 
     private async Task LoadPosts()
     {
@@ -526,43 +849,11 @@
 
     private async Task Logout()
     {
-        await SessionStorage.RemoveItemAsync("UserInfo");
+        await SessionStorage.RemoveItemAsync("User");
         isLoggedIn = false;
         users = new Users();
-        navigation.NavigateTo("/user/login");
+        navigation.NavigateTo("/");
     }
 
-
-    private async Task HandleLoginAsync()
-    {
-        try
-        {
-            var result = await userService.Login(users);
-
-            if (result == null)
-            {
-                await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("toastr.success", "Đăng nhập thành công");
-
-                // Lưu thông tin người dùng vào SessionStorage
-                var serializedUser = Newtonsoft.Json.JsonConvert.SerializeObject(result);
-                await SessionStorage.SetItemAsync("UserInfo", serializedUser);
-                navigation.NavigateTo("/");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Lỗi: {ex.Message}");
-            await JS.InvokeVoidAsync("toastr.error", "Đăng nhập thất bại");
-        }
-    }
-    private async Task HandleRegisterAsync()
-    {
-    }
-
-}
 
 
