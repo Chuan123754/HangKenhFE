@@ -1,5 +1,8 @@
 ﻿@page "/wishlist"
 @using BlazorBootstrap
+@using System.Text.Json;
+@inject IJSRuntime JS
+@inject IUserService userServices
 @inject IWishlistServices wishlistServices
 @inject IProduct_variants_wishlist_Services productvariantswishlist
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
@@ -58,27 +61,52 @@
 </section>
 
 @code {
-    private List<Product_variants_wishlist> product_WL_list = new List<Product_variants_wishlist>();
     private Users user = new Users();
-    protected override async Task OnInitializedAsync()
-    {    
-        await LoadWLP();
+    private List<Product_variants_wishlist> product_WL_list = new List<Product_variants_wishlist>();
 
-    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Lấy thông tin người dùng từ session
-            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
-            if (!string.IsNullOrEmpty(userInfo))
+            var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
+
+            if (!string.IsNullOrEmpty(userJsonString))
             {
-                // Giải mã và Deserialize người dùng từ session
-                var unescapedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(userInfo);
-                user = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(unescapedJson);
-                StateHasChanged();  // Cập nhật UI sau khi lấy thông tin người dùng
+                try
+                {
+                    // Parse JSON để lấy giá trị id và roles
+                    var userData = JsonSerializer.Deserialize<Dictionary<string, object>>(userJsonString);
+
+                    if (userData != null)
+                    {
+                        // Lấy UserId
+                        if (userData.ContainsKey("Id") && long.TryParse(userData["Id"]?.ToString(), out long result))
+                        {
+                            user = await userServices.GetById(result);
+                        }
+                        else
+                        {
+                            user = null; // Nếu không tìm thấy hoặc parse không được, đặt user là null
+                        }
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Error parsing User JSON: {ex.Message}");
+                    user = null; // Nếu JSON không hợp lệ
+                }
             }
-        } 
+            else
+            {
+                user = null; // Nếu dữ liệu session trống
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWLP();
+
     }
     private async Task LoadWLP()
     {
