@@ -9,6 +9,7 @@
 @inject IWishlistServices wishlistServices
 @inject IProduct_variants_wishlist_Services productvariantswishlist
 @inject ICartDetailsService cartDetailServices
+@using System.Text.Json;
 @inject IJSRuntime JS
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 
@@ -354,14 +355,40 @@
     {
         if (firstRender)
         {
-            // Lấy thông tin người dùng từ session
-            var userInfo = await SessionStorage.GetItemAsStringAsync("UserInfo");
-            if (!string.IsNullOrEmpty(userInfo))
+            var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
+
+            if (!string.IsNullOrEmpty(userJsonString))
             {
-                // Giải mã và Deserialize người dùng từ session
-                var unescapedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(userInfo);
-                user = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(unescapedJson);
-                StateHasChanged();  // Cập nhật UI sau khi lấy thông tin người dùng
+                try
+                {
+                    // Parse JSON để lấy giá trị id và roles
+                    var userData = JsonSerializer.Deserialize<Dictionary<string, object>>(userJsonString);
+
+                    if (userData != null)
+                    {
+                        // Lấy UserId
+                        if (userData.ContainsKey("Id") && long.TryParse(userData["Id"]?.ToString(), out long result))
+                        {
+                            user = new Users
+                                {
+                                    Id = result // Gán ID cho đối tượng 'Users'
+                                };
+                        }
+                        else
+                        {
+                            user = null; // Nếu không tìm thấy hoặc parse không được, đặt user là null
+                        }
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Error parsing User JSON: {ex.Message}");
+                    user = null; // Nếu JSON không hợp lệ
+                }
+            }
+            else
+            {
+                user = null; // Nếu dữ liệu session trống
             }
         }
     }
@@ -396,18 +423,21 @@
         }
     }
 
-    private async void AddToCart()
+    private async Task AddToCart()
     {
         try
         {
+            // Kiểm tra xem người dùng đã đăng nhập hay chưa
             if (user != null && user.Id > 0)
             {
+                // Lấy tất cả các giỏ hàng
                 var cart = await cartServices.GetAll();
-                var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
+                // Kiểm tra giỏ hàng của người dùng
+                var cartUser = cart.FirstOrDefault(c => c.UserId == user.Id);
 
                 if (cartUser != null)
                 {
-                    // Check sản phẩm đã tồn tại trong giỏ hàng chưa
+                    // Giỏ hàng đã tồn tại
                     var cartDetails = await cartDetailServices.GetAll();
                     var existingCartDetail = cartDetails.FirstOrDefault(cd => cd.Product_id == selectedProduct.Id && cd.Cart_id == cartUser.Id);
 
@@ -416,7 +446,7 @@
                         // Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng dồn số lượng
                         existingCartDetail.Quantity += 1;
                         await cartDetailServices.Update(existingCartDetail);
-                        await JS.InvokeVoidAsync("toastr.success", "Thêm sản phẩm thành công");
+                        await JS.InvokeVoidAsync("toastr.success", "Cập nhật số lượng sản phẩm thành công");
                     }
                     else
                     {
@@ -434,7 +464,25 @@
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("toastr.error", "Giỏ hàng không tồn tại");
+                    var newCart = new Carts
+                        {
+                            UserId = user.Id,
+                        };
+
+                    // Tạo giỏ hàng mới
+                    await cartServices.Create(newCart);
+
+                    // Sau khi tạo giỏ hàng, thêm sản phẩm vào giỏ hàng
+                    var newCartDetail = new Cart_details
+                        {
+                            Cart_id = newCart.Id, // Sử dụng Id được gán sau khi tạo giỏ hàng
+                            Product_id = selectedProduct.Id,
+                            Quantity = 1,
+                            Status = "ok"
+                        };
+
+                    await cartDetailServices.Create(newCartDetail);
+                    await JS.InvokeVoidAsync("toastr.success", " Sản phẩm đã được thêm thành công");
                 }
             }
             else
