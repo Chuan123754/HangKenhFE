@@ -10,6 +10,7 @@
 @inject IAddressServices addressServices
 @inject IUserService userServices
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
+@using System.Text.Json;
 @inject IJSRuntime JS
 
 <style>
@@ -539,14 +540,37 @@
     {
         if (firstRender)
         {
-            // Lấy thông tin người dùng từ session
-            var userInfo = await SessionStorage.GetItemAsStringAsync("user");
-            if (!string.IsNullOrEmpty(userInfo))
+            var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
+
+            if (!string.IsNullOrEmpty(userJsonString))
             {
-                // Giải mã và Deserialize người dùng từ session
-                var unescapedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(userInfo);
-                user = Newtonsoft.Json.JsonConvert.DeserializeObject<Users>(unescapedJson);
-                StateHasChanged();  // Cập nhật UI sau khi lấy thông tin người dùng
+                try
+                {
+                    // Parse JSON để lấy giá trị id và roles
+                    var userData = JsonSerializer.Deserialize<Dictionary<string, object>>(userJsonString);
+
+                    if (userData != null)
+                    {
+                        // Lấy UserId
+                        if (userData.ContainsKey("Id") && long.TryParse(userData["Id"]?.ToString(), out long result))
+                        {
+                            user = await userServices.GetById(result);
+                        }
+                        else
+                        {
+                            user = null; // Nếu không tìm thấy hoặc parse không được, đặt user là null
+                        }
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Error parsing User JSON: {ex.Message}");
+                    user = null; // Nếu JSON không hợp lệ
+                }
+            }
+            else
+            {
+                user = null; // Nếu dữ liệu session trống
             }
         }
         CalculateTotalMoney();
@@ -1071,16 +1095,9 @@
         isMomoModalVisible = false;
         await LoadOrderDetails();
         await LoadCartDetails();
-
-        // Đặt lại biến trạng thái thanh toán
         isPaymentConfirmed = false;
         StateHasChanged();
     }
-
-    private string momoError = null;
-    private string? ErrorCode;
-    private string payUrl { get; set; }
-    private bool isMomoModalVisible = false;
 
     private void ShowMomoModal(string momoUrl)
     {
