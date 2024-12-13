@@ -189,10 +189,17 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-center justify-content-center flex-column">
+                        @if(lst_CartDetails== null || lst_CartDetails.Count == 0)
+                        {
+                            <h1>Hãy tham quan cửa hàng của chúng tôi </h1>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-success btn-lg" @onclick="CreateModalOrder">
+                                Thanh toán
+                            </button>
+                        }
 
-                        <button class="btn btn-outline-success btn-lg" @onclick="CreateModalOrder">
-                            Thanh toán
-                        </button>
                     </div>
                 </div>
             </main>
@@ -571,6 +578,8 @@
             else
             {
                 user = null; // Nếu dữ liệu session trống
+                await JS.InvokeVoidAsync("toastr.error", "Vui lòng đăng nhập!");
+                return;
             }
         }
         CalculateTotalMoney();
@@ -646,6 +655,11 @@
     {
         var cartDetails = await cartDetailsService.GetAll();
         var cart = await cartServices.GetAll();
+        if(user == null)
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
+            return;
+        }
         var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
         if (cartUser == null)
         {
@@ -679,6 +693,8 @@
             if (orderDetail != null)
             {
                 orderDetail.Quantity = newQuantity; // Cập nhật số lượng trong order details
+                orderDetail.UnitPrice = productVariant.Regular_price;
+                orderDetail.TotalDiscount = productVariant.Sale_price;
                 await orderDetailsServices.Update(orderDetail, orderDetail.Id); // Gọi dịch vụ để cập nhật thông tin
             }
 
@@ -757,112 +773,153 @@
 
     private async Task CreateModalOrder()
     {
-        isModalOrderVisiable = true;
-        try
+        // Kiểm tra số lượng sản phẩm trong kho cho tất cả các item trong selectedCartDetails
+        foreach (var cartDetailId in selectedCartDetails)
         {
-            // Lấy danh sách đơn hàng của người dùng
-            var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
-            var existingOrderPending = ordersUser.FirstOrDefault(o => o.Status == "Pending");
-
-            // Nếu tồn tại đơn hàng "Pending", sử dụng lại
-            if (existingOrderPending != null)
+            var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+            if (cartDetail == null)
             {
-                order = existingOrderPending;
+                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} không tồn tại trong giỏ hàng.");
+                return;
             }
-            else
+
+            var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+            if (productAttribute == null)
             {
-                if (user == null)
+                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetail.Product_id} không tồn tại.");
+                return;
+            }
+
+            if (cartDetail.Quantity > productAttribute.Stock)
+            {
+                await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm {cartDetail.Product_Attributes.SKU} hiện không đủ số lượng quý khách mong muốn!");
+                return;
+            }
+        }
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
+        if (confirmed)
+        {
+            isModalOrderVisiable = true;
+            try
+            {
+                // Lấy danh sách đơn hàng của người dùng
+                var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
+                if (ordersUser == null)
                 {
-                    await JS.InvokeVoidAsync("toastr.warning", "Người dùng không hợp lệ!");
+                    await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy thông tin đơn hàng cho người dùng này.");
                     return;
                 }
+                var existingOrderPending = ordersUser.FirstOrDefault(o => o.Status == "Pending");
 
-                var newOrder = new Orders
-                    {
-                        User_id = user?.Id,
-                        Created_at = DateTime.Now,
-                        Note = "Giao hàng",
-                        Status = "Pending"
-                    };
-
-                var createdOrder = await orderServices.Create(newOrder);
-                if (createdOrder != null)
+                // Nếu tồn tại đơn hàng "Pending", sử dụng lại
+                if (existingOrderPending != null)
                 {
-                    order = createdOrder;
+                    order = existingOrderPending;
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
-                    return;
-                }
-            }
-
-            if (order != null)
-            {
-                long orderId = order.Id;
-
-                if (lst_OrderDetail == null)
-                {
-                    lst_OrderDetail = new List<Order_details>();
-                }
-
-                foreach (var cartDetailId in selectedCartDetails)
-                {
-                    var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                    if (cartDetail == null)
+                    if (user == null)
                     {
-                        Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
-                        continue;
+                        await JS.InvokeVoidAsync("toastr.warning", "Người dùng không hợp lệ!");
+                        return;
                     }
 
-                    // Kiểm tra xem sản phẩm đã có trong order details chưa
-                    var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(orderId, cartDetail.Product_Attributes.Id);
-                    if (existingDetail == null)
+                    // Tạo đơn hàng mới
+                    var newOrder = new Orders
+                        {
+                            User_id = user?.Id,
+                            Created_at = DateTime.Now,
+                            Note = "Giao hàng",
+                            Status = "Pending"
+                        };
+
+                    var createdOrder = await orderServices.Create(newOrder);
+                    if (createdOrder != null)
                     {
-                        var newOrderDetail = new Order_details
-                            {
-                                OrderId = orderId,
-                                Product_Attribute_Id = cartDetail.Product_Attributes.Id,
-                                Quantity = cartDetail.Quantity
-                            };
-                        await orderDetailsServices.Create(newOrderDetail);
+                        order = createdOrder;
                     }
                     else
                     {
-                        // Cập nhật số lượng nếu sản phẩm đã tồn tại trong order details
-                        existingDetail.Quantity = cartDetail.Quantity;
-                        await orderDetailsServices.Update(existingDetail, existingDetail.Id);
+                        await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
+                        return;
                     }
                 }
 
-                var selectedProductAttributeIds = lst_OrderDetail // danh sách sản phẩm có cả trong orderdetails và selectedCartDetail
-                 .Where(item => selectedCartDetails.Contains(item.Id))
-                 .Select(item => item.ProductAttributes.Id)
-                 .ToList();
-
-                var allOrderDetails = await orderDetailsServices.GetOrderDetailsByOrderId(orderId); // danh sách orderdetails của order hiện tại
-
-                foreach (var detail in allOrderDetails)
+                if (order != null)
                 {
-                    // nếu sản phẩm có cả trong lst_CartDetails và selectedCartDetails thì ko xóa
-                    bool shouldDelete = !lst_CartDetails // đấu !
-                        .Where(item => selectedCartDetails.Contains(item.Id))
-                        .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
-
-                    if (shouldDelete)
+                    // Khởi tạo danh sách order detail nếu chưa có
+                    if (lst_OrderDetail == null)
                     {
-                        await orderDetailsServices.Delete(detail.Id);
+                        lst_OrderDetail = new List<Order_details>();
+                    }
+
+                    // Thêm các item từ selectedCartDetails vào lst_OrderDetail
+                    foreach (var cartDetailId in selectedCartDetails)
+                    {
+                        var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+                        if (cartDetail == null)
+                        {
+                            Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
+                            continue;
+                        }
+
+                        // Kiểm tra thông tin sản phẩm
+                        var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                        if (productAttribute == null)
+                        {
+                            Console.WriteLine($"Product attribute for ID {cartDetail.Product_id} not found.");
+                            continue;
+                        }
+
+                        // Kiểm tra xem sản phẩm đã có trong order details chưa
+                        var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(order.Id, cartDetail.Product_Attributes.Id);
+                        if (existingDetail == null)
+                        {
+                            var newOrderDetail = new Order_details
+                                {
+                                    OrderId = order.Id,
+                                    Product_Attribute_Id = cartDetail.Product_Attributes.Id,
+                                    Quantity = cartDetail.Quantity,
+                                    TotalDiscount = cartDetail.Product_Attributes.Sale_price,
+                                    UnitPrice = cartDetail.Product_Attributes.Regular_price
+                                };
+                            await orderDetailsServices.Create(newOrderDetail);
+                            lst_OrderDetail.Add(newOrderDetail); // Thêm vào lst_OrderDetail
+                        }
+                        else
+                        {
+                            existingDetail.Quantity = cartDetail.Quantity;
+                            existingDetail.UnitPrice = cartDetail.Product_Attributes.Regular_price;
+                            existingDetail.TotalDiscount = cartDetail.Product_Attributes.Sale_price;
+                            await orderDetailsServices.Update(existingDetail, existingDetail.Id);
+                        }
+                    }
+
+                    // Xóa các item không còn trong selectedCartDetails
+                    var allOrderDetails = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
+                    foreach (var detail in allOrderDetails)
+                    {
+                        bool shouldDelete = !lst_CartDetails
+                            .Where(item => selectedCartDetails.Contains(item.Id))
+                            .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
+
+                        if (shouldDelete)
+                        {
+                            await orderDetailsServices.Delete(detail.Id);
+                        }
                     }
                 }
-                await LoadOrderDetails();
-                StateHasChanged();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred: " + ex.ToString()); // Log the complete error
+            }
+            await LoadOrderDetails();
+            await LoadCartDetails();
+            StateHasChanged();
+            CalculateTotalMoney();
         }
-        catch (Exception ex)
-        {
-
-        }
-        CalculateTotalMoney();
     }
 
     private async Task CloseModalOrder()
@@ -1033,6 +1090,14 @@
         if (confirmed)
         {
             CheckOut("cash");
+            foreach (var cartDetailId in selectedCartDetails)
+            {
+                var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                productAttribute.Stock -= cartDetail.Quantity;
+                await productAttributeServices.Update(productAttribute, productAttribute.Id);
+                await cartDetailsService.Delete(cartDetailId);
+            }
             await LoadOrderDetails();
             await LoadCartDetails();
         }
@@ -1045,6 +1110,28 @@
         if (confirmed)
         {
             CheckOut("momo");
+            var updateitem = await orderServices.GetByIdOrders(order.Id);
+            if (updateitem.Status == "Chờ xác nhận")
+            {
+                foreach (var cartDetailId in selectedCartDetails)
+                {
+                    var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+                    var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                    productAttribute.Stock -= cartDetail.Quantity;
+                    await productAttributeServices.Update(productAttribute, productAttribute.Id);
+                    await cartDetailsService.Delete(cartDetailId);
+                }
+
+                isPaymentConfirmed = true;
+                await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thanh toán thành công");
+                isMomoModalVisible = false;
+                await ResetViewState();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng chưa được thanh toán");
+            }
+
             await LoadOrderDetails();
             await LoadCartDetails();
         }
@@ -1060,25 +1147,9 @@
     private async Task ConfirmMomoPayment()
     {
         var updateitem = await orderServices.GetByIdOrders(order.Id);
-        if (updateitem.Status == "Chờ xác nhận ")
+        if (updateitem.Status == "Chờ xác nhận")
         {
-            var orderDetailsCopy = lst_OrderDetail.ToList();
-            foreach (var item in orderDetailsCopy)
-            {
-                var product = await productAttributeServices.GetProductAttributesById(item.Product_Attribute_Id);
-                if (product != null)
-                {
-                    if (item.Quantity > product.Stock || product.Stock == 0)
-                    {
-                        await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm {product.SKU} trong kho không đủ.");
-                        return;
-                    }
-                    product.Stock -= item.Quantity; // Trừ số lượng trong kho
-                    await productAttributeServices.Update(product, product.Id);
-                }
-            }
 
-            // Đánh dấu thanh toán đã được xác nhận
             isPaymentConfirmed = true;
             await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
             isMomoModalVisible = false;
@@ -1159,9 +1230,10 @@
             {
                 orderUpdate.TypePayment = "Thanh toán khi nhận hàng";
                 orderUpdate.Address_Id = selectedAddress.Id;
+                orderUpdate.Status = "Chờ xác nhận";
                 typePay = "Chờ xác nhận";
                 await orderServices.Update(orderUpdate, orderUpdate.Id);
-                await JS.InvokeVoidAsync("toastr.success", "Đơn hàng đã được thanh toán thành công!");
+                await JS.InvokeVoidAsync("toastr.success", "Yêu cầu đặt đơn hàng đã được gửi thành công!");
                 await ResetViewState();
 
                 var newOrderTracking = new order_trackings

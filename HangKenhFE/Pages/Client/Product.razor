@@ -434,22 +434,37 @@
                 var cart = await cartServices.GetAll();
                 // Kiểm tra giỏ hàng của người dùng
                 var cartUser = cart.FirstOrDefault(c => c.UserId == user.Id);
-
+                var productAttribute = await productAttributeServices.GetProductAttributesById(selectedProduct.Id);
                 if (cartUser != null)
                 {
                     // Giỏ hàng đã tồn tại
                     var cartDetails = await cartDetailServices.GetAll();
                     var existingCartDetail = cartDetails.FirstOrDefault(cd => cd.Product_id == selectedProduct.Id && cd.Cart_id == cartUser.Id);
 
+                    if (productAttribute.Stock <= 0)
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Xin lỗi, sản phẩm này hiện không đủ.");
+                        return;
+                    }
+
                     if (existingCartDetail != null)
                     {
+                        if (existingCartDetail.Quantity + 1 > productAttribute.Stock)
+                        {
+                            await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm trong kho không đủ.");
+                            return;
+                        }
                         // Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng dồn số lượng
                         existingCartDetail.Quantity += 1;
                         await cartDetailServices.Update(existingCartDetail);
-                        await JS.InvokeVoidAsync("toastr.success", "Cập nhật số lượng sản phẩm thành công");
                     }
                     else
                     {
+                        if (1 > productAttribute.Stock)
+                        {
+                            await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm trong kho không đủ. Hiện có {productAttribute.Stock} sản phẩm.");
+                            return;
+                        }
                         var cartDetail = new Cart_details
                             {
                                 Cart_id = cartUser.Id,
@@ -471,7 +486,11 @@
 
                     // Tạo giỏ hàng mới
                     await cartServices.Create(newCart);
-
+                    if (1 > productAttribute.Stock)
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm trong kho không đủ. Hiện có {productAttribute.Stock} sản phẩm.");
+                        return;
+                    }
                     // Sau khi tạo giỏ hàng, thêm sản phẩm vào giỏ hàng
                     var newCartDetail = new Cart_details
                         {
