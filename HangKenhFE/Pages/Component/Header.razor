@@ -476,7 +476,6 @@
                                         <div>
                                             @if (isLoggedIn)
                                             {
-                                                <p class="message">Đã lưu vào session.</p>
                                                 <button @onclick="HandleLogout" class="btn-logout">Đăng xuất</button>
                                             }
                                             else
@@ -609,8 +608,6 @@
     private bool isPrerendering = true;
     private bool showError = false;
 
-
-
     private bool isModalOpen = false;
 
     private LoginModel loginModel = new LoginModel();
@@ -691,8 +688,6 @@
             loginMessage = $"Lỗi: {ex.Message}";
         }
     }
-
-
 
     private async Task HandleRegisterAsync()
     {
@@ -806,13 +801,6 @@
                 if (users != null)
                 {
                     isLoggedIn = !string.IsNullOrEmpty(users.Name);
-
-                    // Kiểm tra vai trò của người dùng
-                    if (users.Roles != null && users.Roles.Contains("Admin"))
-                    {
-                        navigation.NavigateTo("https://localhost:7277/", forceLoad: true);
-                        return; 
-                    }
                 }
             }
         }
@@ -855,5 +843,6 @@
         navigation.NavigateTo("/");
     }
 
-
+    }
+    
 

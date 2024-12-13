@@ -46,30 +46,8 @@ namespace HangKenhFE.Services
 
         public async Task Create(Carts cart)
         {
-            var user = await GetUserById(cart.Users.Id);
 
-            var cartToSend = new
-            {
-                Id = cart.Id,
-                Status = cart.Status,
-                Description = cart.Description,
-                Users = new
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Phone = user.Phone,
-                    Email = user.Email,
-                    Password = user.Password,
-                    RememberToken = user.RememberToken,
-                    Address = user.Address,
-                    CreatedAt = user.Created_at,
-                    UpdatedAt = user.Updated_at
-                },
-                CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
-                UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
-            };
-
-            string jsonContent = JsonConvert.SerializeObject(cartToSend);
+            string jsonContent = JsonConvert.SerializeObject(cart);
 
             string requestURL = $"{_baseUrl}/api/Carts/carts-post";
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
