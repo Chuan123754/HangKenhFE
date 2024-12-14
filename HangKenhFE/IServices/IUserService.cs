@@ -17,5 +17,6 @@ namespace HangKenhFE.IServices
         Task Delete(long id);
         Task<bool> IsEmailExists(string email); // Kiểm tra email
         Task<bool> IsPhoneExists(string phone); // Kiểm tra số điện thoại
+      
     }
 }
