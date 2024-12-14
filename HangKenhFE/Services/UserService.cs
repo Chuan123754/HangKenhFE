@@ -10,7 +10,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Net.Http.Json;
-using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
 namespace HangKenhFE.Services
@@ -223,5 +222,7 @@ namespace HangKenhFE.Services
                 throw new Exception($"Đăng xuất thất bại: {errorMessage}");
             }
         }
+
     }
 }
+

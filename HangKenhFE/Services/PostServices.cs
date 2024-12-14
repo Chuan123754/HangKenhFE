@@ -281,5 +281,10 @@ namespace HangKenhFE.Services
             var count = await response.Content.ReadFromJsonAsync<int>();
             return count;
         }
+
+        public async Task<Product_Posts> GetBySlugAndTypePage(string slug, string type)
+        {
+            return await _client.GetFromJsonAsync<Product_Posts>($"{_baseUrl}/api/Product_Post/GetBySlugAndTypePage?slug={slug}&type={type}");
+        }
     }
 }

@@ -7,6 +7,7 @@ namespace HangKenhFE.IServices
         Task<List<Product_Attributes>> GetProductAttributesByProductVarianIdClient(long id);
         Task<List<Product_Posts>> GetAllType(string type);
         Task<Product_Posts> GetByIdType(long id, string type);
+        Task<Product_Posts> GetBySlugAndTypePage(string slug, string type);
         Task<List<Product_Posts>> GetCountByType(string type, long designerId);
         Task<List<Product_variants>> GetCountByTypeDesigner(long designerId);
         Task<List<Product_variants>> GetAllByClient();

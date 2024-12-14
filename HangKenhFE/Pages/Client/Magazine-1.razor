@@ -1,4 +1,4 @@
-﻿@page "/page-details/{id:long}"
+﻿@page "/{slug}"
 @inject IBannerServices bnser
 @inject IPostSer sev
 @inject IJSRuntime JS
@@ -7,16 +7,16 @@
 
 
 <section class="section-banner">
-    <img src="@banner.Meta_data"
+     <img src="@banner.Meta_data"
          class="w-100 h-100" alt="banner-image-3">
     <div class="title-banner">
         <h1>
             @banner.Name
         </h1>
-    </div>
+    </div> 
 </section>
 <section id="trending_detail">
-    <div class="container">
+     <div class="container">
         <div class="row">
             <main class="col-md-12">
                 <header>
@@ -39,18 +39,18 @@
                 </article>
             </main>         
         </div>
-    </div>
+    </div> 
 </section>
 
 @code {
     [Parameter]
-    public long Id { get; set; }
+    public string slug { get; set; }
     private Product_Posts posts = new Product_Posts();
     private Banner banner = new Banner();
     protected async override Task OnInitializedAsync()
     {
-        posts = await sev.GetByIdType(Id, "page");  
-        banner = await bnser.GetBannerByProductPostId(Id);
+        posts = await sev.GetBySlugAndTypePage(slug, "page");
+        banner = await bnser.GetBannerByProductPostId(posts.Id);
     }
 
 }
