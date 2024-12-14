@@ -791,7 +791,7 @@
     {
         try
         {
-            var userInfo = await SessionStorage.GetItemAsStringAsync("User");
+            var userInfo = await SessionStorage.GetItemAsStringAsync("user");
 
             if (!string.IsNullOrEmpty(userInfo))
             {
@@ -838,7 +838,7 @@
 
     private async Task Logout()
     {
-        await SessionStorage.RemoveItemAsync("User");
+        await SessionStorage.RemoveItemAsync("user");
         isLoggedIn = false;
         users = new Users();
         navigation.NavigateTo("/");
