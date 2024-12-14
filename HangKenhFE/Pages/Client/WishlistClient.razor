@@ -20,9 +20,14 @@
 <section>
 
     <!-- Thông báo khi danh sách rỗng -->
-    @if (product_WL_list.Count == 0)
+    @if ( user == null )
     {
-        <div class="container mt-4">Danh sách của bạn hiện đang trống!</div>
+        <div class="container mt-4">Đăng nhập để xem thông tin </div>
+    }
+
+    else if (product_WL_list.Count == 0)
+    {
+        <div class="container mt-4">Danh sách yêu thích trống </div>
     }
     else
     {
@@ -36,12 +41,12 @@
                             <img src="@item.Product_Variants.Posts.Feature_image" alt="@item.Product_Variants.Posts.Title" class="img-thumbnail" style="width: 100px; height: auto; margin-right: 15px;">
                             <div>
                                 <h5 class="mb-1">@item.Product_Variants.Posts.Title</h5>
-                               
+
                                 @if (item.Product_Variants.MinPrice.HasValue && item.Product_Variants.MaxPrice.HasValue)
                                 {
                                     <p class="mb-1 text-muted">
-                                        Giá:   @string.Format("{0:N0}", item.Product_Variants?.MinPrice).Replace(".", ",") VNĐ -   @string.Format("{0:N0}", item.Product_Variants?.MaxPrice).Replace(".", ",") VNĐ                                     
-                                    </p>                                 
+                                        Giá:   @string.Format("{0:N0}", item.Product_Variants?.MinPrice).Replace(".", ",") VNĐ -   @string.Format("{0:N0}", item.Product_Variants?.MaxPrice).Replace(".", ",") VNĐ
+                                    </p>
                                 }
                                 else
                                 {
@@ -112,12 +117,21 @@
     {
         var wishlistDetails = await productvariantswishlist.GetAllPW();
         var wishlit = await wishlistServices.GetAll();
-        var wishlistUser = wishlit.Where(c => c.User_id == user.Id).FirstOrDefault();
-        if (wishlistUser == null)
+        if(user != null)
         {
-            return;
+            var wishlistUser = wishlit.Where(c => c.User_id == user.Id).FirstOrDefault();
+            if (wishlistUser == null)
+            {
+                return;
+            }
+            product_WL_list = wishlistDetails.Where(c => c.Wishlist_id == wishlistUser.Id).ToList();
         }
-        product_WL_list = wishlistDetails.Where(c => c.Wishlist_id == wishlistUser.Id).ToList();
+        else
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Đăng nhập để xem thông tin.");
+        }
+
+
     }
 
     private async Task DeleteFromWishlist(long id)
