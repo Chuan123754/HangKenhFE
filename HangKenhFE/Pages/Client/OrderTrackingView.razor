@@ -167,12 +167,25 @@
                 <div class="customer-info" style="flex: 1; padding-left: 20px;">
                     <div class="header-container" style="display: flex; justify-content: space-between; align-items: center;">
                         <h4 style="margin: 0;">Thông Tin Khách Hàng</h4>
-                        <button class="btn btn-warning" @onclick="OpenModalUpdateAddress">Thay đổi địa chỉ nhận hàng</button>
+                        @if (Order.Status == "Chờ xác nhận" || Order.Status == "Đã xác nhận" || Order.Status == "Đã thanh toán" || Order.Status == "Đã chuẩn bị hàng")
+                        {
+                            <button class="btn btn-warning" @onclick="OpenModalUpdateAddress">Thay đổi địa chỉ nhận hàng</button>
+                        }
+                        else if (Order.Status == "Đơn hủy")
+                        {
+                            <span style="color : red"> Đã hủy đơn</span>
+                        }
+                        else
+                        {
+                            <span> Đơn hàng đang trên đường giao tới bạn</span>
+                        }
+
                     </div>
                     @if (Order.Users != null)
                     {
                         <p><strong>Tên khách hàng: </strong>@Order.Users.Name</p>
                         <p><strong>Số điện thoại: </strong> @Order.Users.Phone</p>
+                        <p><strong>E-mail: </strong> @Order.Users.Email</p>
 
                         @if (Address != null)
                         {
@@ -323,6 +336,7 @@
             OrderTracking = await orderTrackingService.GetBy(OrderId);
             OrderAddress = await orderService.OrdersAddress(OrderId);
             Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
+            provinces = await address_Service.GetProvincesAsync();
 
             if (OrderTracking != null && OrderTracking.OrderTrackings.Any())
             {
@@ -469,9 +483,17 @@
         }
     }
 
+    private Address TempAddress;
+
     private async void OpenModalUpdateAddress()
     {
         Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
+        TempAddress = new Address // Tạo bản sao 
+            {
+                Province_city = Address.Province_city,
+                District = Address.District,
+                Ward_commune = Address.Ward_commune
+            };
         modalUpdateAddress = true;
         StateHasChanged();
     }
@@ -486,10 +508,22 @@
     {
         try
         {
-            bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thay đổi địa chỉ nhận hàng ?");
+            bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thay đổi địa chỉ nhận hàng?");
             if (confirmed)
             {
+                var province = provinces.FirstOrDefault(p => p.Id == TempAddress.Province_city);
+                var district = districts.FirstOrDefault(d => d.Id == TempAddress.District);
+                var ward = wards.FirstOrDefault(w => w.Id == TempAddress.Ward_commune);
+                Address.Province_city = province.Name;
+                Address.District = district?.Name;
+                Address.Ward_commune = ward?.Name;
+
+                Address.Street = Address.Street;
+                Address.Phone = Address.Phone;
+                Address.Name = Address.Name;
+
                 modalUpdateAddress = false;
+
                 await addressService.UpdateAddress(Address, Address.Id);
                 await JS.InvokeVoidAsync("toastr.success", "Cập nhật địa chỉ nhận hàng thành công");
                 StateHasChanged();
@@ -513,8 +547,7 @@
         var selectedProvinceId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedProvinceId))
         {
-            // Thiết lập tỉnh hiện tại và xóa các quận huyện, xã
-            Address.Province_city = selectedProvinceId;
+            TempAddress.Province_city = selectedProvinceId; 
             districts = await address_Service.GetDistrictsAsync(int.Parse(selectedProvinceId));
             hasDistricts = districts.Count > 0;
             wards.Clear();
@@ -526,7 +559,7 @@
         var selectedDistrictId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedDistrictId))
         {
-            Address.District = selectedDistrictId;
+            TempAddress.District = selectedDistrictId; 
             wards = await address_Service.GetWardsAsync(int.Parse(selectedDistrictId));
             hasWards = wards.Count > 0;
         }
@@ -536,7 +569,7 @@
         var selectedWardId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedWardId))
         {
-            Address.Ward_commune = selectedWardId;
+            TempAddress.Ward_commune = selectedWardId;
         }
     }
     // Các biến để bind vào form
