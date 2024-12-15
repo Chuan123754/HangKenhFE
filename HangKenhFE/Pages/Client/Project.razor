@@ -19,7 +19,7 @@
         <div class="nav-menu">
             @if (CategoriesList != null)
             {
-                @foreach (var category in CategoriesList)
+                @foreach (var category in CategoriesList.Take(10).ToList())
                 {
                     <div class="nav-menu-item @(category.Id == CateSelected?.Id ? "active" : "")">
                         <a class="nav-link" @onclick="() => OnCategorySelected(category)">
@@ -44,7 +44,7 @@
                             {
                                 <div class="@(post == postChunk.First() ? "project-main-block" : "project-sub-block")">
                                     <div class="@(post == postChunk.First() ? "project-main-block-image" : "project-sub-image")">
-                                        <a @onclick="() => NavDetails(post.Id)" class="w-100">
+                                        <a @onclick="() => NavDetails(post.Slug)" class="w-100">
                                             <img src="@post.Feature_image" 
                                                  alt="@post.Title " 
                                                  class="w-100 h-100 object-fit-cover" />
@@ -52,7 +52,7 @@
 
                                     </div>
                                     <div class="project-article-content">
-                                        <a @onclick="() => NavDetails(post.Id)">
+                                        <a @onclick="() => NavDetails(post.Slug)">
                                             <h3 class="project-article-title @(post == postChunk.First() ? "main-title" : "sub-title")">
                                                 @post.Title
                                             </h3>
@@ -145,9 +145,9 @@
             await LoadPosts();       // Tải lại bài viết cho danh mục đã chọn
         }
     }
-    private void NavDetails(long id)
+    private void NavDetails(string slug)
     {
-        nav.NavigateTo($"/project-detail/{id}");
+        nav.NavigateTo($"/project/{slug}");
     }
 }
 

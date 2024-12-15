@@ -78,7 +78,7 @@
 
                     <div class="row mt-48px">
                         <div class="col-6">
-                            <a @onclick="() => NavDetails(postsToShow[0].Id)" class="w-100">
+                            <a @onclick="() => NavDetails(postsToShow[0].Slug)" class="w-100">
                                 <div class="post-image">
                                     <div class="post-date-tag">
                                         @postsToShow[0].Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
@@ -91,7 +91,7 @@
                                     <span></span>
                                     @postsToShow[0].Post_categories.FirstOrDefault()?.Categories.Title
                                 </div>
-                                <a @onclick="() => NavDetails(postsToShow[0].Id)" class="w-100">
+                                <a @onclick="() => NavDetails(postsToShow[0].Slug)" class="w-100">
                                     <div class="post-big-title">@postsToShow[0].Title</div>
                                 </a>
                                 <div class="post-big-desc">
@@ -104,7 +104,7 @@
                                 @foreach (var post in postsToShow.Skip(1))
                                 {
                                     <div class="col mt-24px">
-                                        <a @onclick="() => NavDetails(post.Id)" class="w-100">
+                                        <a @onclick="() => NavDetails(post.Slug)" class="w-100">
                                             <div class="post-image">
                                                 <div class="post-date-tag">
                                                     @post.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
@@ -117,7 +117,7 @@
                                                 <span></span>
                                                 <span>@post.Post_categories.FirstOrDefault()?.Categories.Title</span>
                                             </div>
-                                            <a @onclick="() => NavDetails(post.Id)" class="w-100">
+                                            <a @onclick="() => NavDetails(post.Slug)" class="w-100">
                                                 <div class="post-title">@post.Title</div>
                                             </a>
                                             <div class="post-big-desc">
@@ -135,7 +135,7 @@
                     @foreach (var postlist in Posts_list.Skip(3))
                     {
                         <div class="col-6 mt-48px">
-                            <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
+                            <a @onclick="() => NavDetails(postlist.Slug)" class="w-100">
                                 <div class="post-image">
                                     <div class="post-date-tag">
                                         @postlist.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
@@ -151,7 +151,7 @@
                                     <span></span>
                                     <span>@postlist.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                 </div>
-                                <a @onclick="() => NavDetails(postlist.Id)" class="w-100">
+                                <a @onclick="() => NavDetails(postlist.Slug)" class="w-100">
                                     <div class="post-title">@postlist.Title</div>
                                 </a>
                                 <div class="post-desc mb-4">
@@ -242,9 +242,9 @@
         search_query = e.Value?.ToString() ?? string.Empty;
         await LoadPosts();
     }
-    private void NavDetails(long id)
+    private void NavDetails(string slug)
     {
-        nav.NavigateTo($"/blogs-details/{id}");
+        nav.NavigateTo($"/blogs/{slug}");
     }
     private string GetCleanText(string input)
     {

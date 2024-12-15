@@ -25,15 +25,15 @@ namespace HangKenhFE.Services
             return await _httpClient.GetFromJsonAsync<Designer>($"{_baseUrl}/api/Designer/{id}");
         }
 
-        public async Task<List<Designer>> GetByTypeAsync(int pageNumber, int pageSize, string searchTerm)
+        public async Task<List<Designer>> GetByTypeAsyncClient(int pageNumber, int pageSize, string searchTerm)
         {
-            var uri = $"{_baseUrl}/api/Designer/get-by-type?pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";
+            var uri = $"{_baseUrl}/api/Designer/get-by-type-client?pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";
             return await _httpClient.GetFromJsonAsync<List<Designer>>(uri);
         }
 
-        public async Task<int> GetTotalCountAsync(string searchTerm)
+        public async Task<int> GetTotalCountAsyncClient(string searchTerm)
         {
-            var url = $"{_baseUrl}/api/Designer/Get-Total-Count?searchTerm={Uri.EscapeDataString(searchTerm)}";
+            var url = $"{_baseUrl}/api/Designer/Get-Total-Count-Client?searchTerm={Uri.EscapeDataString(searchTerm)}";
 
             // Gọi API và nhận tổng số lượng bài viết
             var response = await _httpClient.GetAsync(url);

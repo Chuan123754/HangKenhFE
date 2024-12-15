@@ -7,7 +7,7 @@ namespace HangKenhFE.IServices
         Task<List<Designer>> GetAll();
         Task<Designer> GetById(long id);
 
-        Task<List<Designer>> GetByTypeAsync(int pageNumber, int pageSize, string searchTerm);
-        Task<int> GetTotalCountAsync(string searchTerm);
+        Task<List<Designer>> GetByTypeAsyncClient(int pageNumber, int pageSize, string searchTerm);
+        Task<int> GetTotalCountAsyncClient(string searchTerm);
     }
 }

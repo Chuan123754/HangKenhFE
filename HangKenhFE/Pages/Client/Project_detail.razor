@@ -1,4 +1,4 @@
-﻿@page "/project-detail/{id:long}"
+﻿@page "/project/{slug}"
 @inject IBannerServices bnser
 @inject ICategoriesServices sevcate
 @inject IPostSer sev
@@ -96,27 +96,50 @@
                         <div></div>
                     </div>
                 </div>
-                <div class="row pc">
-                    @* @if($products->isNotEmpty())
-                    @foreach($products as $product)
-                    <div class="col-3 product">
-                    @include('frontend.shortcodes.product_item', [
-                    'product' => $product
-                    ])
+                <div class="product-list">
+
+                    <div class="row product mt-48px">
+                        @foreach (var item in productVariant_list.Take(4).ToList())
+                        {
+                            <div class="col-12 col-lg-3 col-md-3 product">
+                                <figure class="card product-card">
+                                    <div class="product-image">
+                                        <a @onclick="() => NavDetailsProduct(item.Id)">
+                                            <div class="img-wrap">
+                                                <img src="@item.Posts?.Feature_image"
+                                                     style="height:403px !important" class="w-100 h-100 object-fit-cover"
+                                                     alt="">
+                                            </div>
+                                            <div class="img-wrap-hide">
+                                                <img src="@GetFirstImageUrl(item.Posts.Image_library)"
+                                                     style="height:403px !important" class="w-100 h-100 object-fit-cover"
+                                                     alt="">
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <figcaption class="product-info">
+                                        <a @onclick="() => NavDetailsProduct(item.Id)">
+                                            <a href="" class="product-name">@item.Posts.Title</a>
+                                        </a>
+                                        <div class="product-description">
+                                            <span class="description">@item.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
+                                        </div>
+                                        @if (item.MinPrice.HasValue && item.MaxPrice.HasValue)
+                                        {
+                                            <div class="product-price">
+                                                <span class="price">Giá: @item.MinPrice - @item.MaxPrice VND</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div>Chưa có giá</div>
+                                        }
+
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        }
                     </div>
-                    @endforeach
-                    @endif *@
-                </div>
-                <div class="phone product-list-phone slider">
-                    @*   @if($products->isNotEmpty())
-                    @foreach($products as $product)
-                    <article>
-                    @include('frontend.shortcodes.product_item', [
-                    'product' => $product
-                    ])
-                    </article>
-                    @endforeach
-                    @endif *@
                 </div>
             </div>
         </main>
@@ -126,17 +149,19 @@
 
 @code {
     [Parameter]
-    public long Id { get; set; }
+    public string slug { get; set; }
+    private List<Product_variants> productVariant_list = new List<Product_variants>();
     private Product_Posts posts_project = new Product_Posts();
     private List<Product_Posts> list_post = new List<Product_Posts>();
     private Banner banner = new Banner();
     private string abc = "";
     protected async override Task OnInitializedAsync()
     {
-        posts_project = await sev.GetByIdType(Id, "project");
+        posts_project = await sev.GetBySlugAndTypePage(slug, "project");
         abc = await sev.GetNameDesigner(posts_project.AuthorId??0);
-        banner = await bnser.GetBannerByProductPostId(Id);
-        list_post = await sev.GetCountByType("post", Id);
+        banner = await bnser.GetBannerByProductPostId(posts_project.Id);
+        list_post = await sev.GetCountByType("post", posts_project.Id);
+        productVariant_list = await sev.GetAllByClient();
     }
 
     private string GetFirstImageUrl(string imageUrls)
@@ -149,5 +174,8 @@
         var urls = imageUrls.Split(',');
         return urls.FirstOrDefault() ?? string.Empty;
     }
-  
+    private void NavDetailsProduct(long id)
+    {
+        nav.NavigateTo($"/product-detail/{id}");
+    }
 }
