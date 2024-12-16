@@ -1,10 +1,12 @@
 ﻿@page "/cart"
 @using BlazorBootstrap
+@using HangKenhFE.BackgroundServices
 @inject ICartDetailsService cartDetailsService
 @inject ICartService cartServices
 @inject IOrderIServices orderServices
 @inject OrderDetailsIServices orderDetailsServices
 @inject IOrderTrackingServices orderTrackingServices
+@inject EmailNotification email
 @inject IProductAttributeServies productAttributeServices
 @inject IProductVariantServices productVariantServices
 @inject IAddressServices addressServices
@@ -503,7 +505,6 @@
                                                         </div>
                                                         <div>
                                                             <button type="button" class="btn btn-primary" @onclick="ConfirmMomoPayment">Hoàn thành</button>
-                                                            <button class="btn btn-outline-primary" style="margin-left: 10px;" @onclick="() => DownloadInvoice(order.Id)">Xuất hóa đơn</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1083,6 +1084,7 @@
         lst_OrderDetail.Clear();
         isModalOrderVisiable = false;
         ClearInfoAddress();
+        selectedCartDetails.Clear();
 
         await LoadOrderDetails();
         await LoadCartDetails();
@@ -1143,6 +1145,7 @@
 
     private async Task ConfirmMomoPayment()
     {
+
         var updateitem = await orderServices.GetByIdOrders(order.Id);
         if (updateitem.Status == "Chờ xác nhận")
         {
@@ -1179,7 +1182,6 @@
         }
         else
         {
-            // Thông báo nếu trạng thái không hợp lệ
             await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng chưa được thanh toán");
         }
     }
@@ -1260,14 +1262,12 @@
             string typePay = "";
             if (paymentMethod == "momo")
             {
-
                 try
                 {
-                    // Tạo giao dịch MoMo
                     var momoResponse = await orderServices.CreateMomoPaymentUrl(user.Name, orderUpdate.Totalmoney ?? 0, $"Thanh toán hóa đơn {order.Id}");
                     if (!string.IsNullOrEmpty(momoResponse.PayUrl))
                     {
-                        // Hiển thị modal QR code MoMo
+
                         orderUpdate.TypePayment = "Chuyển khoản MoMo";
                         typePay = "Đã thanh toán";
                         ShowMomoModal(momoResponse.PayUrl);
@@ -1299,14 +1299,57 @@
                         OrderId = orderUpdate.Id,
                         Note = "",
                         Status = typePay,
-                        Created_at = DateTime.Now
+                        Created_at = DateTime.Now,
+                        Created_by=null
                     };
                 await orderTrackingServices.AddOrderTracking(newOrderTracking);
             }
+            if (orderUpdate.Status == "Chờ xác nhận")
+            {
+                var fileBytes = await orderServices.ExportInvoice(orderUpdate.Id);
+                var attachmentFileName = $"hoa_don_{orderUpdate.Id}.pdf";
+                var emailUser = user.Email;
+                string emailSubject = "YÊU CẦU ĐẶT HÀNG THÀNH CÔNG";
+                string emailMessage = $@"
+                                    <!DOCTYPE html>
+                                    <html>
+                                    <head>
+                                        <meta charset='utf-8'>
+                                        <title>{emailSubject}</title>
+                                    </head>
+                                    <body>
+                                        <h2>Yêu cầu đặt hàng thành công</h2>
+                                        <p>Xin chào {user.Name}. Cảm ơn bạn đã lựa chọn tin tưởng HangKenh. Yêu cầu đặt hàng đơn hàng {orderUpdate.Id} đã được gửi đi.</p>
+                                        <p>Thông tin đơn hàng của bạn:</p>
+                                        <ul>
+                                            <li><strong> ID đơn hàng:</strong> {orderUpdate.Id}</li>
+                                            <li><strong>Tổng tiền:</strong> {orderUpdate.Totalmoney} VNĐ</li>
+                                        </ul>
+                                        <p>Hãy theo dõi đơn hàng của bạn tại đại Website HANGKENH</p>
+                                        <p>Cảm ơn bạn đã chọn HangKenh!</p>
+                                        <p>Trân trọng,<br />Đội ngũ HangKenh</p>
+                                    </body>
+                                    </html>
+                                    ";
+
+                try
+                {
+                    await email.SendEmailAsync(emailUser, emailSubject, emailMessage);
+                    await JS.InvokeVoidAsync("toastr.success", "Hóa đơn đã được gửi qua email!");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi khi gửi hóa đơn qua email: {ex.Message}");
+                    await JS.InvokeVoidAsync("toastr.error", "Lỗi khi gửi hóa đơn qua email!");
+                }
+            }
+            await LoadOrderDetails();
+            await LoadCartDetails();
+            StateHasChanged();
+ 
+
         }
-        StateHasChanged();
-        await LoadOrderDetails();
-        await LoadCartDetails();
+ 
     }
     private async Task DownloadInvoice(long orderId)
     {
