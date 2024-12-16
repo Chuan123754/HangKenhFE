@@ -1,4 +1,5 @@
 ﻿using Blazored.SessionStorage;
+using HangKenhFE.BackgroundServices;
 using HangKenhFE.Data;
 using HangKenhFE.IServices;
 using HangKenhFE.Models;
@@ -64,6 +65,7 @@ builder.Services.AddScoped<ITextile_technologyServices, Textile_technologyServic
 builder.Services.AddScoped<ILoginService, LoginServices>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<AddressService>();
+builder.Services.AddScoped<EmailNotification>();
 builder.Services.AddScoped<IProductAttributeServies, ProductAttributeServices>();
 builder.Services.AddScoped<IProductVariantServices, ProductVariantServices>();
 builder.Services.AddScoped<OrderDetailsIServices, OrderDetailsServices>();
