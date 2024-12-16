@@ -9,6 +9,11 @@ namespace HangKenhFE.Models
         [Key]
         public long Id { get; set; }
         public long Product_variants_id { get; set; }
+        [NotMapped]
+        public long? MinPrice { get; set; }
+
+        [NotMapped]
+        public long? MaxPrice { get; set; }
         public long Wishlist_id { get; set; }
         [ForeignKey("Product_variants_id")]
         public virtual Product_variants? Product_Variants { get; set; }
