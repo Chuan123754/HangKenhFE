@@ -8,7 +8,6 @@
         </h1>
     </div>
 </section>
-<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
 <section class="introduce">
     <div class="container">
         <div class="row">
@@ -48,11 +47,7 @@
                         </div>
                     </div>
                     <div class="history-video">
-                        <video id="content_video" class="video-js vjs-default-skin"
-                               controls preload="auto" poster="main/assets/images/introduce-video.png">
-                            <source src="https://www.youtube.com/watch?v=BwkXhvkEqS8"
-                                    type="video/youtube" />
-                        </video>
+                        <img src="main/assets/images/introduce-video.png" />                 
                     </div>
                     <div class="history-manufacture">
                         <div class="history-manufacture-content">
@@ -205,10 +200,4 @@
         </div>
     </div>
 </section>
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-<script src="{{ asset('main/assets/js/Youtube.min.js') }}"></script>
-<script>
-    var player = videojs('content_video', {
-        autoplay: false
-    });
-</script>
+

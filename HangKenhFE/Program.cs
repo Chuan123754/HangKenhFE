@@ -76,6 +76,7 @@ builder.Services.AddServerSideBlazor(options => options.DetailedErrors = true);
 builder.Services.AddScoped<IContacServices, ContacServices>();
 builder.Services.AddScoped<IQaService, QaService>();
 
+
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddScoped<IWishlistServices, WishlistServices>();
