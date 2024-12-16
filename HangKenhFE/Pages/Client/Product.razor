@@ -50,70 +50,51 @@
                 <div class="product-details">
                     <h2 class="product-name-detail">@selectedProduct?.Product_Variant?.Posts?.Title</h2>
                     <p class="product-brand">THAM LEN HANGKENH</p>
-                        <div class="product-details-list">
-                            <div>
-                                <p>SẢN PHẨM</p>
-                                <p>@selectedProduct?.Product_Variant?.Posts?.Title</p>
-                            </div>
-                            <div>
-                                <p>CHẤT LIỆU</p>
-                                <p>@selectedProduct?.Product_Variant?.Material?.Title</p>
-                            </div>
-                            <div>
-                                <p>CÔNG NGHỆ DỆT</p>
-                                <p>@selectedProduct?.Product_Variant?.Textile_Technology?.Title</p>
-                            </div>
-                            <div>
-                                <p>PHONG CÁCH</p>
-                                <p>@selectedProduct?.Product_Variant?.Style?.Title</p>
-                            </div>
-                            <div>
-                                <p>MÔ TẢ</p>
-                                <p>@selectedProduct?.Product_Variant?.Description</p>
-                            </div>
-                        </div>
+                    <div class="product-price-rating">
                         <span class="product-price">
-                        @if (selectedProduct?.Sale_price != null && selectedProduct?.Sale_price > 0)
-                        {
-                            <div>
-                                <span style="text-decoration: line-through; color: gray;">
-                                    @string.Format("{0:N0}", selectedProduct?.Regular_price).Replace(".", ",") VNĐ
-                                </span>
-                            </div>
-                            <div>
-                                <span style="font-weight: bold; color: red;">
-                                    @string.Format("{0:N0}", selectedProduct?.Sale_price).Replace(".", ",") VNĐ
-                                </span>
-                            </div>
-                        }
-                        else
-                        {
-                            <div>
-                                <span>
-                                    @string.Format("{0:N0}", selectedProduct?.Regular_price).Replace(".", ",") VNĐ
-                                </span>
-                            </div>
-                        }
+                            @if (selectedProduct?.Sale_price != null && selectedProduct?.Sale_price > 0)
+                            {
+                                <div>
+                                    <span style="text-decoration: line-through; color: gray;">
+                                        @string.Format("{0:N0}", selectedProduct?.Regular_price).Replace(".", ",") VNĐ
+                                    </span>
+                                </div>
+                                <div>
+                                    <span style="font-weight: bold; color: red;">
+                                        @string.Format("{0:N0}", selectedProduct?.Sale_price).Replace(".", ",") VNĐ
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <span>
+                                        @string.Format("{0:N0}", selectedProduct?.Regular_price).Replace(".", ",") VNĐ
+                                    </span>
+                                </div>
+                            }
                         </span>
-                    <span class="product-price">  
-                      
-                        @if(selectedProduct?.Stock <= 0 || selectedProduct?.Stock == null)
+                    </div>
+                    <span class="product-price">
+
+                        @if (selectedProduct?.Stock <= 0 || selectedProduct?.Stock == null)
                         {
                             <span style="font-weight: bold; color: red;">
-                                <p>HẾT HÀNG</p>
+                                <p class="size-guide-link">HẾT HÀNG</p>
                             </span>
                         }
                         else
                         {
-                            <p>Số lượng trong kho : @selectedProduct.Stock</p>
+                            <span class="size-guide-link">Số lượng trong kho : @selectedProduct.Stock</span>
                         }
                     </span>
                     <div class="product-size-guide">
                         <span class="product-size-label">1. Chọn kích thước thảm</span>
+                        <a href="#" class="size-guide-link">Hướng dẫn chọn kích thước</a>
                     </div>
                     <div class="w-100 select-option">
                         <select class="product-size-selector w-100" @onchange="OnSizeChanged">
-                            @foreach (var size in lst_Size)
+                            @foreach (var size in productAttributes_List.GroupBy(p => p.Size_Id).Select(p => p.FirstOrDefault()).Select(p => p.Size))
                             {
                                 <option value="@size.Id">@size.Title</option>
                             }
@@ -121,39 +102,24 @@
                     </div>
                     <div class="product-color-guide">
                         <span class="product-color-label">2. Chọn màu sắc</span>
+                        <a href="#" class="size-guide-link">Hướng dẫn chọn màu sắc</a>
                     </div>
                     <div class="row product-color-select">
-                        @foreach (var color in lst_Color)
+                        @foreach (var color in productAttributes_List.GroupBy(p => p.Color_Id).Select(p => p.FirstOrDefault()).Select(p => p.Color))
                         {
-                            <div class="bg-element-filter bg-element-filter-image"
-                                 style="
-                                     display: flex;
-                                     gap: 8px;
-                                     cursor: pointer;
-                                     border: 2px solid @(selectedColorId == color.Id ? "blue" : "#ddd");
-                                     padding: 10px;
-                                     background-color: @(selectedColorId == color.Id ? "#f0f8ff" : "transparent");
-                                     border-radius: 5px;"
-                                     @onclick="() => OnColorChanged(color.Id)">
 
+                            <div class="bg-element-filter bg-element-filter-image @(selectedColorId == color.Id ? "active" : "")"
+                                 style="display: flex; gap: 8px; cursor: pointer;"
+                                 @onclick="() => OnColorChanged(color.Id)">
                                 <div class="color-preview"
-                                     style="
-                                             width: 24px;
-                                             height: 24px;
-                                             background-color: @color.Color_code;
-                                             border: 1px solid #ddd;">
+                                     style="width: 24px; height: 24px; background-color: @color.Color_code; border-radius: 50%; border: 1px solid #ddd;">
                                 </div>
-                                <span style="
-                                            line-height: 24px;
-                                            font-size: 14px;
-                                            text-align: center;
-                                            font-weight: @(selectedColorId == color.Id ? "bold" : "normal");">
-                                    @color.Title
-                                </span>
+                                <span style="line-height: 24px; font-size: 14px; text-align: center">@color.Title</span>
                             </div>
-                        }
-                    </div>
 
+                        }
+
+                    </div>
                     <div class="product-actions">
                         <button class="btn btn-dark btn-add-to-cart" @onclick="AddToCart">
                             <span class="add-to-cart-text">Thêm vào giỏ hàng</span>
@@ -163,16 +129,32 @@
                             <img src="main/assets/images/like.svg"
                                  class="like">
                         </span>
-                        <span class="product-detail-btn-zoom">
-                            <img src="main/assets/images/zoom.svg"
-                                 class="zoom">
-                        </span>
+                    
+                    </div>
+                    <div class="product-details-list">
+                        <div>
+                            <p>CHẤT LIỆU</p>
+                            <p>@selectedProduct?.Product_Variant?.Material?.Title</p>
+                        </div>
+                        <div>
+                            <p>CÔNG NGHỆ DỆT</p>
+                            <p>@selectedProduct?.Product_Variant?.Textile_Technology?.Title</p>
+                        </div>
+                        <div>
+                            <p>PHONG CÁCH</p>
+                            <p>@selectedProduct?.Product_Variant?.Style?.Title</p>
+                        </div>
+                        <div>
+                            <p>MÔ TẢ</p>
+                            <p>@selectedProduct?.Product_Variant?.Posts.Short_description</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 </section>
+
 <section class="product-detail">
     <div class="container">
         <div class="trending-box">
@@ -208,6 +190,27 @@
         </div>
     </div>
 </section>
+<section id="trending_detail">
+    <div class="container">
+        <div class="row">
+            <main class="col-md-12">
+
+                <article class="mt-40px">
+                    <header>
+
+                        <div class="product-details-list">
+                            @((MarkupString)selectedProduct?.Product_Variant?.Posts.Description)
+                        </div>
+
+                    </header>
+                </article>
+
+            </main>
+
+        </div>
+    </div>
+</section>
+
 <section class="relate-product">
     <div class="container">
         <div class="section-box">
@@ -226,39 +229,13 @@
                             <a @onclick="() => NavDetails(prod.Id)" class="w-100">
                                 <div class="img-wrap">
                                     <img src="@prod.Posts.Feature_image"
-                                         class="w-100 h-100 object-fit-cover">
+                                         style="height:403px !important" class="w-100 h-100 object-fit-cover">
                                 </div>
                                 <div class="img-wrap-hide">
                                     <img src="@GetFirstImageUrl(prod.Posts.Image_library)"
-                                         class="w-100 h-100 object-fit-cover">
+                                         style="height:403px !important" class="w-100 h-100 object-fit-cover">
                                 </div>
                             </a>
-                            <div class="product-action">
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_972)">
-                                            <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_972">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                                <a href="javascript:void(0)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                        <g clip-path="url(#clip0_1486_978)">
-                                            <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_1486_978">
-                                                <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </a>
-                            </div>
                         </div>
                         <figcaption class="product-info">
                             <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Posts.Title</a>
@@ -279,9 +256,6 @@
                                     }
                                 </span>
                             </div>
-                            <a class="btn-white btn-contract">
-                                <span>Liên hệ</span>
-                            </a>
                         </figcaption>
                     </figure>
                 </div>
@@ -329,13 +303,13 @@
         lst_Size = productAttributes_List
             .Where(p => p.Size != null)
             .Select(p => p.Size!)
-            .DistinctBy(size => size.Id) 
+            .DistinctBy(size => size.Id)
             .ToList();
 
         lst_Color = productAttributes_List
-            .Where(p => p.Size_Id == selectedSizeId && p.Color != null) 
-            .Select(p => p.Color!)       
-            .Distinct()                 
+            .Where(p => p.Size_Id == selectedSizeId && p.Color != null)
+            .Select(p => p.Color!)
+            .Distinct()
             .ToList();
 
         selectedProduct = productAttributes_List.First();
@@ -626,8 +600,8 @@
         }
 
         .bg-element-filter.active {
-            border: 1px solid #007bff; 
-            background-color: #e7f1ff; 
+            border: 1px solid #007bff;
+            background-color: #e7f1ff;
         }
 
 </style>

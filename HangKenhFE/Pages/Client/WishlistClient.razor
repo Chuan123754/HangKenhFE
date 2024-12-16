@@ -18,52 +18,77 @@
     </div>
 </section>
 <section>
-
     <!-- Thông báo khi danh sách rỗng -->
-    @if ( user == null )
+    @if (user == null)
     {
-        <div class="container mt-4">Đăng nhập để xem thông tin </div>
+        <div class="container mt-4">
+            Đăng nhập để xem thông tin
+        </div>
     }
-
     else if (product_WL_list.Count == 0)
     {
-        <div class="container mt-4">Danh sách yêu thích trống </div>
+        <div class="container mt-4">
+            Danh sách yêu thích trống
+        </div>
     }
     else
     {
         <div class="container mt-4">
-            <div class="list-group">
-                @for (int i = 0; i < product_WL_list.Count; i++)
-                {
-                    var item = product_WL_list[i];
-                    <div class="list-group-item d-flex align-items-center justify-content-between border-0 @(i < product_WL_list.Count - 1 ? "border-bottom" : "")">
-                        <div class="d-flex align-items-center">
-                            <img src="@item.Product_Variants.Posts.Feature_image" alt="@item.Product_Variants.Posts.Title" class="img-thumbnail" style="width: 100px; height: auto; margin-right: 15px;">
-                            <div>
-                                <h5 class="mb-1">@item.Product_Variants.Posts.Title</h5>
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th class="text-xl-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < product_WL_list.Count; i++)
+                    {
+                        var item = product_WL_list[i];
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@item.Product_Variants.Posts.Feature_image"
+                                         alt="@item.Product_Variants.Posts.Title"
+                                         class="img-thumbnail"
+                                         style="width: 100px; height: auto; margin-right: 15px;">
+                                    <div>
+                                        <h5 class="mb-1">@item.Product_Variants.Posts.Title</h5>
+                                        @if (item.MinPrice.HasValue && item.MaxPrice.HasValue)
+                                        {
+                                            <p class="mb-1 text-muted">
+                                                Giá: @string.Format("{0:N0}", item.MinPrice).Replace(".", ",") VNĐ -
+                                                @string.Format("{0:N0}", item.MaxPrice).Replace(".", ",") VNĐ
+                                            </p>
+                                        }
+                                        else
+                                        {
+                                            <div>Chưa có giá</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center align-middle">
 
-                                @if (item.Product_Variants.MinPrice.HasValue && item.Product_Variants.MaxPrice.HasValue)
-                                {
-                                    <p class="mb-1 text-muted">
-                                        Giá:   @string.Format("{0:N0}", item.Product_Variants?.MinPrice).Replace(".", ",") VNĐ -   @string.Format("{0:N0}", item.Product_Variants?.MaxPrice).Replace(".", ",") VNĐ
-                                    </p>
-                                }
-                                else
-                                {
-                                    <div>Chưa có giá</div>
-                                }
-                            </div>
-                        </div>
-                        <div>
-                            <button class="btn btn-success me-2" @onclick="() => MuaNgay(item.Product_variants_id)">Mua ngay</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteFromWishlist(item.Id)">Xóa</button>
-                        </div>
-                    </div>
-                }
-            </div>
+                                <button class="btn btn-sm btn-outline-success me-2"
+                                            @onclick="() => MuaNgay(item.Product_variants_id)">
+                                        Mua ngay
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            @onclick="() => DeleteFromWishlist(item.Id)">
+                                        Xóa
+                                    </button>
+                            
+                            
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 </section>
+
 
 @code {
     private Users user = new Users();
@@ -73,41 +98,34 @@
     {
         if (firstRender)
         {
-            var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
-
-            if (!string.IsNullOrEmpty(userJsonString))
-            {
-                try
-                {
-                    // Parse JSON để lấy giá trị id và roles
-                    var userData = JsonSerializer.Deserialize<Dictionary<string, object>>(userJsonString);
-
-                    if (userData != null)
-                    {
-                        // Lấy UserId
-                        if (userData.ContainsKey("Id") && long.TryParse(userData["Id"]?.ToString(), out long result))
-                        {
-                            user = await userServices.GetById(result);
-                        }
-                        else
-                        {
-                            user = null; // Nếu không tìm thấy hoặc parse không được, đặt user là null
-                        }
-                    }
-                }
-                catch (JsonException ex)
-                {
-                    Console.WriteLine($"Error parsing User JSON: {ex.Message}");
-                    user = null; // Nếu JSON không hợp lệ
-                }
-            }
-            else
-            {
-                user = null; // Nếu dữ liệu session trống
-            }
+            await InitializeUser();
+            await LoadWLP(); // Chỉ gọi LoadWLP sau khi user đã sẵn sàng
         }
     }
-
+    private async Task InitializeUser()
+    {
+        var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
+        if (!string.IsNullOrEmpty(userJsonString))
+        {
+            try
+            {
+                var userData = JsonSerializer.Deserialize<Dictionary<string, object>>(userJsonString);
+                if (userData != null && userData.ContainsKey("Id") && long.TryParse(userData["Id"]?.ToString(), out long result))
+                {
+                    user = await userServices.GetById(result);
+                }
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Error parsing User JSON: {ex.Message}");
+                user = null;
+            }
+        }
+        else
+        {
+            user = null;
+        }
+    }
     protected override async Task OnInitializedAsync()
     {
         await LoadWLP();
@@ -117,7 +135,7 @@
     {
         var wishlistDetails = await productvariantswishlist.GetAllPW();
         var wishlit = await wishlistServices.GetAll();
-        if(user != null)
+        if (user != null)
         {
             var wishlistUser = wishlit.Where(c => c.User_id == user.Id).FirstOrDefault();
             if (wishlistUser == null)
@@ -141,7 +159,7 @@
     }
     private void MuaNgay(long id)
     {
-        nav.NavigateTo($"/product-detail/{id}");  
+        nav.NavigateTo($"/product-detail/{id}");
     }
 
 }

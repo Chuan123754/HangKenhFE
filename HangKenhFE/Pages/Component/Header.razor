@@ -502,33 +502,136 @@
         <Modal IsModalOpen="ModalService.IsModalOpen" IsModalOpenChanged="HandleModalChange" />
         <div class="menu-dropdown collapse p-4 position-absolute w-100" id="dropdownMenu" style="z-index: 999">
             <div class="container">
-                <div class="d-flex" style="gap: 100px;">
-                    @foreach (var item in page_list)
-                    {
+
+                <div class="row">
+                    <div class="col-9 ">
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item in page_list.Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item.Slug)" class="title-sub-menu">@item.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                        <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item1 in page_list.Skip(4).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item1.Slug)" class="title-sub-menu">@item1.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                        <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item2 in page_list.Skip(8).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item2.Slug)" class="title-sub-menu">@item2.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                          <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item3 in page_list.Skip(12).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item3.Slug)" class="title-sub-menu">@item3.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                        <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item1 in page_list.Skip(16).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item1.Slug)" class="title-sub-menu">@item1.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                          <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item1 in page_list.Skip(20).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item1.Slug)" class="title-sub-menu">@item1.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                          <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item1 in page_list.Skip(24).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item1.Slug)" class="title-sub-menu">@item1.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                          <br />
+                        <div class="d-flex" style="gap: 100px;">
+                            @foreach (var item1 in page_list.Skip(28).Take(4).ToList())
+                            {
+                                <div class="col">
+                                    <ul>
+                                        <li>
+                                            <a @onclick="() => NavDetailsPage(item1.Slug)" class="title-sub-menu">@item1.Title</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                      
+                    </div>
+                    <div class="col-3 ">
                         <div class="col">
                             <ul>
                                 <li>
-                                    <a @onclick="() => NavDetailsPage(item.Slug)" class="title-sub-menu">@item.Title</a>
+                                    <img src="main/assets/images/van-phong-hn.jpg">
+                                </li>
+                                <li>
+                                    <div class="text-dark">Project by NTK Xuân Dũng</div>
+                                </li>
+                                <li>
+                                    <div>Photo: DucChuan</div>
                                 </li>
                             </ul>
                         </div>
-                    }
-                    <div class="col">
-                        <ul>
-                            <li>
-                                <img src="main/assets/images/van-phong-hn.jpg">
-                            </li>
-                            <li>
-                                <div class="text-dark">Project by NTK Xuân Dũng</div>
-                            </li>
-                            <li>
-                                <div>Photo: DucChuan</div>
-                            </li>
-                        </ul>
                     </div>
                 </div>
+
+
+
             </div>
         </div>
+
     </div>
     @*    @if(is_mobile()) *@
     <div class="nav phone nav-mobile">
@@ -845,8 +948,21 @@
     }
     private void NavDetailsPage(string slug)
     {
-        navigation.NavigateTo($"/{slug}");
+        navigation.NavigateTo($"/{slug}", forceLoad: true);
+        CloseMenu();
+    }
+    private async void CloseMenu()
+    {
+        await JS.InvokeVoidAsync("closeDropdownMenu");
     }
 }
 
+<script>
+    function closeDropdownMenu() {
+        const menu = document.getElementById('dropdownMenu');
+        if (menu) {
+            menu.classList.remove('show');
+        }
+    }
+</script>
 

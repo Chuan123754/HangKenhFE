@@ -13,7 +13,7 @@
                     <CarouselCaption>
                         <h2 class="banner-title " style="color:white">@banner.Title</h2>
                         <p class="banner-description " style="color:white">@banner.Short_description</p>
-                        <a @onclick="() => NavDetailsPost(banner.Id)">
+                        <a @onclick="() => NavDetailsPost(banner.Slug)">
                             <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
                                 <span>Xem thêm</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
@@ -33,7 +33,7 @@
                     <CarouselCaption>
                         <h2 class="banner-title" style="color:white; ">@bannersk1.Title</h2>
                         <p class="banner-description" style="color:white">@bannersk1.Short_description</p>
-                        <a @onclick="() => NavDetailsPost(bannersk1.Id)">
+                        <a @onclick="() => NavDetailsPost(bannersk1.Slug)">
                             <button class="btn-more mx-auto mt-12px" style="color:white;  border: 1px solid #ffffff !important">
                                 <span>Xem thêm</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
@@ -55,7 +55,7 @@
             @foreach (var pj in Secsion2_project_noibat3.Take(3).ToList())
             {
                 <div class="col-md-4 col-12">
-                    <a @onclick="() => NavDetailsProject(pj.Id)">
+                    <a @onclick="() => NavDetailsProject(pj.Slug)">
                         <div class="post-image">
                             <div class="post-date-tag">
                                 @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
@@ -70,7 +70,7 @@
                             <span></span>
                             <span>@pj.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                         </div>
-                        <a @onclick="() => NavDetailsProject(pj.Id)">
+                        <a @onclick="() => NavDetailsProject(pj.Slug)">
                             <div class="post-title">@pj.Title</div>
                         </a>
                         <div class="post-author">
@@ -154,12 +154,10 @@
     <div class="container">
         <div class="section-box">
             <div class="sub-title">
-                Loại thảm
+                Discover Our
             </div>
-            <h3 class="title">không gian & Dòng thảm</h3>
-            <div class="decoration">
-                <div></div>
-            </div>
+            <h3 class="title">Bestselling Rugs</h3>
+            <div class="text-underline"></div>
         </div>
         <div class="product-list">
 
@@ -172,41 +170,15 @@
                                 <a @onclick="() => NavDetailsProduct(item.Id)">
                                     <div class="img-wrap">
                                         <img src="@item.Posts?.Feature_image"
-                                             class="w-100 h-100 object-fit-cover"
+                                             style="height:403px !important" class="w-100 h-100 object-fit-cover"
                                              alt="">
                                     </div>
                                     <div class="img-wrap-hide">
                                         <img src="@GetFirstImageUrl(item.Posts.Image_library)"
-                                             class="w-100 h-100 object-fit-cover"
+                                             style="height:403px !important" class="w-100 h-100 object-fit-cover"
                                              alt="">
                                     </div>
-                                </a>
-                                <div class="product-action">
-                                    <a href="javascript:void(0)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                            <g clip-path="url(#clip0_1486_972)">
-                                                <path d="M14.8436 2.8202C14.0545 1.92477 12.9597 1.43164 11.761 1.43164C10.0751 1.43164 9.00777 2.43852 8.40927 3.2832C8.25399 3.50239 8.12189 3.72217 8.01099 3.92898C7.90008 3.72217 7.76802 3.50239 7.61271 3.2832C7.0142 2.43852 5.94686 1.43164 4.26099 1.43164C3.0623 1.43164 1.96752 1.9248 1.17833 2.82023C0.42558 3.67442 0.0109863 4.81842 0.0109863 6.04148C0.0109863 7.37283 0.530768 8.61111 1.64677 9.93836C2.64417 11.1246 4.07908 12.3474 5.74067 13.7633C6.35983 14.2909 7.00011 14.8365 7.68177 15.4329L7.70224 15.4509C7.79061 15.5282 7.9008 15.5669 8.01099 15.5669C8.12117 15.5669 8.23136 15.5282 8.31974 15.4509L8.34021 15.4329C9.02186 14.8365 9.66214 14.2909 10.2814 13.7632C11.9429 12.3474 13.3778 11.1246 14.3752 9.93836C15.4912 8.61108 16.011 7.37283 16.011 6.04148C16.011 4.81842 15.5964 3.67442 14.8436 2.8202ZM9.67327 13.0497C9.13952 13.5045 8.59021 13.9726 8.01099 14.4761C7.4318 13.9727 6.88245 13.5045 6.34861 13.0496C3.09677 10.2786 0.948486 8.44795 0.948486 6.04148C0.948486 5.0468 1.27989 4.12292 1.88167 3.44008C2.49036 2.74948 3.33533 2.36914 4.26099 2.36914C5.54627 2.36914 6.37711 3.16095 6.84774 3.8252C7.26989 4.42095 7.49017 5.02152 7.5653 5.25205C7.62814 5.44502 7.80805 5.57561 8.01099 5.57561C8.21392 5.57561 8.39383 5.44502 8.45667 5.25205C8.5318 5.02152 8.75208 4.42095 9.17424 3.82517C9.64486 3.16095 10.4757 2.36914 11.761 2.36914C12.6866 2.36914 13.5316 2.74948 14.1403 3.44008C14.7421 4.12292 15.0735 5.0468 15.0735 6.04148C15.0735 8.44795 12.9252 10.2786 9.67327 13.0497Z" fill="#242424" />
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip0_1486_972">
-                                                    <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                    </a>
-                                    <a href="javascript:void(0)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-                                            <g clip-path="url(#clip0_1486_978)">
-                                                <path d="M15.8178 15.4381L11.913 11.5334C12.8836 10.3662 13.4683 8.86744 13.4683 7.23438C13.4683 3.52103 10.4474 0.5 6.73421 0.5C3.02094 0.5 0 3.52103 0 7.23438C0 10.9475 3.02094 13.9683 6.73421 13.9683C8.36718 13.9683 9.86604 13.3836 11.0332 12.413L14.9381 16.3178C15.0595 16.4393 15.2188 16.5 15.3779 16.5C15.5371 16.5 15.6963 16.4393 15.8178 16.3178C16.0608 16.0748 16.0608 15.681 15.8178 15.4381ZM1.24414 7.23438C1.24414 4.20705 3.70696 1.74414 6.73421 1.74414C9.76137 1.74414 12.2241 4.20705 12.2241 7.23438C12.2241 10.2615 9.76137 12.7241 6.73421 12.7241C3.70696 12.7241 1.24414 10.2615 1.24414 7.23438Z" fill="#242424" />
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip0_1486_978">
-                                                    <rect width="16" height="16" fill="white" transform="translate(0 0.5)" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                    </a>
-                                </div>
+                                </a>                              
                             </div>
                             <figcaption class="product-info">
                                 <a @onclick="() => NavDetailsProduct(item.Id)">
@@ -225,10 +197,7 @@
                                 {
                                     <div>Chưa có giá</div>
                                 }
-                                <a onclick="showSidebar('sidebar-filter-category')"
-                                   class="btn-white btn-contract btn-contract-mobile">
-                                    <div>Liên hệ</div>
-                                </a>
+                              
                             </figcaption>
                         </figure>
                     </div>
@@ -368,7 +337,7 @@
                         <div class="article-description">
                             @item1.Short_description
                         </div>
-                        <a @onclick="() => NavDetailsProject(item1.Id)">
+                        <a @onclick="() => NavDetailsProject(item1.Slug)">
                             <button class="btn-more">
                                 <span>Xem thêm</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
@@ -392,7 +361,7 @@
                                 <div class="article-description">
                                     @item2.Short_description
                                 </div>
-                                <a @onclick="() => NavDetailsProject(item2.Id)">
+                                <a @onclick="() => NavDetailsProject(item2.Slug)">
                                     <button class="btn-more">
                                         <span>Xem thêm</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
@@ -414,7 +383,7 @@
                                 <div class="article-description">
                                     @item3.Short_description
                                 </div>
-                                <a @onclick="() => NavDetailsProject(item3.Id)">
+                                <a @onclick="() => NavDetailsProject(item3.Slug)">
                                     <button class="btn-more">
                                         <span>Xem thêm</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 23 21"
@@ -447,7 +416,7 @@
             @foreach (var pj in product_posts_list.Take(3).ToList())
             {
                 <div class="col-md-4 col-12">
-                    <a @onclick="() => NavDetailsProject(pj.Id)">
+                    <a @onclick="() => NavDetailsProject(pj.Slug)">
                         <div class="post-image">
                             <div class="post-date-tag">
                                 @pj.Created_at?.ToString("dd/MM/yyyy HH:mm:ss")
@@ -460,7 +429,7 @@
                             <span></span>
                             <span>@pj.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                         </div>
-                        <a @onclick="() => NavDetailsProject(pj.Id)">
+                        <a @onclick="() => NavDetailsProject(pj.Slug)">
                             <div class="post-title">@pj.Title</div>
                         </a>
                         <div class="post-author">
@@ -492,7 +461,7 @@
                             <div class="post-big-short-desc">
                                 @item.Short_description
                             </div>
-                            <a @onclick="() => NavDetailsPost(item.Id)">
+                            <a @onclick="() => NavDetailsPost(item.Slug)">
                                 <button class="btn-more mx-auto mt-12px">
                                     <span>Xem thêm</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20"
@@ -510,7 +479,7 @@
                 @foreach (var it in Secsion5_post_quytrinh.Take(5).Skip(1).ToList())
                 {
                     <div class="d-flex align-items-center border-custom">
-                        <a @onclick="() => NavDetailsPost(it.Id)">
+                        <a @onclick="() => NavDetailsPost(it.Slug)">
                             <div class="f-image">
                                 <img src="@it.Feature_image"
                                      class="w-100 h-100"
@@ -518,7 +487,7 @@
                             </div>
                         </a>
                         <div class="px-4">
-                            <a @onclick="() => NavDetailsPost(it.Id)">
+                            <a @onclick="() => NavDetailsPost(it.Slug)">
                                 <h4 class="post-right-title">@it.Title</h4>
                             </a>
                             <p class="post-right-desc">
@@ -587,12 +556,12 @@
     {
         nav.NavigateTo($"/product-detail/{id}");
     }
-    private void NavDetailsPost(long id)
+    private void NavDetailsPost(string slug)
     {
-        nav.NavigateTo($"/blogs-details/{id}");
+        nav.NavigateTo($"/blogs/{slug}");
     }
-    private void NavDetailsProject(long id)
+    private void NavDetailsProject(string slug)
     {
-        nav.NavigateTo($"/project-detail/{id}");
+        nav.NavigateTo($"/project/{slug}");
     }
 }
