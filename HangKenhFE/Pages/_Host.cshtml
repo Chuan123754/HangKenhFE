@@ -4,7 +4,7 @@
 @{
     Layout = "_Layout";
 }
-<component type="typeof(App)" render-mode="ServerPrerendered" prerender-context="prerendering" />
+<component type="typeof(App)" render-mode="Server" />
 <script>
     window.downloadFileFromStream = async (fileName, contentStreamReference) => {
         const arrayBuffer = await contentStreamReference.arrayBuffer();
@@ -18,4 +18,5 @@
         URL.revokeObjectURL(url);
     };
 </script>
+
 
