@@ -5,6 +5,7 @@
 @inject OrderDetailsIServices orderDetailService
 @inject IOrderTrackingServices orderTrackingService
 @inject IAddressServices addressService
+@inject IAccountService accountService
 @inject IUserService userService
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
@@ -64,7 +65,16 @@
                                 <td>@OrderTracking.TypePayment</td>
                                 <td><span class="@GetStatusClass(tracking.Status)">@tracking.Status</span></td>
                                 <td>@tracking.Note</td>
-                                <td>@OrderTracking.SellerName</td>
+                                 <td>
+                                    @if (@tracking.CreateBy != null)
+                                    {
+                                        @tracking.CreateBy
+                                    }
+                                    else
+                                    {
+                                        <span> Hệ thống</span>
+                                    }                         
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -167,17 +177,24 @@
                 <div class="customer-info" style="flex: 1; padding-left: 20px;">
                     <div class="header-container" style="display: flex; justify-content: space-between; align-items: center;">
                         <h4 style="margin: 0;">Thông Tin Khách Hàng</h4>
-                        @if (Order.Status == "Chờ xác nhận" || Order.Status == "Đã xác nhận" || Order.Status == "Đã thanh toán" || Order.Status == "Đã chuẩn bị hàng")
+                        @if(Order.Address_Id != null )
                         {
-                            <button class="btn btn-warning" @onclick="OpenModalUpdateAddress">Thay đổi địa chỉ nhận hàng</button>
-                        }
-                        else if (Order.Status == "Đơn hủy")
-                        {
-                            <span style="color : red"> Đã hủy đơn</span>
+                            @if (Order.Status == "Chờ xác nhận" || Order.Status == "Đã xác nhận" || Order.Status == "Đã thanh toán" || Order.Status == "Đã chuẩn bị hàng")
+                            {
+                                <button class="btn btn-warning" @onclick="OpenModalUpdateAddress">Thay đổi địa chỉ nhận hàng</button>
+                            }
+                            else if (Order.Status == "Đơn hủy")
+                            {
+                                <span style="color : red"> Đã hủy đơn</span>
+                            }
+                            else
+                            {
+                                <span> Đơn hàng đang trên đường giao tới bạn</span>
+                            }
                         }
                         else
                         {
-                            <span> Đơn hàng đang trên đường giao tới bạn</span>
+                            <span> Đơn hàng được bán tại cửa hàng</span>
                         }
 
                     </div>
@@ -320,6 +337,7 @@
     private Orders? Order { get; set; }
     private Orders? OrderAddress { get; set; }
     private Address Address = new Address();
+    private Account admin = new Account();
     private long selectedTrackingId;
     private bool modalCacelOrder = false;
     private string reasonCancel;
@@ -330,8 +348,7 @@
     protected override async Task OnInitializedAsync()
     {
         try
-        {
-
+        {                     
             Order = await orderService.GetByIdOrders(OrderId);
             OrderTracking = await orderTrackingService.GetBy(OrderId);
             OrderAddress = await orderService.OrdersAddress(OrderId);
@@ -353,7 +370,12 @@
                 OrderTracking.Status = null;
                 selectedTrackingId = 0;
             }
-
+            Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
+            else
+            {
+                admin = null;
+            }
+     
             StateHasChanged();
         }
         catch (Exception ex)

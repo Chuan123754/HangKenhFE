@@ -1,7 +1,10 @@
 ﻿@page "/user/UserDetails/{userId:long}"
 @inject IUserService UserService
+﻿@using Microsoft.AspNetCore.Identity
+@using Newtonsoft.Json
 @inject NavigationManager Navigation
 @inject AddressService address_Service
+@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 
 <h3>Chi tiết Người dùng</h3>
 
@@ -165,6 +168,8 @@ else
             existingUser.Updated_at = DateTime.Now;
 
             await UserService.Update(existingUser);
+
+            await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(existingUser));
 
             // Xóa bản ghi hiện tại sau khi cập nhật bản ghi tìm thấy
             await UserService.Delete(user.Id);

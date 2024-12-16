@@ -1275,7 +1275,8 @@
                         OrderId = orderUpdate.Id,
                         Note = "",
                         Status = typePay,
-                        Created_at = DateTime.Now
+                        Created_at = DateTime.Now,
+                        Created_by=null
                     };
                 await orderTrackingServices.AddOrderTracking(newOrderTracking);
             }
