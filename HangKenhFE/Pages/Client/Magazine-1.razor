@@ -41,16 +41,38 @@
         </div>
     </div> 
 </section>
-
 @code {
     [Parameter]
     public string slug { get; set; }
+
     private Product_Posts posts = new Product_Posts();
     private Banner banner = new Banner();
+
     protected async override Task OnInitializedAsync()
     {
-        posts = await sev.GetBySlugAndTypePage(slug, "page");
-        banner = await bnser.GetBannerByProductPostId(posts.Id);
+        await LoadPosts();
     }
 
+    protected async override Task OnParametersSetAsync()
+    {
+        await LoadPosts(); 
+    }
+
+    private async Task LoadPosts()
+    {
+        if (!string.IsNullOrEmpty(slug))
+        {
+            posts = await sev.GetBySlugAndTypePage(slug, "page");
+            if (posts != null)
+            {
+                banner = await bnser.GetBannerByProductPostId(posts.Id);
+            }
+        }
+        else
+        {
+            posts = new Product_Posts();
+            banner = new Banner();
+        }
+        StateHasChanged(); // Làm mới giao diện
+    }
 }
