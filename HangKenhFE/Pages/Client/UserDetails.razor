@@ -51,43 +51,6 @@ else
             <label for="Email">Email</label>
             <InputText id="Email" class="form-control" @bind-Value="user.Email" Disabled="true" />
         </div>
-
-        <div class="form-group">
-            <label for="Address">Chọn Địa chỉ</label>
-            <select class="form-control" @onchange="OnProvinceChange">
-                <option value="">Chọn tỉnh/thành phố</option>
-                @foreach (var province in provinces)
-                {
-                    <option value="@province.Id">@province.Name</option>
-                }
-            </select>
-            @if (hasDistricts)
-            {
-                <select class="form-control mt-2" @onchange="OnDistrictChange">
-                    <option value="">Chọn quận/huyện</option>
-                    @foreach (var district in districts)
-                    {
-                        <option value="@district.Id">@district.Name</option>
-                    }
-                </select>
-            }
-            @if (hasWards)
-            {
-                <select class="form-control mt-2" @onchange="OnWardChange">
-                    <option value="">Chọn phường/xã</option>
-                    @foreach (var ward in wards)
-                    {
-                        <option value="@ward.Id">@ward.Name</option>
-                    }
-                </select>
-            }
-        </div>
-
-        <div class="form-group">
-            <label for="Street">Địa chỉ cụ thể</label>
-            <InputText id="Street" class="form-control" @bind-Value="address.Street" />
-        </div>
-
         <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
     </EditForm>
 
@@ -117,14 +80,6 @@ else
     private DateTime? otpExpiryTime;
     private string otpError;
 
-
-    private List<Province> provinces = new List<Province>();
-    private List<Districted> districts = new List<Districted>();
-    private List<Ward> wards = new List<Ward>();
-    private Address address = new Address();
-    private bool hasDistricts = false;
-    private bool hasWards = false;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -135,45 +90,12 @@ else
                 errorMessage = "Người dùng không tồn tại.";
                 Navigation.NavigateTo("/");
             }
-            provinces = await address_Service.GetProvincesAsync();
+
 
         }
         catch (Exception ex)
         {
             errorMessage = $"Lỗi: {ex.Message}";
-        }
-    }
-
-    private async Task OnProvinceChange(ChangeEventArgs e)
-    {
-        var selectedProvinceId = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(selectedProvinceId))
-        {
-            address.Province_city = selectedProvinceId;
-            districts = await address_Service.GetDistrictsAsync(int.Parse(selectedProvinceId));
-            hasDistricts = districts.Count > 0;
-            wards.Clear();
-            hasWards = false;
-        }
-    }
-
-    private async Task OnDistrictChange(ChangeEventArgs e)
-    {
-        var selectedDistrictId = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(selectedDistrictId))
-        {
-            address.District = selectedDistrictId;
-            wards = await address_Service.GetWardsAsync(int.Parse(selectedDistrictId));
-            hasWards = wards.Count > 0;
-        }
-    }
-
-    private async Task OnWardChange(ChangeEventArgs e)
-    {
-        var selectedWardId = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(selectedWardId))
-        {
-            address.Ward_commune = selectedWardId;
         }
     }
 
@@ -261,35 +183,22 @@ else
 
     private async Task HandleSubmit()
     {
-        if (otpSent)
-        {
-            otpError = "Vui lòng xác nhận OTP trước khi lưu thông tin.";
-            return;
-        }
-
-        if (string.IsNullOrEmpty(address.Province_city) || string.IsNullOrEmpty(address.District) || string.IsNullOrEmpty(address.Ward_commune))
-        {
-            errorMessage = "Vui lòng nhập đầy đủ thông tin địa chỉ trước khi lưu.";
-            return;
-        }
 
         try
         {
-            address.User_Id = user.Id;
-            var createdAddress = await address_Service.CreateAddressAndReturn(address);
-            if (createdAddress != null)
+            if (otpSent == true)
             {
-                user.Address = createdAddress.Id.ToString();
-                await UserService.Update(user);
-                message = "Lưu thay đổi thành công!";
-                Navigation.NavigateTo("/");
+                otpError = "Vui lòng xác nhận OTP trước khi lưu thông tin.";
+                return;
             }
             else
             {
-                errorMessage = "Không thể tạo địa chỉ mới.";
+                await UserService.Update(user);
+                message = "Lưu thay đổi thành công!";
+                Navigation.NavigateTo("/");
+                StateHasChanged();
             }
 
-            StateHasChanged();
         }
         catch (Exception ex)
         {

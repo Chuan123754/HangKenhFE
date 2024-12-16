@@ -54,18 +54,6 @@
                 <div class="col">
                     <h2 class="page-title">DANH SÁCH ĐƠN HÀNG</h2>
                 </div>
-                <div class="col-auto ms-auto d-print-none ms-4">
-                    <div class="btn-list">
-                        <button class="btn btn-outline-primary d-none d-sm-inline-block" @onclick="NavigateToSell">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M12 5l0 14" />
-                                <path d="M5 12l14 0" />
-                            </svg>
-                            Tạo đơn hàng mới
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -82,20 +70,11 @@
                                class="form-control flex-grow-1"
                                @bind="searchText"
                                @oninput="SearchOrders"
-                               placeholder="Nhập Id đơn hàng, tên khách hàng hoặc số điện thoại" />
-                        <button type="button" class="btn btn-outline-primary">
-                            Tìm kiếm
-                        </button>
+                               placeholder="Nhập Id đơn hàng" />
                     </div>
                 </div>
                 <div class="col-12">
                     <div class="card">
-                        <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
-                            <input type="date" id="startDate" @bind="startDate" class="form-control" placeholder="Ngày bắt đầu" style="max-width: 200px;" />
-                            <input type="date" id="endDate" @bind="endDate" class="form-control" placeholder="Ngày kết thúc" style="max-width: 200px;" />
-                            <button class="btn btn-primary" @onclick="FilterByDateRange">Lọc theo thời gian</button>
-                        </div>
-
                         <div class="table-responsive">
                             <div class="search-box d-flex align-items-center justify-content-between mb-3">
                             </div>
@@ -103,12 +82,10 @@
                                 <thead>
                                     <tr>
                                         <th>Id đơn hàng</th>
-                                        <th>Người tạo</th>
                                         <th>Tên khách hàng</th>
                                         <th>Số điện thoại</th>
-                                        <th>Loại hóa đơn</th>
                                         <th>Tổng tiền</th>
-                                        <th>Ngày tạo</th>
+                                        <th>Ngày đặt hàng</th>
                                         <th>Trạng thái</th>
                                         <th>Action</th>
                                     </tr>
@@ -121,17 +98,6 @@
                                         {
                                             <tr>
                                                 <td>@item.Id</td>
-                                                <td>
-                                                    @if (item.CreatedByAdminId == null)
-                                                    {
-                                                        <span>Hệ thống</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        @(item.Admin.FirstName + " " + item.Admin.LastName)
-                                                    }
-
-                                                </td>
                                                 <td>
                                                     @if (item.Users == null)
                                                     {
@@ -151,11 +117,6 @@
                                                     {
                                                         @item.Users.Phone
                                                     }
-                                                </td>
-                                                <td>
-                                                    <span class="@GetNoteClass(item.Note)">
-                                                        @item.Note
-                                                    </span>
                                                 </td>
 
                                                 <td>
@@ -221,6 +182,24 @@
 
     private long? ParsedUserId;
 
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GetUserIdFromSession();
+
+            // Nếu không bị chuyển hướng, tiếp tục tải danh sách đơn hàng
+            if (ParsedUserId != null)
+            {
+                await LoadOrders();
+                await ListOrder();
+                LoadPagedOrders();
+                StateHasChanged(); // Cập nhật giao diện
+            }
+        }
+    }
+    
     private async Task GetUserIdFromSession()
     {
         var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
@@ -241,7 +220,7 @@
                     }
                     else
                     {
-                        ParsedUserId = null; // Nếu không tìm thấy userId hoặc không parse được
+                        ParsedUserId = null; 
                     }
 
                     
@@ -250,29 +229,15 @@
             catch (JsonException ex)
             {
                 Console.WriteLine($"Error parsing User JSON: {ex.Message}");
-                ParsedUserId = null; // Nếu JSON không hợp lệ
+                ParsedUserId = null;
             }
         }
         else
         {
-            ParsedUserId = null; // Nếu dữ liệu session trống
+            ParsedUserId = null; 
         }
     }
 
-
-
-    private string GetNoteClass(string note)
-    {
-        if (note == "Tại quầy")
-        {
-            return "badge bg-taiquay";
-        }
-        else if (note == "Giao hàng")
-        {
-            return "badge bg-giaohang";
-        }
-        return "badge bg-secondary";
-    }
     private void LoadPagedOrders()
     {
         totalPages = (int)Math.Ceiling((double)lst_Orders.Count / pageSize);
@@ -304,10 +269,7 @@
         }
         return "badge bg-secondary";
     }
-    private void NavigateToSell()
-    {
-        nav.NavigateTo("/admin/sell");
-    }
+
 
     private async Task LoadOrders()
     {
@@ -321,9 +283,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await GetUserIdFromSession();
-
-        // Nếu không bị chuyển hướng, tiếp tục tải danh sách đơn hàng
         if (ParsedUserId != null)
         {
             await LoadOrders();
@@ -365,76 +324,8 @@
         successfulOrders = lst_Orders.Count(o => o.Status == "Giao thành công");
         canceledOrders = lst_Orders.Count(o => o.Status == "Đã hủy");
 
-        // Phân trang danh sách đơn hàng
         LoadPagedOrders();
     }
-
-
-
-    private async Task FilterByDateRange()
-    {
-        lst_Orders = await orderService.GetAll() ?? new List<Orders>();
-
-        if (startDate.HasValue && endDate.HasValue)
-        {
-            lst_Orders = lst_Orders
-                .Where(o => o.Created_at >= startDate.Value && o.Created_at <= endDate.Value)
-                .ToList();
-        }
-
-        currentPage = 1;
-        LoadPagedOrders();
-    }
-
-
-    // private async Task GetPendingOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Chờ xác nhận").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetConfirmOrder()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Đã xác nhận").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetPreparedOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Đã chuẩn bị hàng").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetPickedOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Đã lấy hàng").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetShippingOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Đang vận chuyển").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetFailedOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Giao thất bại").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetSuccessfulOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Giao thành công").ToList();
-    //     LoadPagedOrders();
-    // }
-    // private async Task GetCanceledOrders()
-    // {
-    //     var lstOrders = await orderService.GetAll();
-    //     lst_Orders = lstOrders.Where(o => o.Status == "Đã hủy").ToList();
-    //     LoadPagedOrders();
-    // }
 
     private async Task SearchOrders(ChangeEventArgs e)
     {
@@ -446,22 +337,10 @@
         {
             await ListOrder();
         }
-        else if (searchText.Length == 10 && searchText.All(char.IsDigit))
-        {
-            lst_Orders = lst_Orders
-                .Where(o => o.Users?.Phone == searchText)
-                .ToList();
-        }
         else if (int.TryParse(searchText, out int searchId))
         {
             lst_Orders = lst_Orders
                 .Where(o => o.Id == searchId)
-                .ToList();
-        }
-        else
-        {
-            lst_Orders = lst_Orders
-                .Where(o => o.Users?.Name?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
                 .ToList();
         }
 

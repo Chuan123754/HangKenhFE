@@ -324,8 +324,8 @@
                     <h3>Đăng nhập</h3>
                     <form @onsubmit="HandleLoginAsync">
                         <p class="message">@loginMessage</p> <!-- Thông báo đăng nhập -->
-                        <label for="username">Tên đăng nhập hoặc email *</label>
-                        <input type="text" @bind="loginModel.Username" id="username" placeholder="Tên đăng nhập hoặc email" required>
+                        <label for="username">Nhập email của bạn *</label>
+                        <input type="text" @bind="loginModel.Username" id="username" placeholder="Nhập email" required>
 
                         <label for="password">Mật khẩu *</label>
                         <input type="password" @bind="loginModel.Password" id="password" placeholder="Mật khẩu" required>
@@ -348,8 +348,8 @@
                     <h3>Đăng ký</h3>
                     <form @onsubmit="HandleRegisterAsync">
                         <p class="message">@registerMessage</p> <!-- Thông báo đăng ký -->
-                        <label for="reg_uname">Tên đăng nhập *</label>
-                        <input type="text" @bind="registerModel.Username" id="reg_uname" placeholder="Nhập tên đăng nhập" required>
+                        <label for="reg_uname">Họ và tên *</label>
+                        <input type="text" @bind="registerModel.Username" id="reg_uname" placeholder="Họ và tên" required>
 
                         <label for="reg_email">Email *</label>
                         <input type="email" @bind="registerModel.Email" id="reg_email" placeholder="Nhập e-mail" required>
@@ -800,7 +800,7 @@
             var newUser = new Users
                 {
                     Name = registerModel.Username,
-                    Phone = "0123456789",
+                    Phone = "",
                     Email = registerModel.Email,
                     Password = registerModel.Password,
                     Address = "Nothing",
