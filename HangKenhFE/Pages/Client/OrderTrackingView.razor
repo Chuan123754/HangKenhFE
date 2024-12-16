@@ -370,11 +370,6 @@
                 OrderTracking.Status = null;
                 selectedTrackingId = 0;
             }
-            Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
-            else
-            {
-                admin = null;
-            }
      
             StateHasChanged();
         }
