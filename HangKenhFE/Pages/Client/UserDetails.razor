@@ -1,71 +1,77 @@
-﻿@page "/user/UserDetails/{userId:long}"
+﻿@page "/admin/UserDetails/{userId:long}"
 @inject IUserService UserService
-﻿@using Microsoft.AspNetCore.Identity
-@using Newtonsoft.Json
 @inject NavigationManager Navigation
 @inject AddressService address_Service
-@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
+@inject IJSRuntime JSRuntime
 
-<h3>Chi tiết Người dùng</h3>
+<h3 class="text-center">Chi tiết Người dùng</h3>
 
 @if (user == null)
 {
-    <p>Đang tải thông tin người dùng...</p>
+    <p class="text-center">Đang tải thông tin người dùng...</p>
 }
 else
 {
-    <EditForm Model="@user" OnValidSubmit="HandleSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="card shadow-lg" style="width: 50%; border-radius: 10px;">
+            <div class="card-body">
+                <EditForm Model="@user" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-        <div class="form-group">
-            <label for="Name">Tên</label>
-            <InputText id="Name" class="form-control" @bind-Value="user.Name" Disabled="@user.OTPCheck" />
+                    <div class="form-group mb-3">
+                        <label for="Name">Tên</label>
+                        <InputText id="Name" class="form-control" @bind-Value="user.Name" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="Phone">Số điện thoại</label>
+                        <InputText id="Phone" class="form-control" @bind-Value="user.Phone" Disabled="@(user.OTPCheck || otpSent)" />
+                        @if (!user.OTPCheck)
+                        {
+                            <button type="button" class="btn btn-secondary mt-2" @onclick="SendOtp" Disabled="@otpSent">
+                                Gửi OTP
+                            </button>
+                        }
+
+                        @if (!user.OTPCheck)
+                        {
+                            <div class="form-group mt-2">
+                                <label for="OTP">Nhập OTP</label>
+                                <InputText id="OTP" class="form-control" @bind-Value="otpInput" />
+                                <button type="button" class="btn btn-success mt-2" @onclick="VerifyOtp">
+                                    Xác nhận OTP
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    @if (otpError != null)
+                    {
+                        <p class="text-danger">@otpError</p>
+                    }
+
+                    <div class="form-group mb-3">
+                        <label for="Email">Email</label>
+                        <InputText id="Email" class="form-control" @bind-Value="user.Email" />
+                    </div>
+
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(message))
+                {
+                    <p class="text-success text-center mt-3">@message</p>
+                }
+
+
+            </div>
+
         </div>
-
-        <div class="form-group">
-            <label for="Phone">Số điện thoại</label>
-            <InputText id="Phone" class="form-control" @bind-Value="user.Phone" Disabled="@(user.OTPCheck || otpSent)" />
-            @if (!user.OTPCheck)
-            {
-                <button type="button" class="btn btn-secondary mt-2" @onclick="SendOtp" Disabled="@otpSent">
-                    Gửi OTP
-                </button>
-            }
-            @if (otpSent)
-            {
-                <div class="form-group mt-2">
-                    <label for="OTP">Nhập OTP</label>
-                    <InputText id="OTP" class="form-control" @bind-Value="otpInput" />
-                    <button type="button" class="btn btn-success mt-2" @onclick="VerifyOtp">
-                        Xác nhận OTP
-                    </button>
-                </div>
-            }
-        </div>
-
-        @if (otpError != null)
-        {
-            <p class="text-danger">@otpError</p>
-        }
-
-
-        <div class="form-group">
-            <label for="Email">Email</label>
-            <InputText id="Email" class="form-control" @bind-Value="user.Email" Disabled="true" />
-        </div>
-        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-    </EditForm>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <p class="text-success">@message</p>
-    }
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <p class="text-danger">@errorMessage</p>
-    }
+    </div>
 }
 
 @code {
@@ -73,8 +79,7 @@ else
     public long userId { get; set; }
 
     private Users user;
-    private string message = string.Empty;
-    private string errorMessage = string.Empty;
+    private string message;
 
     // OTP handling
     private string otpInput;
@@ -83,6 +88,39 @@ else
     private DateTime? otpExpiryTime;
     private string otpError;
 
+    private bool isCreateAddress = false;
+    private List<Province> provinces = new List<Province>();
+    private List<Districted> districts = new List<Districted>();
+    private List<Ward> wards = new List<Ward>();
+    private Address address = new Address();
+    private bool hasDistricts = false;
+    private bool hasWards = false;
+
+
+    private async Task<bool> ShowConfirmation(string message)
+    {
+        return await JSRuntime.InvokeAsync<bool>("confirm", message);
+    }
+
+    private async Task ShowToast(string type, string message)
+    {
+        switch (type)
+        {
+            case "success":
+                await JSRuntime.InvokeVoidAsync("toastr.success", message);
+                break;
+            case "error":
+                await JSRuntime.InvokeVoidAsync("toastr.error", message);
+                break;
+            case "warning":
+                await JSRuntime.InvokeVoidAsync("toastr.warning", message);
+                break;
+            case "info":
+                await JSRuntime.InvokeVoidAsync("toastr.info", message);
+                break;
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -90,24 +128,17 @@ else
             user = await UserService.GetById(userId);
             if (user == null)
             {
-                errorMessage = "Người dùng không tồn tại.";
-                Navigation.NavigateTo("/");
+                await ShowToast("error", "Người dùng không tồn tại.");
+                Navigation.NavigateTo("/admin/users");
+                return;
             }
-
+            address = null;
 
         }
         catch (Exception ex)
         {
-            errorMessage = $"Lỗi: {ex.Message}";
+            await ShowToast("error", $"Lỗi: {ex.Message}");
         }
-    }
-
-
-    protected override void OnInitialized()
-    {
-        generatedOtp = null;
-        otpExpiryTime = null;
-        otpSent = false;
     }
 
     private async Task SendOtp()
@@ -125,32 +156,28 @@ else
 
         otpError = null;
         message = $"OTP của bạn là: {generatedOtp} (Giả lập, chỉ dành cho thử nghiệm)";
-        StateHasChanged();
-
-        await Task.Delay(500);
     }
 
     private async Task VerifyOtp()
     {
         if (generatedOtp == null)
         {
-            otpError = "Không tìm thấy OTP. Vui lòng gửi lại.";
+            await ShowToast("error", "Không tìm thấy OTP. Vui lòng gửi lại.");
             return;
         }
 
         if (otpExpiryTime == null || otpExpiryTime <= DateTime.Now)
         {
-            otpError = "OTP đã hết hạn. Vui lòng gửi lại.";
+            await ShowToast("error", "OTP đã hết hạn. Vui lòng gửi lại.");
             return;
         }
 
         if (otpInput != generatedOtp)
         {
-            otpError = "OTP không chính xác.";
+            await ShowToast("error", "OTP không chính xác.");
             return;
         }
 
-        otpError = null;
         otpSent = false;
 
         var allUsers = await UserService.GetAll();
@@ -158,7 +185,6 @@ else
 
         if (existingUser != null)
         {
-            // Cập nhật thông tin từ bản ghi hiện tại vào bản ghi tìm thấy
             existingUser.Name = user.Name;
             existingUser.Phone = user.Phone;
             existingUser.Email = user.Email;
@@ -168,46 +194,47 @@ else
             existingUser.Updated_at = DateTime.Now;
 
             await UserService.Update(existingUser);
-
-            await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(existingUser));
-
-            // Xóa bản ghi hiện tại sau khi cập nhật bản ghi tìm thấy
             await UserService.Delete(user.Id);
             user = existingUser;
 
-            message = "Cập nhật thông tin thành công! Số điện thoại đã được liên kết.";
+            await ShowToast("success", "Cập nhật thông tin thành công! Số điện thoại đã được liên kết.");
         }
         else
         {
+            user.OTPCheck = true;
             await UserService.Update(user);
-            message = "Cập nhật thông tin thành công!";
+            await ShowToast("success", "Cập nhật thông tin thành công!");
         }
-
-        StateHasChanged();
     }
+
 
     private async Task HandleSubmit()
     {
-
+        if (otpSent)
+        {
+            await ShowToast("warning", "Vui lòng xác nhận OTP trước khi lưu thông tin.");
+            return;
+        }
         try
         {
-            if (otpSent == true)
+            var allUsers = await UserService.GetAll();
+            var emailExists = allUsers.Any(u => u.Email == user.Email && u.Id != user.Id);
+
+            if (emailExists)
             {
-                otpError = "Vui lòng xác nhận OTP trước khi lưu thông tin.";
+                await ShowToast("error", "Email đã tồn tại. Vui lòng nhập email khác.");
                 return;
             }
-            else
-            {
-                await UserService.Update(user);
-                message = "Lưu thay đổi thành công!";
-                Navigation.NavigateTo("/");
-                StateHasChanged();
-            }
 
+            user.Address = null;
+            await UserService.Update(user);
+
+            await ShowToast("success", "Lưu thay đổi thành công!");
+            Navigation.NavigateTo("/");
         }
         catch (Exception ex)
         {
-            errorMessage = $"Lỗi khi cập nhật thông tin: {ex.Message}";
+            await ShowToast("error", $"Lỗi khi cập nhật thông tin: {ex.Message}");
         }
     }
 }

@@ -8,14 +8,15 @@
 
 <style>
     .text-bold {
-        font-weight: bold; /* Làm chữ "Tất cả" đậm */
+        font-weight: bold;
     }
+
     .badge {
         padding: 0.3em 0.6em;
-        border-radius: px;
         color: white;
         font-size: 14px;
     }
+
     .customer-badge {
         display: inline-block;
         padding: 0.5em 1em;
@@ -24,16 +25,19 @@
         background-color: #C0C0C0;
         font-size: 14px;
         color: #333;
+        color: g
     }
+
     .bg-taiquay {
         background-color: #CCCC99;
-        color:black;
+        color: black;
     }
 
     .bg-giaohang {
         background-color: #FFCC99;
         color: black;
     }
+
     .bg-danger {
         background-color: red;
     }
@@ -45,19 +49,73 @@
     .bg-secondary {
         background-color: gray;
     }
-</style>
-<div class="page-wrapper">
-    <!-- Page header -->
-    <div class="page-header d-print-none">
-        <div class="container-xl">
-            <div class="row g-2 align-items-center">
-                <div class="col">
-                    <h2 class="page-title">DANH SÁCH ĐƠN HÀNG</h2>
-                </div>
-            </div>
-        </div>
-    </div>
 
+    .page-wrapper {
+        padding: 20px 0;
+        border: none; /* Xóa viền */
+    }
+
+    .search-box {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+    }
+
+    #searchInput {
+        width: 300px; /* Tăng chiều rộng của thanh tìm kiếm */
+        max-width: 100%; /* Đảm bảo không vượt quá kích thước container */
+        border-radius: 8px; /* Làm tròn góc */
+        border: 1px solid #ccc; /* Thêm viền nhẹ */
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .color-preview {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #ccc;
+        color: #555;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+        }
+
+    .table {
+        border-collapse: collapse;
+        border: none; /* Loại bỏ viền bảng */
+    }
+
+        .table td, .table th {
+            border: none; /* Loại bỏ viền ô */
+            border-bottom: 1px solid #ddd; /* Chỉ giữ viền dưới */
+            text-align: center;
+        }
+
+    .btn-danger {
+        color: #fff;
+    }
+
+        .btn-danger:hover {
+            background-color: #e74c3c;
+        }
+
+</style>
+<section class="section-banner">
+    <img src="main/assets/images/banner-category.jpg"
+         class="w-100 h-100" alt="banner-image-3">
+    <div class="title-banner">
+        <h1>
+            DANH SÁCH ĐƠN HÀNG
+        </h1>
+    </div>
+</section>
+<div class="page-wrapper">
+  
     <!-- Page body -->
     <div class="page-body">
         <div class="container-xl">
@@ -65,23 +123,22 @@
 
                 <!-- Input tìm kiếm -->
                 <div class="form-group d-flex justify-content-end">
-                    <div class="d-flex gap-2" style="width: 40%;">
+                    <div class="search-box">
                         <input type="text" id="searchInput"
-                               class="form-control flex-grow-1"
+                               class="form-control"
                                @bind="searchText"
                                @oninput="SearchOrders"
                                placeholder="Nhập Id đơn hàng" />
                     </div>
                 </div>
+
                 <div class="col-12">
-                    <div class="card">
+                    <div class="card-body">
                         <div class="table-responsive">
-                            <div class="search-box d-flex align-items-center justify-content-between mb-3">
-                            </div>
-                            <table class="table card-table table-vcenter text-nowrap datatable">
+                            <table class="table  card-table  table-vcenter text-nowrap datatable">
                                 <thead>
                                     <tr>
-                                        <th>Id đơn hàng</th>
+                                        <th>ID đơn hàng</th>
                                         <th>Tên khách hàng</th>
                                         <th>Số điện thoại</th>
                                         <th>Tổng tiền</th>
@@ -130,18 +187,11 @@
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => GoToOrderTracking(item.Id)">Chi tiết</button>
-
                                                 </td>
                                             </tr>
                                         }
                                     }
-                                    else
-                                    {
-                                        <tr>
 
-                                            <td colspan="9" class="text-center">Không có dữ liệu để hiển thị.</td>
-                                        </tr>
-                                    }
                                 </tbody>
                             </table>
                             <div class="mt-4">
@@ -199,7 +249,7 @@
             }
         }
     }
-    
+
     private async Task GetUserIdFromSession()
     {
         var userJsonString = await JS.InvokeAsync<string>("sessionStorage.getItem", "user");
@@ -220,10 +270,10 @@
                     }
                     else
                     {
-                        ParsedUserId = null; 
+                        ParsedUserId = null;
                     }
 
-                    
+
                 }
             }
             catch (JsonException ex)
@@ -234,7 +284,7 @@
         }
         else
         {
-            ParsedUserId = null; 
+            ParsedUserId = null;
         }
     }
 

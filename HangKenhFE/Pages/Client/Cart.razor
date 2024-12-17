@@ -1110,6 +1110,14 @@
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
             }
+            var newOrder = new Orders
+                {
+                    User_id = user?.Id,
+                    Created_at = DateTime.Now,
+                    Note = "Giao hàng",
+                    Status = "Pending"
+                };
+             await orderServices.Create(newOrder);
             await LoadOrderDetails();
             await LoadCartDetails();
             await ResetViewState();
@@ -1158,6 +1166,14 @@
                     Created_at = DateTime.Now
                 };
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
+            var newOrder = new Orders
+                {
+                    User_id = user?.Id,
+                    Created_at = DateTime.Now,
+                    Note = "Giao hàng",
+                    Status = "Pending"
+                };
+            await orderServices.Create(newOrder);
             await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
             isMomoModalVisible = false;
             await LoadOrderDetails();
@@ -1192,6 +1208,14 @@
                     Created_at = DateTime.Now
                 };
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
+            var newOrder = new Orders
+                {
+                    User_id = user?.Id,
+                    Created_at = DateTime.Now,
+                    Note = "Giao hàng",
+                    Status = "Pending"
+                };
+            await orderServices.Create(newOrder);
             await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thành công rồi");
             isMomoModalVisible = false;
             await LoadOrderDetails();
@@ -1276,7 +1300,7 @@
                         Note = "",
                         Status = typePay,
                         Created_at = DateTime.Now,
-                        Created_by=null
+                        Created_by = null
                     };
                 await orderTrackingServices.AddOrderTracking(newOrderTracking);
             }
