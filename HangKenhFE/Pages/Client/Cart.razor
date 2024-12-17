@@ -1085,7 +1085,6 @@
         isModalOrderVisiable = false;
         ClearInfoAddress();
         selectedCartDetails.Clear();
-
         await LoadOrderDetails();
         await LoadCartDetails();
         StateHasChanged();
@@ -1110,14 +1109,6 @@
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
             }
-            var newOrder = new Orders
-                {
-                    User_id = user?.Id,
-                    Created_at = DateTime.Now,
-                    Note = "Giao hàng",
-                    Status = "Pending"
-                };
-             await orderServices.Create(newOrder);
             await LoadOrderDetails();
             await LoadCartDetails();
             await ResetViewState();
@@ -1138,7 +1129,6 @@
                 isMomoModalVisible = false;
                 await LoadOrderDetails();
                 await LoadCartDetails();
-                await ResetViewState();
             }
         }
     }
@@ -1161,19 +1151,11 @@
             var newOrderTracking = new order_trackings
                 {
                     OrderId = orderUpdate.Id,
-                    Note = "",
+                    Note = "Khách đã thanh toán MOMO",
                     Status = "Chờ xác nhận",
                     Created_at = DateTime.Now
                 };
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
-            var newOrder = new Orders
-                {
-                    User_id = user?.Id,
-                    Created_at = DateTime.Now,
-                    Note = "Giao hàng",
-                    Status = "Pending"
-                };
-            await orderServices.Create(newOrder);
             await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
             isMomoModalVisible = false;
             await LoadOrderDetails();
@@ -1203,7 +1185,7 @@
             var newOrderTracking = new order_trackings
                 {
                     OrderId = orderUpdate.Id,
-                    Note = "",
+                    Note = "Khách đã thanh toán MOMO",
                     Status = "Chờ xác nhận",
                     Created_at = DateTime.Now
                 };
@@ -1292,17 +1274,16 @@
                 typePay = "Chờ xác nhận";
                 await orderServices.Update(orderUpdate, orderUpdate.Id);
                 await JS.InvokeVoidAsync("toastr.success", "Yêu cầu đặt đơn hàng đã được gửi thành công!");
-                await ResetViewState();
-
                 var newOrderTracking = new order_trackings
                     {
                         OrderId = orderUpdate.Id,
-                        Note = "",
+                        Note = "Khách hàng thanh toán khi nhận hàng",
                         Status = typePay,
                         Created_at = DateTime.Now,
                         Created_by = null
                     };
                 await orderTrackingServices.AddOrderTracking(newOrderTracking);
+           
             }
             if (orderUpdate.Status == "Chờ xác nhận")
             {

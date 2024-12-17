@@ -473,9 +473,7 @@
                                         <a @onclick="@(async () => { OpenModal(); CloseDropdown(); })">Đăng nhập / Đăng ký</a>
                                     }
                                 </li>
-                                <li>
-                                    <a href="" @onclick="CloseDropdown">Thông tin cá nhân</a>
-                                </li>
+                                <li><a @onclick="NavigateToUser">Thông tin cá nhân</a></li>
                             </ul>
                         </li>
 
@@ -831,6 +829,7 @@
                 {
                     // Điều hướng đến trang thông tin người dùng
                     navigation.NavigateTo($"/admin/UserDetails/{currentUser.Id}");
+                    CloseDropdown();
                     return;
                 }
             }
