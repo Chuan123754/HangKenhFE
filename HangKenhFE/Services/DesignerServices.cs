@@ -25,6 +25,11 @@ namespace HangKenhFE.Services
             return await _httpClient.GetFromJsonAsync<Designer>($"{_baseUrl}/api/Designer/{id}");
         }
 
+        public async Task<Designer> GetByIdSlug(string slug)
+        {
+            return await _httpClient.GetFromJsonAsync<Designer>($"{_baseUrl}/api/Designer/GetByIdSlug?slug={slug}");
+        }
+
         public async Task<List<Designer>> GetByTypeAsyncClient(int pageNumber, int pageSize, string searchTerm)
         {
             var uri = $"{_baseUrl}/api/Designer/get-by-type-client?pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";

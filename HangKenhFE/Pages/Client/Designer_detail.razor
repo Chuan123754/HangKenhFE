@@ -1,4 +1,4 @@
-﻿@page "/designer-detail/{id:long}"
+﻿@page "/designer/{slug}"
 @inject IBannerServices bnser
 @inject IDesignerServices sev
 @inject IPostSer pot
@@ -191,7 +191,7 @@
 
 @code {
     [Parameter]
-    public long Id { get; set; }
+    public string Slug { get; set; }
     private Designer designer = new Designer();
     private MetaData metaData = new MetaData();
     private List<Product_Posts> list_post = new List<Product_Posts>();
@@ -199,10 +199,10 @@
     private Banner banner = new Banner();
     protected async override Task OnInitializedAsync()
     {
-        designer = await sev.GetById(Id);
-        banner = await bnser.GetBannerByDesignerId(Id);
-        list_post = await pot.GetCountByType("post", Id);
-        list_product = await pot.GetCountByTypeDesigner( Id);
+        designer = await sev.GetByIdSlug(Slug);
+        banner = await bnser.GetBannerByDesignerId(designer.id_Designer);
+        list_post = await pot.GetCountByType("post", designer.id_Designer);
+        list_product = await pot.GetCountByTypeDesigner(designer.id_Designer);
 
         metaData = designer.GetMetaData();
     }

@@ -40,13 +40,7 @@
                     <div class="col-8">
                         <h2 class="category-font-header">NHÀ THIẾT KẾ</h2>
                     </div>
-                  @*   <div class="col-4 filter-basic">
-                        <label>Hiển thị</label>
-                        <img src="main/assets/images/candle.svg"
-                             class="candle" alt="candle">
-                        <img src="main/assets/images/category.svg"
-                             class="category" alt="category">
-                    </div> *@
+              
                 </div>
             </header>
             <div class="row mt-48px">
@@ -57,7 +51,7 @@
                             <div class="designer-avatar">
                                 @if (!string.IsNullOrEmpty(designer.image))
                                 {
-                                    <a @onclick="() => NavDetails(designer.id_Designer)">
+                                    <a @onclick="() => NavDetails(designer.slug)">
                                         <img src="@designer.image"
                                              width="312" height="318"
                                              alt="@(!string.IsNullOrEmpty(designer.ShortName) ? designer.ShortName : designer.Name)">
@@ -65,7 +59,7 @@
                                 }
                             </div>
                             <figcaption class="designer-info text-center">
-                                <a @onclick="() => NavDetails(designer.id_Designer)"
+                                <a @onclick="() => NavDetails(designer.slug)"
                                    class="designer-name">
                                     @(designer.ShortName ?? designer.Name)
                                 </a>
@@ -117,8 +111,8 @@
         await LoadPosts();
     }
 
-    private void NavDetails(long id)
+    private void NavDetails(string slug)
     {
-        nav.NavigateTo($"/designer-detail/{id}");
+        nav.NavigateTo($"/designer/{slug}");
     }
 }
