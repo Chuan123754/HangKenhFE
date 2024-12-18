@@ -330,10 +330,7 @@
                         <label for="password">Mật khẩu *</label>
                         <input type="password" @bind="loginModel.Password" id="password" placeholder="Mật khẩu" required>
 
-                        <div class="form-options">
-                            <label>
-                                <input type="checkbox" id="rememberme"> Ghi nhớ mật khẩu
-                            </label>
+                        <div class="form-options">                       
                             <a @onclick="NavigateToForgotPassword" class="forgot-password">Quên mật khẩu?</a>
                         </div>
 
@@ -835,8 +832,11 @@
             }
 
             // Nếu không tìm thấy thông tin người dùng, điều hướng đến trang đăng nhập
-            await ShowToast("warning", "Vui lòng đăng nhập để xem thông tin cá nhân.");
-            navigation.NavigateTo("/user/login");
+           // await ShowToast("warning", "Vui lòng đăng nhập để xem thông tin cá nhân.");
+           // navigation.NavigateTo("/user/login");
+            await JS.InvokeVoidAsync("toastr.error", $"Vui lòng đăng nhập để xem thông tin cá nhân.");
+            return;
+
         }
         catch (Exception ex)
         {

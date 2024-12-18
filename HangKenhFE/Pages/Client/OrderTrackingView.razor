@@ -29,13 +29,17 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center bg-light">
                 <h5 class="card-title mb-0">Lịch sử đơn hàng</h5>
-                @if (Order.Status == "Chờ xác nhận" || Order.Status == "Đã xác nhận" || Order.Status == "Đã thanh toán" || Order.Status == "Đã chuẩn bị hàng")
+                @if (Order.Status == "Chờ xác nhận" && Order.CreatedByAdminId == null || Order.Status == "Đã xác nhận" && Order.CreatedByAdminId == null || Order.Status == "Đã thanh toán"  && Order.CreatedByAdminId==null|| Order.Status == "Đã chuẩn bị hàng")
                 {
                     <button class="btn btn-danger mb-0" @onclick="OpenModalCacelOrder">Hủy đơn</button>
                 }
                 else if (Order.Status == "Đơn hủy")
                 {
                     <span style="color : red"> Đã hủy đơn</span>
+                }
+                else if (Order.CreatedByAdminId != null)
+                {
+                    <span> Đơn hàng được giao dịch tại quầy</span>
                 }
                 else
                 {
@@ -105,7 +109,7 @@
                         @foreach (var product in OrderTracking.Products)
                         {
                             <tr>
-                                <td><img src="@product.Image" alt="Hình ảnh" style="width: 80px; height: auto;" /></td>
+                                <td><img src="@product.Image" alt="Hình ảnh" style="width: 80px; height: 105px;" /></td>
                                 <td>@product.SKU </td>
                                 <td>@product.Color</td>
                                 <td>@product.Size</td>
@@ -186,6 +190,10 @@
                             else if (Order.Status == "Đơn hủy")
                             {
                                 <span style="color : red"> Đã hủy đơn</span>
+                            }
+                            else if(Order.Status == "Hoàn tất đơn")
+                            {
+                                <span> Hoàn thành</span>
                             }
                             else
                             {
