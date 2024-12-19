@@ -4,6 +4,7 @@
 @inject OrderDetailsIServices orderDetailsService
 @inject IOrderTrackingServices OrderTrackingService
 @inject IJSRuntime JS
+@inject IUserService userservices
 @using System.Text.Json;
 
 <style>
@@ -115,91 +116,93 @@
     </div>
 </section>
 <div class="page-wrapper">
-  
+
     <!-- Page body -->
     <div class="page-body">
         <div class="container-xl">
             <div class="row row-deck row-cards">
-
                 <!-- Input tìm kiếm -->
-                <div class="form-group d-flex justify-content-end">
-                    <div class="search-box">
-                        <input type="text" id="searchInput"
-                               class="form-control"
-                               @bind="searchText"
-                               @oninput="SearchOrders"
-                               placeholder="Nhập Id đơn hàng" />
+                    <div class="form-group d-flex justify-content-end">
+                        <div class="search-box">
+                            <input type="text" id="searchInput"
+                                   class="form-control"
+                                   @bind="searchText"
+                                   @oninput="SearchOrders"
+                                   placeholder="Nhập Id đơn hàng" />
+                        </div>
                     </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table  card-table  table-vcenter text-nowrap datatable">
-                                <thead>
-                                    <tr>
-                                        <th>ID đơn hàng</th>
-                                        <th>Tên khách hàng</th>
-                                        <th>Số điện thoại</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Ngày đặt hàng</th>
-                                        <th>Trạng thái</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (pagedOrders != null && pagedOrders.Any())
-                                    {
-                                        int index = 0;
-                                        @foreach (var item in pagedOrders)
+                
+                
+               
+                    <div class="col-12">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table  card-table  table-vcenter text-nowrap datatable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID đơn hàng</th>
+                                            <th>Tên khách hàng</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Ngày đặt hàng</th>
+                                            <th>Trạng thái</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (pagedOrders != null && pagedOrders.Any())
                                         {
-                                            <tr>
-                                                <td>@item.Id</td>
-                                                <td>
-                                                    @if (item.Users == null)
-                                                    {
-                                                        <span class="customer-badge">Khách lẻ</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        @item.Users.Name
-                                                    }
-                                                </td>
-                                                <td>
-                                                    @if (item.Users == null)
-                                                    {
-                                                        <span class="customer-badge">N/A</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        @item.Users.Phone
-                                                    }
-                                                </td>
+                                            int index = 0;
+                                            @foreach (var item in pagedOrders)
+                                            {
+                                                <tr>
+                                                    <td>@item.Id</td>
+                                                    <td>
+                                                        @if (item.Users == null)
+                                                        {
+                                                            <span class="customer-badge">Khách lẻ</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            @item.Users.Name
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (item.Users == null)
+                                                        {
+                                                            <span class="customer-badge">N/A</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            @item.Users.Phone
+                                                        }
+                                                    </td>
 
-                                                <td>
-                                                    @string.Format("{0:N0}", (item.Totalmoney)).Replace(".", ",") VNĐ
-                                                </td>
-                                                <td>@item.Created_at</td>
-                                                <td>
-                                                    <span class="@GetStatusClass(item.Status)">
-                                                        @item.Status
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => GoToOrderTracking(item.Id)">Chi tiết</button>
-                                                </td>
-                                            </tr>
+                                                    <td>
+                                                        @string.Format("{0:N0}", (item.Totalmoney)).Replace(".", ",") VNĐ
+                                                    </td>
+                                                    <td>@item.Created_at</td>
+                                                    <td>
+                                                        <span class="@GetStatusClass(item.Status)">
+                                                            @item.Status
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => GoToOrderTracking(item.Id)">Chi tiết</button>
+                                                    </td>
+                                                </tr>
+                                            }
                                         }
-                                    }
 
-                                </tbody>
-                            </table>
-                            <div class="mt-4">
-                                <Pagination TItem="Orders" PageNumber="currentPage" TotalPages="totalPages" PageSize="pageSize" TotalItems="lst_Orders.Count" OnPageChanged="GoToPage" OnPageSizeChanged="OnPageSizeChanged" />
+                                    </tbody>
+                                </table>
+                                <div class="mt-4">
+                                    <Pagination TItem="Orders" PageNumber="currentPage" TotalPages="totalPages" PageSize="pageSize" TotalItems="lst_Orders.Count" OnPageChanged="GoToPage" OnPageSizeChanged="OnPageSizeChanged" />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -226,7 +229,7 @@
     private int failedOrders = 0; // giao thất bại
     private int successfulOrders = 0; // giao thành công
     private int canceledOrders = 0; // bị hủy
-
+    private Users users = new Users();
     private DateTime? startDate;
     private DateTime? endDate;
 
@@ -248,6 +251,7 @@
                 StateHasChanged(); // Cập nhật giao diện
             }
         }
+
     }
 
     private async Task GetUserIdFromSession()
@@ -260,20 +264,19 @@
             {
                 // Parse JSON để lấy giá trị id và roles
                 var userData = JsonSerializer.Deserialize<Dictionary<string, object>>(userJsonString);
-
                 if (userData != null)
                 {
                     // Lấy UserId
                     if (userData.ContainsKey("Id") && long.TryParse(userData["Id"]?.ToString(), out long result))
                     {
                         ParsedUserId = result;
+                        users = await userservices.GetById(ParsedUserId ?? 0);
+
                     }
                     else
                     {
                         ParsedUserId = null;
                     }
-
-
                 }
             }
             catch (JsonException ex)
@@ -390,7 +393,7 @@
         else if (int.TryParse(searchText, out int searchId))
         {
             lst_Orders = lst_Orders
-                .Where(o => o.Id == searchId)
+                .Where(o => o.Id == searchId && o.User_id == ParsedUserId)
                 .ToList();
         }
 

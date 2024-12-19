@@ -135,17 +135,19 @@
             }
         </div>
         <div class="trending-box trending-box-item mt-24px">
-            @foreach (var sp3 in Secsion3_product_trendy4.Skip(1).Take(3).ToList())
-            {
-                <div class="flex-item">
-                    <div class="position-relative">
-                        <img src="@sp3.Feature_image" alt="Ảnh 3" class="img-fluid">
+          
+                @foreach (var sp3 in Secsion3_product_trendy4.Skip(1).Take(3).ToList())
+                {
+
+                    <div class="position-relative" style="max-width: 416px !important">
+                        <img src="@sp3.Feature_image" alt="Ảnh 3" style="width:416px; height: 535px" class="img-fluid">
                         <div class="img-title">
                             <h2>@sp3.Title</h2>
                         </div>
                     </div>
-                </div>
-            }
+
+                }
+        
 
         </div>
     </div>
@@ -170,15 +172,15 @@
                                 <a @onclick="() => NavDetailsProduct(item.Id)">
                                     <div class="img-wrap">
                                         <img src="@item.Posts?.Feature_image"
-                                             style="height:403px !important" class="w-100 h-100 object-fit-cover"
+                                             style="height:403px !important; width:306px !important" class="w-100 h-100 object-fit-cover"
                                              alt="">
                                     </div>
                                     <div class="img-wrap-hide">
                                         <img src="@GetFirstImageUrl(item.Posts.Image_library)"
-                                             style="height:403px !important" class="w-100 h-100 object-fit-cover"
+                                             style="height:403px !important;  width:306px !important" class="w-100 h-100 object-fit-cover"
                                              alt="">
                                     </div>
-                                </a>                              
+                                </a>
                             </div>
                             <figcaption class="product-info">
                                 <a @onclick="() => NavDetailsProduct(item.Id)">
@@ -197,7 +199,7 @@
                                 {
                                     <div>Chưa có giá</div>
                                 }
-                              
+
                             </figcaption>
                         </figure>
                     </div>
@@ -352,7 +354,7 @@
             }
             <div class="col-md-6 col-12">
                 <div class="d-grid">
-                    @foreach (var item2 in Secsion4_project_antuong.Take(1).Skip(1).ToList())
+                    @foreach (var item2 in Secsion4_project_antuong.Take(2).Skip(1).ToList())
                     {
                         <div class="col">
                             <img src="@item2.Feature_image" class="w-100" alt="@item2.Title">
@@ -374,7 +376,7 @@
                             </div>
                         </div>
                     }
-                    @foreach (var item3 in Secsion4_project_antuong.Take(1).Skip(2).ToList())
+                    @foreach (var item3 in Secsion4_project_antuong.Take(3).Skip(2).ToList())
                     {
                         <div class="col mt-24px">
                             <img src="@item3.Feature_image" class="w-100" alt="@item3.Title">

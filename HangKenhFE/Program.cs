@@ -86,17 +86,22 @@ builder.Services.AddScoped<IProduct_variants_wishlist_Services, Product_variants
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
-    var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
-    var response = await httpClient.GetAsync("https://localhost:7011/api/Accsess/GetAll");
+    try
+    {
+        var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
+        var response = await httpClient.GetAsync("https://localhost:7011/api/Accsess/GetAll");
+    }
+    catch 
+    {
+    }
+    
 }
 
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
+
     app.UseExceptionHandler("/Error");
     app.UseHsts();
-}
 app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();

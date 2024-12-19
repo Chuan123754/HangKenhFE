@@ -13,6 +13,7 @@
 @inject IUserService userServices
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 @using System.Text.Json;
+@using System.Text.RegularExpressions
 @inject IJSRuntime JS
 <style>
     .color-preview {
@@ -55,7 +56,7 @@
 
     .product-img {
         width: 80px;
-        height: auto;
+        height: 105px;
     }
 </style>
 
@@ -105,7 +106,7 @@
                                             </td>
                                             <!-- Ảnh sản phẩm -->
                                             <td class="text-center align-middle">
-                                                <img src="@item.Product_Attributes.Image" alt="Hình ảnh" class="product-img" style="width: 80px; height: auto;" />
+                                                <img src="@item.Product_Attributes.Image" alt="Hình ảnh" class="product-img" style="width: 80px; height: 105px;" />
                                             </td>
 
                                             <!-- Tên sản phẩm -->
@@ -265,7 +266,7 @@
                                                     @if (isModalCreateAddress)
                                                     {
                                                         <div class="modal fade show d-block" tabindex="-1" role="dialog">
-                                                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 40%; width: auto;">
+                                                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 60%; width: auto;">
                                                                 <div class="modal-content">
                                                                     <div class="modal-header">
                                                                         <h5 class="modal-title">Thêm mới địa chỉ</h5>
@@ -400,7 +401,7 @@
                                     {
                                         <div class="row mb-3 align-items-center border-bottom pb-3">
                                             <div class="col-3 text-center">
-                                                <img src="@item.ProductAttributes.Image" alt="Hình ảnh" class="product-img" style="width: 80px; height: auto;" />
+                                                <img src="@item.ProductAttributes.Image" alt="Hình ảnh" class="product-img" style="width: 60px; height: 85px;" />
                                             </div>
                                             <div class="col-3 text-start">
                                                 <h6 class="mb-0">@item.ProductAttributes.SKU</h6>
@@ -456,13 +457,8 @@
                                 </div>
                                 <div class="container my-4">
                                     <div class="row">
-                                        <div class="col-6">
-                                            <h5>Thông tin Voucher</h5>
-                                            <!-- Thông tin voucher thêm vào đây -->
-                                            <input type="text" class="form-control" placeholder="Nhập mã voucher" />
-                                            <button class="btn btn-primary mt-2">Áp dụng</button>
-                                        </div>
-                                        <div class="col-6 text-end">
+                                       
+                                        <div class="col-12 text-end">
                                             <h5>Thông tin thanh toán</h5>
                                             <div class="d-flex justify-content-between">
                                                 <span>Tổng tiền hàng:</span>
@@ -931,6 +927,7 @@
     private async Task CloseModalOrder()
     {
         isModalOrderVisiable = false;
+        selectedCartDetails.Clear();
     }
 
     private async Task LoadOrderDetails()
@@ -963,6 +960,12 @@
             await JS.InvokeVoidAsync("toastr.error", "Vui lòng nhập đầy đủ thông tin địa chỉ.");
             return;
         }
+        if (string.IsNullOrEmpty(address.Phone) || !Regex.IsMatch(address.Phone, @"^0\d{9}$"))
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số.");
+            return;
+        }
+
         var orderUser = await orderServices.GetByIdOrders(order.Id);
         if (order?.User_id.HasValue == true)
         {
@@ -1084,7 +1087,6 @@
         lst_OrderDetail.Clear();
         isModalOrderVisiable = false;
         ClearInfoAddress();
-        selectedCartDetails.Clear();
         await LoadOrderDetails();
         await LoadCartDetails();
         StateHasChanged();
@@ -1109,9 +1111,11 @@
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
             }
+            selectedCartDetails.Clear();
             await LoadOrderDetails();
             await LoadCartDetails();
             await ResetViewState();
+            StateHasChanged();
         }
 
     }
@@ -1122,14 +1126,6 @@
         if (confirmed)
         {
             CheckOut("momo");
-            var updateitem = await orderServices.GetByIdOrders(order.Id);
-            if (updateitem.Status == "Chờ xác nhận")
-            {
-                await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thanh toán thành công");
-                isMomoModalVisible = false;
-                await LoadOrderDetails();
-                await LoadCartDetails();
-            }
         }
     }
 
@@ -1158,6 +1154,8 @@
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
             await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
             isMomoModalVisible = false;
+            selectedCartDetails.Clear();
+            StateHasChanged();
             await LoadOrderDetails();
             await LoadCartDetails();
             await ResetViewState();
@@ -1200,6 +1198,8 @@
             await orderServices.Create(newOrder);
             await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thành công rồi");
             isMomoModalVisible = false;
+            selectedCartDetails.Clear();
+            StateHasChanged();
             await LoadOrderDetails();
             await LoadCartDetails();
             await ResetViewState();
