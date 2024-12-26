@@ -1106,7 +1106,7 @@
             {
                 var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
                 var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
-                productAttribute.Stock -= cartDetail.Quantity;
+                productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
             }
