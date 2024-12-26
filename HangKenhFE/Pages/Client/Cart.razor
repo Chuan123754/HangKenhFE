@@ -127,11 +127,11 @@
                                             <!-- Số lượng -->
                                             <td class="text-center align-middle">
                                                 <div class="btn-group" role="group">
-                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity - 1)">
+                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity - 1??0)">
                                                         <i class="bi bi-dash"></i> <!-- Sử dụng icon Bootstrap -->
                                                     </button>
                                                     <span class="btn btn-light btn-sm mx-2 px-2 py-1">@item.Quantity</span>
-                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1)">
+                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1??0)">
                                                         <i class="bi bi-plus-lg"></i>
                                                     </button>
                                                 </div>
@@ -291,7 +291,7 @@
                                                                                     {
                                                                                         @foreach (var province in provinces)
                                                                                         {
-                                                                                            <option value="@province.Id">@province.Name</option>
+                                                                                            <option value="@province.ProvinceID">@province.ProvinceName</option>
                                                                                         }
                                                                                     }
                                                                                 </select>
@@ -304,7 +304,7 @@
                                                                                     {
                                                                                         @foreach (var district in districts)
                                                                                         {
-                                                                                            <option value="@district.Id">@district.Name</option>
+                                                                                            <option value="@district.DistrictID">@district.DistrictName</option>
                                                                                         }
                                                                                     }
                                                                                 </select>
@@ -317,7 +317,7 @@
                                                                                     {
                                                                                         @foreach (var ward in wards)
                                                                                         {
-                                                                                            <option value="@ward.Id">@ward.Name</option>
+                                                                                            <option value="@ward.WardCode">@ward.WardName</option>
                                                                                         }
                                                                                     }
                                                                                 </select>
@@ -534,12 +534,12 @@
     private List<long> initialCartDetails = new List<long>();
     private bool isAllSelected = false;
 
-    private decimal totalAmount = 0; // tổng tiền hàng đã giảm
-    private decimal totalPrincipal = 0; // tổng tiền hàng chưa giảm
-    decimal discountAmount = 0; // tiền được giảm
-    private int totalQuantity = 0;
-    private decimal feeShipping = 0; // phí ship
-    private decimal totalMoney = 0; // cần thanh toán
+    private decimal? totalAmount = 0; // tổng tiền hàng đã giảm
+    private decimal? totalPrincipal = 0; // tổng tiền hàng chưa giảm
+    decimal? discountAmount = 0; // tiền được giảm
+    private int? totalQuantity = 0;
+    private decimal? feeShipping = 0; // phí ship
+    private decimal? totalMoney = 0; // cần thanh toán
     private bool isModalOrderVisiable = false;
     private bool isModalAddressVisiable = false;
     private bool isModalCreateAddress = false;
@@ -736,41 +736,41 @@
         discountAmount = totalPrincipal - totalAmount;
 
         totalQuantity = lst_OrderDetail.Sum(item => item.Quantity);
-        feeShipping = CalculateShippingFee();
+        // feeShipping = CalculateShippingFee();
 
         totalMoney = (feeShipping + totalAmount);
     }
 
-    private decimal CalculateShippingFee()
-    {
-        const decimal baseShippingFee = 38000m;
-        decimal feeShipping = baseShippingFee;
+    // private decimal CalculateShippingFee()
+    // {
+    //     const decimal baseShippingFee = 38000m;
+    //     decimal feeShipping = baseShippingFee;
 
-        if (totalQuantity > 10)
-        {
-            feeShipping += (Math.Min(totalQuantity, 20) - 10) * 3000m; // Phí cho từ 11 đến 20 sản phẩm
-        }
+    //     if (totalQuantity > 10)
+    //     {
+    //         feeShipping += (Math.Min(totalQuantity, 20) - 10) * 3000m; // Phí cho từ 11 đến 20 sản phẩm
+    //     }
 
-        if (totalQuantity > 20)
-        {
-            feeShipping += (Math.Min(totalQuantity, 30) - 20) * 3000m;
-            feeShipping *= 0.70m;
-        }
+    //     if (totalQuantity > 20)
+    //     {
+    //         feeShipping += (Math.Min(totalQuantity, 30) - 20) * 3000m;
+    //         feeShipping *= 0.70m;
+    //     }
 
-        if (totalQuantity > 30)
-        {
-            feeShipping += (Math.Min(totalQuantity, 50) - 30) * 3000m;
-            feeShipping *= 0.50m;
-        }
+    //     if (totalQuantity > 30)
+    //     {
+    //         feeShipping += (Math.Min(totalQuantity, 50) - 30) * 3000m;
+    //         feeShipping *= 0.50m;
+    //     }
 
-        if (totalQuantity > 40)
-        {
-            feeShipping += (totalQuantity - 50) * 3000m;
-            feeShipping *= 0.30m;
-        }
+    //     if (totalQuantity > 40)
+    //     {
+    //         feeShipping += (totalQuantity - 50) * 3000m;
+    //         feeShipping *= 0.30m;
+    //     }
 
-        return feeShipping;
-    }
+    //     return feeShipping;
+    // }
 
     private async Task CreateModalOrder()
     {
@@ -784,7 +784,7 @@
                 return;
             }
 
-            var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+            var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
             if (productAttribute == null)
             {
                 await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetail.Product_id} không tồn tại.");
@@ -866,7 +866,7 @@
                         }
 
                         // Kiểm tra thông tin sản phẩm
-                        var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                        var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
                         if (productAttribute == null)
                         {
                             Console.WriteLine($"Product attribute for ID {cartDetail.Product_id} not found.");
@@ -881,7 +881,7 @@
                                 {
                                     OrderId = order.Id,
                                     Product_Attribute_Id = cartDetail.Product_Attributes.Id,
-                                    Quantity = cartDetail.Quantity,
+                                    Quantity = cartDetail.Quantity??0,
                                     TotalDiscount = cartDetail.Product_Attributes.Sale_price,
                                     UnitPrice = cartDetail.Product_Attributes.Regular_price
                                 };
@@ -890,7 +890,7 @@
                         }
                         else
                         {
-                            existingDetail.Quantity = cartDetail.Quantity;
+                            existingDetail.Quantity = cartDetail.Quantity??0;
                             existingDetail.UnitPrice = cartDetail.Product_Attributes.Regular_price;
                             existingDetail.TotalDiscount = cartDetail.Product_Attributes.Sale_price;
                             await orderDetailsServices.Update(existingDetail, existingDetail.Id);
@@ -964,30 +964,31 @@
             await JS.InvokeVoidAsync("toastr.error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số.");
             return;
         }
-
-        var orderUser = await orderServices.GetByIdOrders(order.Id);
-        if (order?.User_id.HasValue == true)
+        var orderPending = await orderServices.GetByIdOrders(order.Id);
+        if (orderPending?.User_id.HasValue == true)
         {
-            address.User_Id = order.User_id.Value; // Gắn User_Id từ Order
+            address.User_Id = orderPending.User_id.Value; // Gắn User_Id từ Order
             if (address.Type == null) address.Type = "";
             if (address.Status == null) address.Status = "";
 
-            address.Name = address?.Name ?? "";
-            address.Phone = address?.Phone ?? "";
-            address.Email = user?.Email ?? "";
-            var province = provinces.FirstOrDefault(p => p.Id == address.Province_city);
-            var district = districts.FirstOrDefault(d => d.Id == address.District);
-            var ward = wards.FirstOrDefault(w => w.Id == address.Ward_commune);
-            address.Province_city = province.Name;
-            address.District = district?.Name;
-            address.Ward_commune = ward?.Name;
+            var province = provinces.FirstOrDefault(p => p.ProvinceID.ToString() == address.Province_city);
+            var district = districts.FirstOrDefault(d => d.DistrictID.ToString() == address.District);
+            var ward = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
+            var codeWard = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
+            var districtId = districts.FirstOrDefault(w => w.DistrictID.ToString() == address.District);
+            address.Province_city = province.ProvinceName;
+            address.District = district?.DistrictName;
+            address.Ward_commune = ward?.WardName;
+            address.WardCode = codeWard?.WardCode;
+            address.DistrictId = districtId?.DistrictID;
+
             var result = await addressServices.CreateAddress(address);
 
             if (result)
             {
                 await JS.InvokeVoidAsync("toastr.success", "Địa chỉ đã được tạo thành công.");
                 isModalCreateAddress = false;
-                lst_Address = await addressServices.GetAddressByUserId(order.User_id.Value);
+                lst_Address = await addressServices.GetAddressByUserId(orderPending.User_id.Value);
             }
             else
             {
@@ -1006,20 +1007,23 @@
     }
 
     // tách được đoạn code này ra chỗ khác thì càng tốt
-    private List<Province> provinces = new List<Province>();
-    private List<Districted> districts = new List<Districted>();
-    private List<Ward> wards = new List<Ward>();
+    private List<Provinces> provinces = new List<Provinces>();
+    private List<Districts> districts = new List<Districts>();
+    private List<Wards> wards = new List<Wards>();
     private bool hasDistricts = false;
     private bool hasWards = false;
+    private string selectedProvinceId;
+    private string selectedDistrictId;
+    private string selectedWardId;
     [Inject] private AddressService address_Service { get; set; }
     private async Task OnProvinceChange(ChangeEventArgs e)
     {
-        var selectedProvinceId = e.Value?.ToString();
+        selectedProvinceId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedProvinceId))
         {
             // Thiết lập tỉnh hiện tại và xóa các quận huyện, xã
             address.Province_city = selectedProvinceId;
-            districts = await address_Service.GetDistrictsAsync(int.Parse(selectedProvinceId));
+            districts = await address_Service.GetDistrictsByProvinceAsync(int.Parse(selectedProvinceId));
             hasDistricts = districts.Count > 0;
             wards.Clear();
             hasWards = false;
@@ -1027,17 +1031,17 @@
     }
     private async Task OnDistrictChange(ChangeEventArgs e)
     {
-        var selectedDistrictId = e.Value?.ToString();
+        selectedDistrictId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedDistrictId))
         {
             address.District = selectedDistrictId;
-            wards = await address_Service.GetWardsAsync(int.Parse(selectedDistrictId));
+            wards = await address_Service.GetWardsByDistrictAsync(int.Parse(selectedDistrictId));
             hasWards = wards.Count > 0;
         }
     }
     private async Task OnWardChange(ChangeEventArgs e)
     {
-        var selectedWardId = e.Value?.ToString();
+        selectedWardId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedWardId))
         {
             address.Ward_commune = selectedWardId;
@@ -1050,8 +1054,7 @@
     private string street;
     private string phone;
     private Address selectedAddress;
-
-    private void SelectAddress(Address address)
+    private async Task SelectAddress(Address address)
     {
         ClearInfoAddress();
         if (address != null)
@@ -1063,9 +1066,29 @@
             street = address.Street;
             phone = address.User?.Phone;
         }
+        var orderPending = await orderServices.GetByIdOrders(order.Id);
+        orderPending.Address_Id = selectedAddress.Id;
+        orderPending.CreatedByAdminId = null;
+        await orderServices.Update(orderPending, orderPending.Id);
+        var shippingRequest = new ShippingRequest
+            {
+                service_type_id = 2,
+                to_district_id = address.DistrictId,
+                to_ward_code = address.WardCode.ToString(),
+                length = 100,
+                width = 80,
+                height = 5,
+                weight = 1000,
+                insurance_value = 500000,
+                coupon = null,
+                cod_failed_amount = null,
+                cod_value = null
+            };
+        feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
         isModalAddressVisiable = false;
+        isModalAddressVisiable = false;
+        CalculateTotalMoney();
     }
-
     private void ClearInfoAddress()
     {
         selectedAddress = null;
@@ -1105,7 +1128,7 @@
             foreach (var cartDetailId in selectedCartDetails)
             {
                 var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
                 productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
@@ -1137,7 +1160,7 @@
             foreach (var cartDetailId in selectedCartDetails)
             {
                 var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
                 productAttribute.Stock -= cartDetail.Quantity;
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
@@ -1173,7 +1196,7 @@
             foreach (var cartDetailId in selectedCartDetails)
             {
                 var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id);
+                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
                 productAttribute.Stock -= cartDetail.Quantity;
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);

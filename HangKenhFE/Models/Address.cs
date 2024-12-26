@@ -10,6 +10,8 @@ namespace HangKenhFE.Models
         public long Id { get; set; }
         public long? User_Id { get; set; }
         public string? Name { get; set; }
+        public string? WardCode { get; set; }
+        public int? DistrictId { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; } // user không đăng nhập thì nhập email để theo dõi đơn 
         public string? Street { get; set; } // địa chỉ cụ thể 
@@ -21,6 +23,7 @@ namespace HangKenhFE.Models
         public string? Status { get; set; }
         [ForeignKey("User_Id")]
         public virtual Users? User { get; set; }
-        public virtual Orders? Order { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Orders> Orders { get; set; } = new List<Orders>();
     }
 }

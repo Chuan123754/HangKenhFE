@@ -285,7 +285,7 @@
                                     {
                                         @foreach (var province in provinces)
                                         {
-                                            <option value="@province.Id">@province.Name</option>
+                                            <option value="@province.ProvinceID">@province.ProvinceName</option>
                                         }
                                     }
                                 </select>
@@ -298,7 +298,7 @@
                                     {
                                         @foreach (var district in districts)
                                         {
-                                            <option value="@district.Id">@district.Name</option>
+                                            <option value="@district.DistrictID">@district.DistrictName</option>
                                         }
                                     }
                                 </select>
@@ -311,7 +311,7 @@
                                     {
                                         @foreach (var ward in wards)
                                         {
-                                            <option value="@ward.Id">@ward.Name</option>
+                                            <option value="@ward.WardCode">@ward.WardName</option>
                                         }
                                     }
                                 </select>
@@ -378,7 +378,7 @@
                 OrderTracking.Status = null;
                 selectedTrackingId = 0;
             }
-     
+
             StateHasChanged();
         }
         catch (Exception ex)
@@ -536,12 +536,12 @@
             bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thay đổi địa chỉ nhận hàng?");
             if (confirmed)
             {
-                var province = provinces.FirstOrDefault(p => p.Id == TempAddress.Province_city);
-                var district = districts.FirstOrDefault(d => d.Id == TempAddress.District);
-                var ward = wards.FirstOrDefault(w => w.Id == TempAddress.Ward_commune);
-                Address.Province_city = province.Name;
-                Address.District = district?.Name;
-                Address.Ward_commune = ward?.Name;
+                var province = provinces.FirstOrDefault(p => p.Code == TempAddress.Province_city);
+                var district = districts.FirstOrDefault(d => d.Code == TempAddress.District);
+                var ward = wards.FirstOrDefault(w => w.WardCode == TempAddress.Ward_commune);
+                Address.Province_city = province.ProvinceName;
+                Address.District = district?.DistrictName;
+                Address.Ward_commune = ward?.WardName;
 
                 Address.Street = Address.Street;
                 Address.Phone = Address.Phone;
@@ -561,19 +561,24 @@
         }
     }
 
-    private List<Province> provinces = new List<Province>();
-    private List<Districted> districts = new List<Districted>();
-    private List<Ward> wards = new List<Ward>();
+    private List<Provinces> provinces = new List<Provinces>();
+    private List<Districts> districts = new List<Districts>();
+    private List<Wards> wards = new List<Wards>();
     private bool hasDistricts = false;
     private bool hasWards = false;
+    private decimal feeShipping = 0;
+    private string selectedProvinceId;
+    private string selectedDistrictId;
+    private string selectedWardId;
     [Inject] private AddressService address_Service { get; set; }
     private async Task OnProvinceChange(ChangeEventArgs e)
     {
-        var selectedProvinceId = e.Value?.ToString();
+        selectedProvinceId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedProvinceId))
         {
-            TempAddress.Province_city = selectedProvinceId; 
-            districts = await address_Service.GetDistrictsAsync(int.Parse(selectedProvinceId));
+            // Thiết lập tỉnh hiện tại và xóa các quận huyện, xã
+            TempAddress.Province_city = selectedProvinceId;
+            districts = await address_Service.GetDistrictsByProvinceAsync(int.Parse(selectedProvinceId));
             hasDistricts = districts.Count > 0;
             wards.Clear();
             hasWards = false;
@@ -581,17 +586,17 @@
     }
     private async Task OnDistrictChange(ChangeEventArgs e)
     {
-        var selectedDistrictId = e.Value?.ToString();
+        selectedDistrictId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedDistrictId))
         {
-            TempAddress.District = selectedDistrictId; 
-            wards = await address_Service.GetWardsAsync(int.Parse(selectedDistrictId));
+            TempAddress.District = selectedDistrictId;
+            wards = await address_Service.GetWardsByDistrictAsync(int.Parse(selectedDistrictId));
             hasWards = wards.Count > 0;
         }
     }
     private async Task OnWardChange(ChangeEventArgs e)
     {
-        var selectedWardId = e.Value?.ToString();
+        selectedWardId = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedWardId))
         {
             TempAddress.Ward_commune = selectedWardId;
@@ -603,4 +608,48 @@
     private string ward;
     private string street;
     private string phone;
+    private Address selectedAddress;
+    private async Task SelectAddress(Address address)
+    {
+        ClearInfoAddress();
+        if (address != null)
+        {
+            selectedAddress = address;
+            city = address.Province_city;
+            district = address.District;
+            ward = address.Ward_commune;
+            street = address.Street;
+            phone = address.User?.Phone;
+        }
+        var orderPending = await orderService.GetByIdOrders(OrderId);
+        orderPending.Address_Id = selectedAddress.Id;
+        orderPending.CreatedByAdminId = null;
+        modalUpdateAddress = false;
+        var shippingRequest = new ShippingRequest
+            {
+                service_type_id = 2,
+                to_district_id = address.DistrictId,
+                to_ward_code = address.WardCode.ToString(),
+                length = 100,
+                width = 80,
+                height = 5,
+                weight = 1000,
+                insurance_value = 500000,
+                coupon = null,
+                cod_failed_amount = null,
+                cod_value = null
+            };
+        orderPending.FeeShipping = await address_Service.CalculateShippingFee(shippingRequest);
+        orderPending.Totalmoney = orderPending.TotalAmount + orderPending.FeeShipping;
+        await orderService.Update(orderPending, orderPending.Id);
+    }
+    private void ClearInfoAddress()
+    {
+        selectedAddress = null;
+        city = string.Empty;
+        district = string.Empty;
+        ward = string.Empty;
+        street = string.Empty;
+        phone = string.Empty;
+    }
 }

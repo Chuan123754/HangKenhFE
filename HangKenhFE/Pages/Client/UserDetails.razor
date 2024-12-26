@@ -88,15 +88,6 @@ else
     private DateTime? otpExpiryTime;
     private string otpError;
 
-    private bool isCreateAddress = false;
-    private List<Province> provinces = new List<Province>();
-    private List<Districted> districts = new List<Districted>();
-    private List<Ward> wards = new List<Ward>();
-    private Address address = new Address();
-    private bool hasDistricts = false;
-    private bool hasWards = false;
-
-
     private async Task<bool> ShowConfirmation(string message)
     {
         return await JSRuntime.InvokeAsync<bool>("confirm", message);
@@ -132,7 +123,6 @@ else
                 Navigation.NavigateTo("/admin/users");
                 return;
             }
-            address = null;
 
         }
         catch (Exception ex)
