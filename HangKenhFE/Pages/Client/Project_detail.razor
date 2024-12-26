@@ -106,12 +106,12 @@
                                     <div class="product-image">
                                         <a @onclick="() => NavDetailsProduct(item.Id)">
                                             <div class="img-wrap">
-                                                <img src="@item.Posts?.Feature_image"
+                                                <img src="@item.Feature_image"
                                                      style="height:403px !important" class="w-100 h-100 object-fit-cover"
                                                      alt="">
                                             </div>
                                             <div class="img-wrap-hide">
-                                                <img src="@GetFirstImageUrl(item.Posts.Image_library)"
+                                                <img src="@GetFirstImageUrl(item.Image_library)"
                                                      style="height:403px !important" class="w-100 h-100 object-fit-cover"
                                                      alt="">
                                             </div>
@@ -119,10 +119,10 @@
                                     </div>
                                     <figcaption class="product-info">
                                         <a @onclick="() => NavDetailsProduct(item.Id)">
-                                            <a href="" class="product-name">@item.Posts.Title</a>
+                                            <a href="" class="product-name">@item.Title</a>
                                         </a>
                                         <div class="product-description">
-                                            <span class="description">@item.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
+                                            <span class="description">@item.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                         </div>
                                         @if (item.MinPrice.HasValue && item.MaxPrice.HasValue)
                                         {
@@ -150,7 +150,7 @@
 @code {
     [Parameter]
     public string slug { get; set; }
-    private List<Product_variants> productVariant_list = new List<Product_variants>();
+    private List<Product_Posts> productVariant_list = new List<Product_Posts>();
     private Product_Posts posts_project = new Product_Posts();
     private List<Product_Posts> list_post = new List<Product_Posts>();
     private Banner banner = new Banner();

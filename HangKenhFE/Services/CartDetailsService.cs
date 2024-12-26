@@ -81,7 +81,7 @@ namespace HangKenhFE.Services
             return JsonConvert.DeserializeObject<Users>(userJson);
         }
 
-        private async Task<Product_variants> FetchProduct(long productId)
+        private async Task<Product_Posts> FetchProduct(long productId)
         {
             string requestURL = $"{_baseUrl}/api/PostProducts/postproducts-get-id/{productId}";
             var response = await _httpClient.GetAsync(requestURL);
@@ -91,10 +91,10 @@ namespace HangKenhFE.Services
             }
 
             var productJson = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<Product_variants>(productJson);
+            return JsonConvert.DeserializeObject<Product_Posts>(productJson);
         }
 
-        private object PrepareCartDetails(Cart_details cartDetails, Carts cart, Users user, Product_variants product)
+        private object PrepareCartDetails(Cart_details cartDetails, Carts cart, Users user, Product_Posts product)
         {
             return new
             {

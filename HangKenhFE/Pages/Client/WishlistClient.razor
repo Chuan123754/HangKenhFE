@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 @inject IUserService userServices
 @inject IWishlistServices wishlistServices
-@inject IProduct_variants_wishlist_Services productvariantswishlist
+@inject IProduct_wishlist_Services productvariantswishlist
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 @inject NavigationManager nav
 
@@ -48,12 +48,12 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="@item.Product_Variants.Posts.Feature_image"
-                                         alt="@item.Product_Variants.Posts.Title"
+                                    <img src="@item.Product_Posts.Feature_image"
+                                         alt="@item.Product_Posts.Title"
                                          class="img-thumbnail"
                                          style="width: 100px; height: auto; margin-right: 15px;">
                                     <div>
-                                        <h5 class="mb-1">@item.Product_Variants.Posts.Title</h5>
+                                        <h5 class="mb-1">@item.Product_Posts.Title</h5>
                                         @if (item.MinPrice.HasValue && item.MaxPrice.HasValue)
                                         {
                                             <p class="mb-1 text-muted">
@@ -71,7 +71,7 @@
                             <td class="text-center align-middle">
 
                                 <button class="btn btn-sm btn-outline-success me-2"
-                                            @onclick="() => MuaNgay(item.Product_variants_id)">
+                                            @onclick="() => MuaNgay(item.Product_Posts_Id)">
                                         Mua ngay
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger"
@@ -92,7 +92,7 @@
 
 @code {
     private Users user = new Users();
-    private List<Product_variants_wishlist> product_WL_list = new List<Product_variants_wishlist>();
+    private List<Product_wishlist> product_WL_list = new List<Product_wishlist>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

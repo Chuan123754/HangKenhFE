@@ -7,7 +7,7 @@
 @inject IProductAttributeServies productAttributeServices
 @inject ICartService cartServices
 @inject IWishlistServices wishlistServices
-@inject IProduct_variants_wishlist_Services productvariantswishlist
+@inject IProduct_wishlist_Services productattributewishlist
 @inject ICartDetailsService cartDetailServices
 @using System.Text.Json;
 @inject IJSRuntime JS
@@ -30,7 +30,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/"> Trang chủ</a></li>
                     <li class="breadcrumb-item"><a href="/category"> Sản phẩm</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">@selectedProduct?.Product_Variant.Posts.Title</li>
+                    <li class="breadcrumb-item active" aria-current="page">@selectedProduct?.Posts.Title</li>
                 </ol>
             </nav>
         </header>
@@ -39,7 +39,7 @@
                 <div class="image-slider">
                     @if (selectedProduct != null)
                     {
-                        foreach (var image in selectedProduct.Product_Variant.Posts.Image_library.Split(','))
+                        foreach (var image in selectedProduct.Posts.Image_library.Split(','))
                         {
                             <img src="@image" class="mb-3" alt="Ảnh sản phẩm" />
                         }
@@ -48,7 +48,7 @@
             </div>
             <div class="block-right">
                 <div class="product-details">
-                    <h2 class="product-name-detail">@selectedProduct?.Product_Variant?.Posts?.Title</h2>
+                    <h2 class="product-name-detail">@selectedProduct?.Posts?.Title</h2>
                     <p class="product-brand">THAM LEN HANGKENH</p>
                     <div class="product-price-rating">
                         <span class="product-price">
@@ -90,7 +90,7 @@
                     </span>
                     <div class="product-size-guide">
                         <span class="product-size-label">1. Chọn kích thước thảm</span>
-                        <a href="#" class="size-guide-link">Hướng dẫn chọn kích thước</a>
+                        
                     </div>
                     <div class="w-100 select-option">
                         <select class="product-size-selector w-100" @onchange="OnSizeChanged">
@@ -102,7 +102,7 @@
                     </div>
                     <div class="product-color-guide">
                         <span class="product-color-label">2. Chọn màu sắc</span>
-                        <a href="#" class="size-guide-link">Hướng dẫn chọn màu sắc</a>
+               
                     </div>
                     <div class="row product-color-select">
                         @foreach (var color in productAttributes_List.GroupBy(p => p.Color_Id).Select(p => p.FirstOrDefault()).Select(p => p.Color))
@@ -129,24 +129,23 @@
                             <img src="main/assets/images/like.svg"
                                  class="like">
                         </span>
-                    
                     </div>
                     <div class="product-details-list">
                         <div>
                             <p>CHẤT LIỆU</p>
-                            <p>@selectedProduct?.Product_Variant?.Material?.Title</p>
+                            <p>@selectedProduct?.Material?.Title</p>
                         </div>
                         <div>
                             <p>CÔNG NGHỆ DỆT</p>
-                            <p>@selectedProduct?.Product_Variant?.Textile_Technology?.Title</p>
+                            <p>@selectedProduct?.Textile_Technology?.Title</p>
                         </div>
                         <div>
                             <p>PHONG CÁCH</p>
-                            <p>@selectedProduct?.Product_Variant?.Style?.Title</p>
+                            <p>@selectedProduct?.Style?.Title</p>
                         </div>
                         <div>
                             <p>MÔ TẢ</p>
-                            <p>@selectedProduct?.Product_Variant?.Posts.Short_description</p>
+                            <p>@selectedProduct?.Posts.Short_description</p>
                         </div>
                     </div>
                 </div>
@@ -199,7 +198,7 @@
                     <header>
 
                         <div class="product-details-list">
-                            @((MarkupString)selectedProduct?.Product_Variant?.Posts.Description)
+                            @((MarkupString)selectedProduct?.Posts.Description)
                         </div>
 
                     </header>
@@ -228,19 +227,19 @@
                         <div class="product-image">
                             <a @onclick="() => NavDetails(prod.Id)" class="w-100">
                                 <div class="img-wrap">
-                                    <img src="@prod.Posts.Feature_image"
+                                    <img src="@prod.Feature_image"
                                          style="height:403px !important" class="w-100 h-100 object-fit-cover">
                                 </div>
                                 <div class="img-wrap-hide">
-                                    <img src="@GetFirstImageUrl(prod.Posts.Image_library)"
+                                    <img src="@GetFirstImageUrl(prod.Image_library)"
                                          style="height:403px !important" class="w-100 h-100 object-fit-cover">
                                 </div>
                             </a>
                         </div>
                         <figcaption class="product-info">
-                            <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Posts.Title</a>
+                            <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Title</a>
                             <div class="product-description">
-                                <span class="description">@prod.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
+                                <span class="description">@prod.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                             </div>
                             <div class="product-price">
                                 <span class="price">
@@ -271,7 +270,7 @@
 @code {
     [Parameter]
     public long Id { get; set; }
-    private List<Product_variants> productVariant_list = new List<Product_variants>();
+    private List<Product_Posts> productVariant_list = new List<Product_Posts>();
     private List<Product_Attributes> productAttributes_List = new List<Product_Attributes>();
     private List<Size> lst_Size = new List<Size>();
     private List<Color> lst_Color = new List<Color>();
@@ -294,7 +293,7 @@
     private int totalItems;
     protected async override Task OnInitializedAsync()
     {
-        productAttributes_List = await postServices.GetProductAttributesByProductVarianIdClient(Id);
+        productAttributes_List = await postServices.GetProductAttributesByPostIdClient(Id);
 
         if (productAttributes_List == null || !productAttributes_List.Any())
         {
@@ -315,7 +314,7 @@
         selectedProduct = productAttributes_List.First();
         selectedSizeId = selectedProduct.Size?.Id ?? 0;
         selectedColorId = selectedProduct.Color?.Id ?? 0;
-        productPostId = selectedProduct.Product_Variant?.Posts?.Id ?? 0;
+        productPostId = selectedProduct.Posts?.Id ?? 0;
 
         if (productPostId > 0)
         {
@@ -502,8 +501,8 @@
                 if (wishlistUser != null)
                 {
                     // Check sản phẩm đã tồn tại trong wishlist chưa
-                    var WLP = await productvariantswishlist.GetAllPW();
-                    var existingWLP = WLP.FirstOrDefault(cd => cd.Product_variants_id == Id && cd.Wishlist_id == wishlistUser.Id);
+                    var WLP = await productattributewishlist.GetAllPW();
+                    var existingWLP = WLP.FirstOrDefault(cd => cd.Product_Posts_Id == Id && cd.Wishlist_id == wishlistUser.Id);
 
                     if (existingWLP != null)
                     {
@@ -513,13 +512,13 @@
                     }
                     else
                     {
-                        var wislisdetail = new Product_variants_wishlist
+                        var wislisdetail = new Product_wishlist
                             {
                                 Wishlist_id = wishlistUser.Id,
-                                Product_variants_id = Id,
+                                Product_Posts_Id = Id,
                             };
 
-                        await productvariantswishlist.Create(wislisdetail);
+                        await productattributewishlist.Create(wislisdetail);
                         await JS.InvokeVoidAsync("toastr.success", "Thêm sản phẩm vào wishlist thành công");
                     }
                 }
@@ -548,7 +547,7 @@
     private async Task LoadPosts()
     {
         string searchTerm = string.IsNullOrEmpty(search_query) ? "" : search_query;
-        productVariant_list = await postServices.GetByTypeAsyncProduct("product", page_number, page_size, searchTerm);
+        productVariant_list  = await postServices.GetByTypeAsyncProduct("product", page_number, page_size, searchTerm);
         totalItems = await postServices.GetTotalCountAsync("product", searchTerm);
         total_pages = (int)Math.Ceiling((double)totalItems / page_size);
     }

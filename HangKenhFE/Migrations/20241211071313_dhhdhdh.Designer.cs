@@ -1071,7 +1071,7 @@ namespace HangKenhFE.Migrations
                     b.ToTable("product_post");
                 });
 
-            modelBuilder.Entity("HangKenhFE.Models.Product_variants", b =>
+            modelBuilder.Entity("HangKenhFE.Models.Product_Posts", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1872,7 +1872,7 @@ namespace HangKenhFE.Migrations
                         .WithMany("Product_Attributes")
                         .HasForeignKey("Color_Id");
 
-                    b.HasOne("HangKenhFE.Models.Product_variants", "Product_Variant")
+                    b.HasOne("HangKenhFE.Models.Product_Posts", "Product_Variant")
                         .WithMany("Product_Attributes")
                         .HasForeignKey("Product_Variant_Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1902,24 +1902,24 @@ namespace HangKenhFE.Migrations
                     b.Navigation("Designer");
                 });
 
-            modelBuilder.Entity("HangKenhFE.Models.Product_variants", b =>
+            modelBuilder.Entity("HangKenhFE.Models.Product_Posts", b =>
                 {
                     b.HasOne("HangKenhFE.Models.Material", "Material")
-                        .WithMany("Product_Variants")
+                        .WithMany("Product_Posts")
                         .HasForeignKey("Material_id");
 
                     b.HasOne("HangKenhFE.Models.Product_Posts", "Posts")
-                        .WithMany("Product_Variants")
+                        .WithMany("Product_Posts")
                         .HasForeignKey("Post_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HangKenhFE.Models.Style", "Style")
-                        .WithMany("Product_Variants")
+                        .WithMany("Product_Posts")
                         .HasForeignKey("Style_id");
 
                     b.HasOne("HangKenhFE.Models.Textile_technology", "Textile_Technology")
-                        .WithMany("Product_Variants")
+                        .WithMany("Product_Posts")
                         .HasForeignKey("Textile_technology_id");
 
                     b.Navigation("Material");
@@ -1933,7 +1933,7 @@ namespace HangKenhFE.Migrations
 
             modelBuilder.Entity("HangKenhFE.Models.Product_variants_wishlist", b =>
                 {
-                    b.HasOne("HangKenhFE.Models.Product_variants", "Product_Variants")
+                    b.HasOne("HangKenhFE.Models.Product_Posts", "Product_Posts")
                         .WithMany("Product_Variants_Wishlists")
                         .HasForeignKey("Product_variants_id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1945,7 +1945,7 @@ namespace HangKenhFE.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product_Variants");
+                    b.Navigation("Product_Posts");
 
                     b.Navigation("Wishlist");
                 });
@@ -2073,7 +2073,7 @@ namespace HangKenhFE.Migrations
 
             modelBuilder.Entity("HangKenhFE.Models.Material", b =>
                 {
-                    b.Navigation("Product_Variants");
+                    b.Navigation("Product_Posts");
                 });
 
             modelBuilder.Entity("HangKenhFE.Models.Menus", b =>
@@ -2108,10 +2108,10 @@ namespace HangKenhFE.Migrations
 
                     b.Navigation("Post_tags");
 
-                    b.Navigation("Product_Variants");
+                    b.Navigation("Product_Posts");
                 });
 
-            modelBuilder.Entity("HangKenhFE.Models.Product_variants", b =>
+            modelBuilder.Entity("HangKenhFE.Models.Product_Posts", b =>
                 {
                     b.Navigation("Product_Attributes");
 
@@ -2125,12 +2125,12 @@ namespace HangKenhFE.Migrations
 
             modelBuilder.Entity("HangKenhFE.Models.Style", b =>
                 {
-                    b.Navigation("Product_Variants");
+                    b.Navigation("Product_Posts");
                 });
 
             modelBuilder.Entity("HangKenhFE.Models.Textile_technology", b =>
                 {
-                    b.Navigation("Product_Variants");
+                    b.Navigation("Product_Posts");
                 });
 
             modelBuilder.Entity("HangKenhFE.Models.Users", b =>
