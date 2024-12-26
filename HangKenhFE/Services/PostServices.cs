@@ -16,9 +16,9 @@ namespace HangKenhFE.Services
             _client = new HttpClient();
             _baseUrl = configuration.GetValue<string>("ApiSettings:BaseUrl"); // Lấy URL từ appsettings.json
         }
-        public async Task<List<Product_Attributes>> GetProductAttributesByProductVarianIdClient(long id)
+        public async Task<List<Product_Attributes>> GetProductAttributesByPostIdClient(long id)
         {
-            string requestURL = $"{_baseUrl}/api/ProductAttributes/GetProductAttributesByProductVarianIdClient?id={id}";
+            string requestURL = $"{_baseUrl}/api/ProductAttributes/GetProductAttributesByPostIdClient?id={id}";
             var response = await _client.GetStringAsync(requestURL);
             return JsonConvert.DeserializeObject<List<Product_Attributes>>(response);
         }
@@ -83,17 +83,17 @@ namespace HangKenhFE.Services
             return response; // Kết quả trả về sẽ là chuỗi JSON hoặc chuỗi đơn giản
         }
 
-        public async Task<List<Product_variants>> GetAllByClient()
+        public async Task<List<Product_Posts>> GetAllByClient()
         {
             var uri = $"{_baseUrl}/api/Product_Post/GetAllByClient";
-            // Lấy dữ liệu từ API và ánh xạ vào danh sách Product_variants
-            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+            // Lấy dữ liệu từ API và ánh xạ vào danh sách Product_Posts
+            return await _client.GetFromJsonAsync<List<Product_Posts>>(uri);
         }
 
-        public async Task<List<Product_variants>> GetByTypeAsyncProduct(string type, int pageNumber, int pageSize, string searchTerm)
+        public async Task<List<Product_Posts>> GetByTypeAsyncProduct(string type, int pageNumber, int pageSize, string searchTerm)
         {
             var uri = $"{_baseUrl}/api/Product_Post/get-by-type-product?type={type}&pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";
-            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+            return await _client.GetFromJsonAsync<List<Product_Posts>>(uri);
         }
 
         public async Task<int> GetTotalCountAsyncProduct(string type, string searchTerm)
@@ -113,12 +113,12 @@ namespace HangKenhFE.Services
             return await _client.GetFromJsonAsync<List<Product_Posts>>($"{_baseUrl}/api/Product_Post/Get-all-client-type-cate?type={type}&cate={cate}");
         }
 
-        public async Task<List<Product_variants>> GetCountByTypeDesigner(long designerId)
+        public async Task<List<Product_Posts>> GetCountByTypeDesigner(long designerId)
         {
-            return await _client.GetFromJsonAsync<List<Product_variants>>($"{_baseUrl}/api/Product_Post/GetCountByTypeDesigner?designerId={designerId}");
+            return await _client.GetFromJsonAsync<List<Product_Posts>>($"{_baseUrl}/api/Product_Post/GetCountByTypeDesigner?designerId={designerId}");
         }     
 
-        public async Task<List<Product_variants>> GetByTypeAsyncFilter(List<long?> idDesigner, List<long?> idColor, List<long?> idMaterial, List<long?> idTextile_technology, List<long?> idStyle, List<long?> idSize, List<long?> idCategory, int pageNumber, int pageSize, string searchTerm)
+        public async Task<List<Product_Posts>> GetByTypeAsyncFilter(List<long?> idDesigner, List<long?> idColor, List<long?> idMaterial, List<long?> idTextile_technology, List<long?> idStyle, List<long?> idSize, List<long?> idCategory, int pageNumber, int pageSize, string searchTerm)
         {
             var categoriesString = string.Join("&", idCategory.Select(c => $"idCategory={c}"));
             var colorString = string.Join("&", idColor.Select(c => $"idColor={c}"));
@@ -129,7 +129,7 @@ namespace HangKenhFE.Services
             var designerString = string.Join("&", idDesigner.Select(c => $"idDesigner={c}"));
       
             var uri = $"{_baseUrl}/api/Product_Post/get-by-product-filter?{designerString}&{colorString}&{materialString}&{textileString}&{styleString}&{sizeString}&{categoriesString}&pageNumber={pageNumber}&pageSize={pageSize}&searchTerm={Uri.EscapeDataString(searchTerm)}";
-            return await _client.GetFromJsonAsync<List<Product_variants>>(uri);
+            return await _client.GetFromJsonAsync<List<Product_Posts>>(uri);
         }
 
         public async Task<int> GetTotalCountAsyncFilter(List<long?> idDesigner, List<long?> idColor, List<long?> idMaterial, List<long?> idTextile_technology, List<long?> idStyle, List<long?> idSize, List<long?> idCategory, string searchTerm)

@@ -15,25 +15,32 @@ namespace HangKenhFE.Models
     {
         [Key]
         public long Id { get; set; }
+        public int? STT { get; set; }
         [StringLength(255)]
+        [Required(ErrorMessage = "Tên là bắt buộc.")]
         public string? Title { get; set; }
 
         [StringLength(255)]
         [Unicode(false)]
+        [Required(ErrorMessage = "Đường dẫn là bắt buộc.")]
         public string? Slug { get; set; }
 
         [StringLength(20)]
+        [Required(ErrorMessage = "Trạng thái là bắt buộc.")]
         public string? Status { get; set; }
         public long? AuthorId { get; set; }
-        public bool? Deleted { get; set; }
 
         [StringLength(255)]
         public string? Type { get; set; }
-        public string? product_video { get; set; }
         public string? Short_description { get; set; }
         public string? Description { get; set; }
         public string? Image_library { get; set; }
         public string? Feature_image { get; set; }
+        [NotMapped]
+        public long? MinPrice { get; set; }
+
+        [NotMapped]
+        public long? MaxPrice { get; set; }
 
         public DateTime? Post_date { get; set; }
 
@@ -47,7 +54,9 @@ namespace HangKenhFE.Models
 
         public DateTime? Updated_at { get; set; }
         [JsonIgnore]
-        public virtual ICollection<Product_variants> Product_Variants { get; set; } = new List<Product_variants>();
+        public virtual ICollection<Product_Attributes> Product_Attributes { get; set; } = new List<Product_Attributes>();
+        [JsonIgnore]
+        public virtual ICollection<Product_wishlist> Product_Wishlists { get; set; } = new List<Product_wishlist>();
 
         public virtual List<Post_tags> Post_tags { get; set; } = new List<Post_tags>();
 
@@ -62,13 +71,15 @@ namespace HangKenhFE.Models
         public const string STATUS_DRAFT = "draft";
         public const string STATUS_PENDING = "pending";
         public const string STATUS_PUBLISH = "publish";
+        public const string STATUS_DELETE = "delete";
 
         // Dictionary to hold status labels
         public static readonly Dictionary<string, string> STATUSES = new Dictionary<string, string>
         {
             { STATUS_DRAFT, "Nháp" },
             { STATUS_PENDING, "Hạ xuống" },
-             { STATUS_PUBLISH, "Công khai" }
+             { STATUS_PUBLISH, "Công khai" },
+             { STATUS_DELETE, "Đã xoá" }
         };
 
         // Dictionary to hold status classes (for styling purposes)
@@ -76,7 +87,8 @@ namespace HangKenhFE.Models
         {
            { STATUS_DRAFT, "text-danger" },
             { STATUS_PENDING, "text-warning" },
-             { STATUS_PUBLISH, "text-success" }
+             { STATUS_PUBLISH, "text-success" },
+             { STATUS_DELETE, "text-muted" }
         };
 
         // Get the label for the current status

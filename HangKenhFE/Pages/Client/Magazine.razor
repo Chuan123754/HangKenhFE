@@ -90,22 +90,22 @@
                                 <div class="product-image">
                                     <a @onclick="() => NavDetails(prod.Id)" class="w-100">
                                         <div class="img-wrap">
-                                            <img src="@prod.Posts.Feature_image"
+                                            <img src="@prod.Feature_image"
                                                  style="height:548px !important" class="w-100 h-100 object-fit-cover"
-                                                 alt="@prod.Posts.Title">
-                                        </div>
+                                                 alt="@prod.Title">
+                                        </div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
                                         <div class="img-wrap-hide">
-                                            <img src="@GetFirstImageUrl(prod.Posts.Image_library)"
+                                            <img src="@GetFirstImageUrl(prod.Image_library)"
                                                  style="height:548px !important" class="w-100 h-100 object-fit-cover"
-                                                 alt="@prod.Posts.Title">
+                                                 alt="@prod.Title">
                                         </div>
                                     </a>
                                   
                                 </div>
                                 <figcaption class="product-info">
-                                    <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Posts.Title</a>
+                                    <a @onclick="() => NavDetails(prod.Id)" class="product-name">@prod.Title</a>
                                     <div class="product-description">
-                                        <span class="description">@prod.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
+                                        <span class="description">@prod.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                     </div>
                                     @if (prod.MinPrice.HasValue && prod.MaxPrice.HasValue)
                                     {
@@ -133,7 +133,7 @@
     public string slug { get; set; }
     private Product_Posts posts = new Product_Posts();
     private List<Product_Posts> list_post = new List<Product_Posts>();
-    private List<Product_variants> list_product = new List<Product_variants>();
+    private List<Product_Posts> list_product = new List<Product_Posts>();
     private Banner banner = new Banner();
     private string abc = "";
     protected async override Task OnInitializedAsync()

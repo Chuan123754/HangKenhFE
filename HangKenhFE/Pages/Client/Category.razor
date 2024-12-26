@@ -243,22 +243,22 @@
                                 <div class="product-image">
                                     <a @onclick="() => NavDetails(ps.Id)" class="w-100">
                                         <div class="img-wrap">
-                                            <img src="@ps.Posts.Feature_image"
+                                            <img src="@ps.Feature_image"
                                                  class="w-100 h-100 object-fit-cover"
-                                               style="height:403px !important"  alt="@ps.Posts.Title">
+                                               style="height:403px !important"  alt="@ps.Title">
                                         </div>
                                         <div class="img-wrap-hide">
-                                            <img src="@GetFirstImageUrl(ps.Posts.Image_library)"
+                                            <img src="@GetFirstImageUrl(ps.Image_library)"
                                                  class="w-100 h-100 object-fit-cover"
-                                                 style="height:403px !important" alt="@ps.Posts.Title">
+                                                 style="height:403px !important" alt="@ps.Title">
                                         </div>
                                     </a>
                                 
                                 </div>
                                 <figcaption class="product-info">
-                                    <a @onclick="() => NavDetails(ps.Id)" class="product-name">@ps.Posts.Title</a>
+                                    <a @onclick="() => NavDetails(ps.Id)" class="product-name">@ps.Title</a>
                                     <div class="product-description">
-                                        <span class="description">@ps.Posts.Post_categories.FirstOrDefault()?.Categories?.Title</span>
+                                        <span class="description">@ps.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                     </div>
                                     <div class="product-price">
                                         @if (ps.MinPrice.HasValue && ps.MaxPrice.HasValue)
@@ -290,7 +290,7 @@
     </div>
 </section>
 @code {
-    private List<Product_variants> product_list = new List<Product_variants>();
+    private List<Product_Posts> product_list = new List<Product_Posts>();
     private List<Categories> categoriesList = new List<Categories>();
     private List<Color> colorsList = new List<Color>();
     private List<Material> materialsList = new List<Material>();

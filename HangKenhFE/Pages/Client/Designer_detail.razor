@@ -157,12 +157,12 @@
                 <div class="row mb-80px @(i % 2 != 0 ? "flex-row-reverse" : "")">
                     <div class="col-6">
                         <div style="height: 675px">
-                            <img src="@post.Posts.Feature_image" class="w-100 h-100 object-fit-cover" alt="@post.Posts.Title">
+                            <img src="@post.Feature_image" class="w-100 h-100 object-fit-cover" alt="@post.Title">
                         </div>
                         <div class="article">
-                            <h3 class="article-heading">@post.Posts.Title</h3>
+                            <h3 class="article-heading">@post.Title</h3>
                             <div class="article-description">
-                                @post.Posts.Short_description
+                                @post.Short_description
                             </div>
                             <a @onclick="() => NavDetails(post.Id)">
                                 <button class="btn-white">
@@ -177,8 +177,8 @@
                     </div>
                     <div class="col-6" style="height: 1000px">
                         <img class="w-100 h-100 object-fit-cover"
-                             src="@GetFirstImageUrl(post.Posts.Image_library)"
-                             alt="@post.Posts.Title">
+                             src="@GetFirstImageUrl(post.Image_library)"
+                             alt="@post.Title">
                     </div>
                 </div>
             }
@@ -195,7 +195,7 @@
     private Designer designer = new Designer();
     private MetaData metaData = new MetaData();
     private List<Product_Posts> list_post = new List<Product_Posts>();
-    private List<Product_variants> list_product = new List<Product_variants>();
+    private List<Product_Posts> list_product = new List<Product_Posts>();
     private Banner banner = new Banner();
     protected async override Task OnInitializedAsync()
     {

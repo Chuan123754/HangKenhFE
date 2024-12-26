@@ -46,16 +46,13 @@ builder.Services.AddScoped<IAddressServices, AddressService>();
 builder.Services.AddScoped<ICategoriesServices, CategoriesServices>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICartDetailsService, CartDetailsService>();
-//builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IPostTagService, PostTagService>();
 builder.Services.AddScoped<ITagsServices, TagsServices>();
-//builder.Services.AddScoped<IPostMetaService, PostMetaService>();
 builder.Services.AddScoped<IDiscountServices, DiscountServices>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IUserVoucherService, UserVoucherService>();
 builder.Services.AddScoped<FilesIServices, FilesServices>();
 builder.Services.AddScoped<IDesignerServices, DesignerServices>();
-builder.Services.AddScoped<IOptionsServices, OptionServices>();
 builder.Services.AddScoped<IPostSer, PostServices>();
 builder.Services.AddScoped<IColorServices, ColorServices>();
 builder.Services.AddScoped<ISizeServices, SizeServices>();
@@ -67,7 +64,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<AddressService>();
 builder.Services.AddScoped<EmailNotification>();
 builder.Services.AddScoped<IProductAttributeServies, ProductAttributeServices>();
-builder.Services.AddScoped<IProductVariantServices, ProductVariantServices>();
 builder.Services.AddScoped<OrderDetailsIServices, OrderDetailsServices>();
 builder.Services.AddScoped<IOrderIServices, OrderServices>();
 builder.Services.AddScoped<IOrderTrackingServices, OrderTrackingService>();
@@ -82,7 +78,7 @@ builder.Services.AddScoped<IQaService, QaService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddScoped<IWishlistServices, WishlistServices>();
-builder.Services.AddScoped<IProduct_variants_wishlist_Services, Product_variants_wishlist_Services>();
+builder.Services.AddScoped<IProduct_wishlist_Services, Product_wishlist_Services>();
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
