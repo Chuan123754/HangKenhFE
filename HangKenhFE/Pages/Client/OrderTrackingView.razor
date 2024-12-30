@@ -215,7 +215,7 @@
                         @if (Address != null)
                         {
                             <p><strong>Tên Người nhận hàng: </strong>@Address.Name </p>
-                            <p><strong>Địa chỉ nhận hàng : </strong>  @Address.Street -  @Address.Ward_commune - @Address.District - @Address.Province_city </p>
+                            <p><strong>Địa chỉ nhận hàng : </strong>  @Order.Strees </p>
                             <p><strong>Số điện thoại người nhận: </strong>@Address.Phone</p>
                         }
                     }
@@ -329,7 +329,7 @@
                         </div>
 
                         <div class="modal-footer d-flex justify-content-between">
-                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ConfirmUpdateAddress">Xác nhận</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ConfirmUpdateStrees">Xác nhận</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CloseModalUpdateAddress">Hủy</button>
                         </div>
                     </form>
@@ -507,17 +507,17 @@
             return;
         }
     }
-
     private Address TempAddress;
 
     private async void OpenModalUpdateAddress()
     {
         Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
-        TempAddress = new Address // Tạo bản sao 
+        TempAddress = new Address // Tạo bản sao để thao tác
             {
                 Province_city = Address.Province_city,
                 District = Address.District,
-                Ward_commune = Address.Ward_commune
+                Ward_commune = Address.Ward_commune,
+                Street = Address.Street
             };
         modalUpdateAddress = true;
         StateHasChanged();
@@ -529,35 +529,60 @@
         StateHasChanged();
     }
 
-    private async Task ConfirmUpdateAddress()
+    private async Task ConfirmUpdateStrees()
     {
         try
         {
-            bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thay đổi địa chỉ nhận hàng?");
-            if (confirmed)
+            // Hiển thị hộp thoại xác nhận
+            bool confirmed = await JS.InvokeAsync<bool>("confirm", "Bạn có chắc chắn muốn cập nhật địa chỉ giao hàng?");
+            if (!confirmed) return;
+
+            // Chuyển đổi và tìm kiếm Province
+            if (!int.TryParse(selectedProvinceId, out int provinceId))
             {
-                var province = provinces.FirstOrDefault(p => p.Code == TempAddress.Province_city);
-                var district = districts.FirstOrDefault(d => d.Code == TempAddress.District);
-                var ward = wards.FirstOrDefault(w => w.WardCode == TempAddress.Ward_commune);
-                Address.Province_city = province.ProvinceName;
-                Address.District = district?.DistrictName;
-                Address.Ward_commune = ward?.WardName;
-
-                Address.Street = Address.Street;
-                Address.Phone = Address.Phone;
-                Address.Name = Address.Name;
-
-                modalUpdateAddress = false;
-
-                await addressService.UpdateAddress(Address, Address.Id);
-                await JS.InvokeVoidAsync("toastr.success", "Cập nhật địa chỉ nhận hàng thành công");
-                StateHasChanged();
+                throw new Exception("Không thể chuyển đổi `selectedProvinceId` sang kiểu số nguyên.");
             }
+            var province = provinces.FirstOrDefault(p => p.ProvinceID == provinceId);
+            if (province == null)
+            {
+                throw new Exception("Không tìm thấy tỉnh/thành phố với ID đã chọn.");
+            }
+
+            // Chuyển đổi và tìm kiếm District
+            if (!int.TryParse(selectedDistrictId, out int districtId))
+            {
+                throw new Exception("Không thể chuyển đổi `selectedDistrictId` sang kiểu số nguyên.");
+            }
+            var district = districts.FirstOrDefault(d => d.DistrictID == districtId);
+            if (district == null)
+            {
+                throw new Exception("Không tìm thấy quận/huyện với ID đã chọn.");
+            }
+
+            // Tìm kiếm Ward
+            var ward = wards.FirstOrDefault(w => w.WardCode == selectedWardId);
+            if (ward == null)
+            {
+                throw new Exception("Không tìm thấy xã/phường với mã đã chọn.");
+            }
+
+            // Cập nhật trường Strees của Order
+            Order.Strees = $"{TempAddress.Street} - {ward.WardName} - {district.DistrictName} - {province.ProvinceName}";
+
+            // Gửi yêu cầu cập nhật tới API
+            await orderService.UpdateStrees(Order, Order.Id);
+
+            // Ẩn modal sau khi cập nhật
+            modalUpdateAddress = false;
+
+            // Hiển thị thông báo thành công
+            await JS.InvokeVoidAsync("toastr.success", "Địa chỉ giao hàng đã được cập nhật thành công.");
+            StateHasChanged();
         }
-        catch
+        catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("toastr.error", "Cập nhật địa chỉ thất bại. Vui lòng thử lại sau");
-            return;
+            // Hiển thị thông báo lỗi nếu xảy ra lỗi
+            await JS.InvokeVoidAsync("toastr.error", $"Cập nhật địa chỉ giao hàng thất bại: {ex.Message}");
         }
     }
 

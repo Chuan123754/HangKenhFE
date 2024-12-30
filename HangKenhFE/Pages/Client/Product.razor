@@ -414,7 +414,7 @@
                     var cartDetails = await cartDetailServices.GetAll();
                     var existingCartDetail = cartDetails.FirstOrDefault(cd => cd.Product_id == selectedProduct.Id && cd.Cart_id == cartUser.Id);
 
-                    if (productAttribute.Stock <= 0)
+                    if (productAttribute.Stock <= 0 || productAttribute.Stock == null)
                     {
                         await JS.InvokeVoidAsync("toastr.error", "Xin lỗi, sản phẩm này hiện không đủ.");
                         return;

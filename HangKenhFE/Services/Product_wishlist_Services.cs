@@ -52,7 +52,7 @@ namespace HangKenhFE.Services
                 throw new Exception($"Failed to get details of Product_variants_wishlist with ID {id}: {error}");
             }
 
-            return await response.Content.ReadFromJsonAsync<Product_wishlist>(); throw new NotImplementedException();
+            return await response.Content.ReadFromJsonAsync<Product_wishlist>(); 
         }
     }
 }

@@ -247,5 +247,10 @@ namespace HangKenhFE.Services
 
             return revenueData;
         }
+
+        public async Task UpdateStrees(Orders orders, long id)
+        {
+            await _client.PutAsJsonAsync($"{_baseUrl}/api/Orders/UpdateStrees?id={id}", orders);
+        }
     }
 }
