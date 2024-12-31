@@ -56,6 +56,7 @@ namespace HangKenhFE.Services
                 TotalPrincipal = tracking.TotalPrincipal,
                 TotalAmount = tracking.TotalAmount,
                 TotalDiscount = tracking.TotalDiscount,
+                TotalVoucher = tracking.TotalVoucher,
                 FeeShipping = tracking.FeeShipping,
                 TotalMoney = tracking.TotalMoney,
                 Created_by = tracking.Created_by
