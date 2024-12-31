@@ -18,7 +18,6 @@ namespace HangKenhFE.Services
         {
             await _client.PostAsJsonAsync($"{_baseUrl}/api/ProductAttributes/CreateProductAttrubute", productAttribute);
         }
-
         public async Task Delete(long id)
         {
             await _client.DeleteAsync($"{_baseUrl}/api/ProductAttributes/DeleteProductAttribute?id={id}");

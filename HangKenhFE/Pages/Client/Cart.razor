@@ -778,6 +778,11 @@
         foreach (var cartDetailId in selectedCartDetails)
         {
             var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+            if(cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} số lượng không đủ.");
+                return;
+            }
             if (cartDetail == null)
             {
                 await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} không tồn tại trong giỏ hàng.");
@@ -796,6 +801,7 @@
                 await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm {cartDetail.Product_Attributes.SKU} hiện không đủ số lượng quý khách mong muốn!");
                 return;
             }
+
         }
 
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
@@ -1263,6 +1269,7 @@
             orderUpdate.Totalmoney = totalMoney;
             orderUpdate.FeeShipping = feeShipping;
             orderUpdate.Address_Id = selectedAddress.Id;
+            orderUpdate.Strees = $"{selectedAddress.Street} - {selectedAddress.Ward_commune} - {selectedAddress.District} - {selectedAddress.Province_city}";
             string typePay = "";
             if (paymentMethod == "momo")
             {
