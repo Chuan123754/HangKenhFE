@@ -391,7 +391,7 @@
                                 }
                                 <div class="container">
                                     <div class="row mb-3 text-center fw-bold" style="background-color: #f8f9fa; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                        <div class="col-3 d-flex align-items-center justify-content-center">Ảnh</div>
+                                        <div class="col-2 d-flex align-items-center justify-content-center">Ảnh</div>
                                         <div class="col-3 d-flex align-items-center justify-content-center">Sản phẩm</div>
                                         <div class="col-2 d-flex align-items-center justify-content-center">Số lượng</div>
                                         <div class="col-2 d-flex align-items-center justify-content-center">Đơn giá</div>
@@ -425,7 +425,7 @@
                                                             @string.Format("{0:N0}", item.ProductAttributes.Regular_price) VNĐ
                                                         </span>
                                                         <br />
-                                                        <span style="color: red; font-weight: bold;">
+                                                        <span style="color: red; ">
                                                             @string.Format("{0:N0}", item.ProductAttributes.Sale_price) VNĐ
                                                         </span>
                                                     </div>
@@ -443,7 +443,7 @@
                                                             @string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Regular_price)) VNĐ
                                                         </span>
                                                         <br />
-                                                        <span style="color: red; font-weight: bold;">
+                                                        <span style="color: red; ">
                                                             @string.Format("{0:N0}", (item.Quantity * item.ProductAttributes.Sale_price)) VNĐ
                                                         </span>
                                                     </div>
@@ -552,18 +552,15 @@
                                     decimal conditionValue = 0m;
                                     decimal maxDiscountValue = 0m;
                                     string formattedPercent = item.Vouchers.Percent ?? "0";
-                  @*                   if (decimal.TryParse(item.Vouchers.Condition, out conditionValue))
+                                    decimal totalAmountValue = totalAmount ?? 0m;
+                                    if (decimal.TryParse(item.Vouchers.Condition, out conditionValue))
                                     {
-                                        suggestBuy = Math.Max(0, conditionValue - totalAmount); // Tính giá trị cần mua thêm
-                                    } *@
-
-                                    // Chuyển đổi Condition sang decimal để format
+                                        suggestBuy = Math.Max(0, conditionValue - totalAmountValue); 
+                                    }
                                     if (!decimal.TryParse(item.Vouchers.Condition, out conditionValue))
                                     {
                                         conditionValue = 0m;
                                     }
-
-                                    // Chuyển đổi MaxDiscountValue sang decimal để format
                                     if (!decimal.TryParse(item.Vouchers.MaxDiscountValue, out maxDiscountValue))
                                     {
                                         maxDiscountValue = 0m;
@@ -573,7 +570,7 @@
                                     decimal percentValue = 0m;
                                     if (decimal.TryParse(item.Vouchers.Percent, out percentValue))
                                     {
-                                        formattedPercent = percentValue.ToString("N0"); // Định dạng lại nếu không chứa ký tự %
+                                        formattedPercent = percentValue.ToString("N0");
                                     }
 
                                     <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px;">
@@ -601,16 +598,26 @@
                                             }
                                             else
                                             {
-                                                <button class="btn btn-outline-success" @onclick="() => SelectVoucher(item.VoucherId)">
-                                                    @if (voucher == null)
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-outline-success" @onclick="() => SelectVoucher(item.VoucherId)">
+                                                        @if (SelectedVoucherId == item.VoucherId)
+                                                        {
+                                                            <span>Đã áp dụng</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>Áp dụng</span>
+                                                        }
+                                                    </button>
+                                                    @if (SelectedVoucherId == item.VoucherId)
                                                     {
-                                                        <span>Đã áp dụng</span>
+                                                        <span style="color: green; font-weight: bold;">
+                                                            Tiết kiệm được : @string.Format("{0:N0}", voucherAmount) VNĐ
+                                                        </span>
                                                     }
-                                                    else
-                                                    {
-                                                        <span>Áp dụng</span>
-                                                    }
-                                                </button>
+                                                </div>
+
+                                        
                                             }
                                         </div>
                                         <div style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
@@ -710,18 +717,20 @@
                 return;
             }
         }
-        CalculateTotalMoney();
     }
 
     protected override async Task OnInitializedAsync()
     {
         provinces = await address_Service.GetProvincesAsync();
         var allVoucher = await userVoucherServices.GetAll();
-        lst_UserVoucher = allVoucher.Where(v => v.UserId == user.Id && v.IsApplied == false).ToList();
+        if(user!=null)
+        {
+            lst_UserVoucher = allVoucher.Where(v => v.UserId == user.Id && v.IsApplied == false).ToList();
+        }
+
 
         await LoadCartDetails();
         await LoadOrderDetails();
-        CalculateTotalMoney();
 
     }
 
@@ -735,11 +744,7 @@
         isModalChooseVoucher = false;
     }
 
-    private async Task SelectVoucher(long id)
-    {
-        voucher = await voucherServices.Details(id);
-        isModalChooseVoucher = true;
-    }
+    private long? SelectedVoucherId;
 
     private async Task ToggleSelectAll()
     {
@@ -813,7 +818,6 @@
             return;
         }
         lst_CartDetails = cartDetails.Where(c => c.Cart_id == cartUser.Id).ToList();
-        CalculateTotalMoney();
     }
 
     private async Task UpdateQuantityView(long itemId, int newQuantity)
@@ -864,6 +868,23 @@
         await LoadCartDetails();
     }
 
+    private async Task SelectVoucher(long id)
+    {
+        if (SelectedVoucherId == id)
+        {
+            SelectedVoucherId = null;
+        }
+        else
+        {
+            SelectedVoucherId = id;
+            voucher = await voucherServices.Details(id);
+            CalculateTotalMoney();
+        }
+
+        isModalChooseVoucher = true;
+        StateHasChanged();
+    }
+
     private async void CalculateTotalMoney()
     {
         totalAmount = lst_OrderDetail.Sum(item =>
@@ -881,15 +902,46 @@
         });
 
         discountAmount = totalPrincipal - totalAmount;
+        // tính tiền giảm từ voucher
+        decimal percentValue = 0;
+        if(voucher!=null)
+        {
+            if (!string.IsNullOrEmpty(voucher.Percent) && !decimal.TryParse(voucher.Percent, out percentValue))
+            {
+                throw new InvalidOperationException("Percent is not a valid decimal value.");
+            }
+            if (voucher.Description == "Percentage")
+            {
+                voucherAmount = (totalAmount * percentValue / 100);
+                if (voucherAmount >= Convert.ToDecimal(voucher.MaxDiscountValue ?? "0"))
+                {
+                    voucherAmount = Convert.ToDecimal(voucher.MaxDiscountValue ?? "0");
+                }
+            }
+            else if (voucher.Description == "Fixed")
+            {
+                voucherAmount = percentValue;
+            }
+        }
+
 
         totalQuantity = lst_OrderDetail.Sum(item => item.Quantity);
 
-        totalMoney = (feeShipping + totalAmount);
+        totalMoney = feeShipping + totalAmount - voucherAmount;
+        StateHasChanged();
     }
 
     private async Task CreateModalOrder()
     {
+        voucher = null;
+        voucherAmount = 0;
+        SelectedVoucherId = null;
         // Kiểm tra số lượng sản phẩm trong kho cho tất cả các item trong selectedCartDetails
+        if (selectedCartDetails.Count == 0 || selectedCartDetails == null)
+        {
+            await JS.InvokeVoidAsync("toastr.error", $"Vui lòng chọn sản phẩm trước khi thanh toán");
+            return;
+        }
         foreach (var cartDetailId in selectedCartDetails)
         {
             var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
@@ -918,11 +970,11 @@
             }
 
         }
-
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
         if (confirmed)
         {
             isModalOrderVisiable = true;
+
             try
             {
                 // Lấy danh sách đơn hàng của người dùng
@@ -1053,7 +1105,6 @@
     private async Task LoadOrderDetails()
     {
         lst_OrderDetail = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
-        CalculateTotalMoney();
     }
 
     private async Task ChoseAddressModal()
@@ -1254,6 +1305,9 @@
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
             }
+            var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId??0, user.Id);
+            appliedVoucher.IsApplied = true;
+            await userVoucherServices.Update(appliedVoucher);
             selectedCartDetails.Clear();
             await LoadOrderDetails();
             await LoadCartDetails();
@@ -1295,6 +1349,9 @@
                     Created_at = DateTime.Now
                 };
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
+            var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId ?? 0, user.Id);
+            appliedVoucher.IsApplied = true;
+            await userVoucherServices.Update(appliedVoucher);
             await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
             isMomoModalVisible = false;
             selectedCartDetails.Clear();
@@ -1339,6 +1396,9 @@
                     Status = "Pending"
                 };
             await orderServices.Create(newOrder);
+            var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId ?? 0, user.Id);
+            appliedVoucher.IsApplied = true;
+            await userVoucherServices.Update(appliedVoucher);
             await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thành công rồi");
             isMomoModalVisible = false;
             selectedCartDetails.Clear();
@@ -1383,6 +1443,7 @@
             orderUpdate.TotalPrincipal = totalPrincipal; 
             orderUpdate.Totalmoney = totalMoney;
             orderUpdate.FeeShipping = feeShipping;
+            orderUpdate.TotalVoucher = voucherAmount;
             orderUpdate.Address_Id = selectedAddress.Id;
             orderUpdate.Strees = $"{selectedAddress.Street} - {selectedAddress.Ward_commune} - {selectedAddress.District} - {selectedAddress.Province_city}";
             string typePay = "";
