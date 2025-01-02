@@ -176,6 +176,8 @@
                     <p style="color: red;"><strong>Tổng tiền chiết khấu :</strong> - @OrderTracking.TotalDiscount.ToString("N0") VND</p>
                     <p><strong>Phí giao hàng: </strong> @OrderTracking.FeeShipping.ToString("N0") VND</p>
                     <p><strong>Tổng tiền hàng đã giảm: </strong> @OrderTracking.TotalAmount.ToString("N0") VND</p>
+                    <p style="color: red;"><strong>Giảm giá Voucher : </strong> @OrderTracking.TotalVoucher.ToString("N0") VND</p>
+
                     <p style="color: green;"><strong>Tổng tiền cần thanh toán: </strong> @OrderTracking.TotalMoney.ToString("N0") VND</p>
                 </div>
                 <div class="customer-info" style="flex: 1; padding-left: 20px;">
@@ -378,13 +380,12 @@
                 OrderTracking.Status = null;
                 selectedTrackingId = 0;
             }
-
-            StateHasChanged();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Lỗi tải thông tin vận chuyển: {ex.Message}");
         }
+        StateHasChanged();
     }
 
     private async Task ReloadTrackingData()
@@ -533,8 +534,25 @@
     {
         try
         {
+            int.TryParse(selectedDistrictId, out var toDistrictId);
+            var shippingRequest = new ShippingRequest
+                {
+                    service_type_id = 2,
+                    to_district_id = toDistrictId,
+                    to_ward_code = selectedWardId.ToString(),
+                    length = 100,
+                    width = 80,
+                    height = 8,
+                    weight = 2000,
+                    insurance_value = 500000,
+                    coupon = null,
+                    cod_failed_amount = null,
+                    cod_value = null
+                };
+            decimal newFeeShipping = await address_Service.CalculateShippingFee(shippingRequest);
+
             // Hiển thị hộp thoại xác nhận
-            bool confirmed = await JS.InvokeAsync<bool>("confirm", "Bạn có chắc chắn muốn cập nhật địa chỉ giao hàng?");
+            bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Phí giao hàng mới sẽ là {newFeeShipping.ToString("N0")} VNĐ. Xác nhận thay đổi địa chỉ giao hàng ?");
             if (!confirmed) return;
 
             // Chuyển đổi và tìm kiếm Province
@@ -565,25 +583,20 @@
             {
                 throw new Exception("Không tìm thấy xã/phường với mã đã chọn.");
             }
-
-            // Cập nhật trường Strees của Order
+            Order.FeeShipping = newFeeShipping;
+            Order.Totalmoney = Order.TotalAmount + Order.FeeShipping - Order.TotalVoucher;
+            await orderService.Update(Order, Order.Id);
             Order.Strees = $"{TempAddress.Street} - {ward.WardName} - {district.DistrictName} - {province.ProvinceName}";
-
-            // Gửi yêu cầu cập nhật tới API
             await orderService.UpdateStrees(Order, Order.Id);
-
-            // Ẩn modal sau khi cập nhật
             modalUpdateAddress = false;
-
-            // Hiển thị thông báo thành công
             await JS.InvokeVoidAsync("toastr.success", "Địa chỉ giao hàng đã được cập nhật thành công.");
-            StateHasChanged();
         }
         catch (Exception ex)
         {
             // Hiển thị thông báo lỗi nếu xảy ra lỗi
             await JS.InvokeVoidAsync("toastr.error", $"Cập nhật địa chỉ giao hàng thất bại: {ex.Message}");
         }
+        StateHasChanged();
     }
 
     private List<Provinces> provinces = new List<Provinces>();
