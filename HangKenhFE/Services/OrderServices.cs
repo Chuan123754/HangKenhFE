@@ -76,6 +76,35 @@ namespace HangKenhFE.Services
             await _client.PutAsJsonAsync($"{_baseUrl}/api/Orders/Update?id={id}", orders);
         }
 
+
+        public async Task<bool> UpdatePendingOrderUserId(long orderId, long userId)
+        {
+            try
+            {
+                // Tải đơn hàng từ DB
+                var existingOrder = await GetByIdOrders(orderId);
+                if (existingOrder == null)
+                {
+                    throw new Exception("Đơn hàng không tồn tại.");
+                }
+
+                // Cập nhật User_id
+                existingOrder.User_id = userId;
+
+                // Gửi yêu cầu cập nhật qua API
+                var response = await _client.PutAsJsonAsync($"{_baseUrl}/api/Orders/Update-Pending?id={orderId}", existingOrder);
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                Console.WriteLine($"Lỗi khi cập nhật pendingOrder: {ex.Message}");
+                return false;
+            }
+        }
+
+
         public async Task UpdateStatus(Orders orders, long id)
         {
             await _client.PutAsJsonAsync($"{_baseUrl}/api/Orders/UpdateStatus?id={id}", orders);

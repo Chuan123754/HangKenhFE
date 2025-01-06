@@ -41,13 +41,8 @@ namespace HangKenhFE.Services
         {
             user.Created_at = DateTime.Now;
             user.Updated_at = DateTime.Now;
-
-            // Kiểm tra trùng lặp email
-            if (!string.IsNullOrWhiteSpace(user.Email) && await IsEmailExists(user.Email))
-            {
-                throw new Exception("Email đã tồn tại.");
-            }
-            string userRequestURL = $"https://localhost:7011/api/Users/Users-post";
+        
+            string userRequestURL = $"https://localhost:7011/api/Users/register-sync";
             var userJsonContent = JsonConvert.SerializeObject(user);
             var userContent = new StringContent(userJsonContent, Encoding.UTF8, "application/json");
             var userResponse = await _httpClient.PostAsync(userRequestURL, userContent);
@@ -200,6 +195,27 @@ namespace HangKenhFE.Services
                 var errorMessage = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Lỗi khi tìm kiếm người dùng: {errorMessage}");
             }
+        }
+
+        public async Task<bool> CheckPhoneNumberAsync(string phone)
+        {
+            // Gửi yêu cầu đến API
+            var response = await _httpClient.GetAsync($"https://localhost:7011/api/Users/GetUserByPhone?phone={phone}");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<PhoneCheckResponse>();
+                if (result != null && result.Exists)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Lớp để deserialize dữ liệu phản hồi từ API
+        private class PhoneCheckResponse
+        {
+            public bool Exists { get; set; }
         }
 
 

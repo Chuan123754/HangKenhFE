@@ -12,6 +12,7 @@ namespace HangKenhFE.IServices
         Task<Orders> OrdersAddress(long id);
         Task<Orders> Create(Orders orders);
         Task Update(Orders orders, long id);
+        Task<bool> UpdatePendingOrderUserId(long orderId, long userId);
         Task UpdateStrees(Orders orders, long id);
         Task UpdateStatus(Orders orders, long id);
         Task Delete(long id);
