@@ -1,12 +1,15 @@
 ﻿﻿@using Microsoft.AspNetCore.Identity
 @using Newtonsoft.Json
 @inject IUserService userService
+@inject IProductAttributeServies productAttributeServices
+@inject ICartService cartServices
+@inject ICartDetailsService cartDetailServices
+@inject IOrderIServices orderServices
 @inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 @inject NavigationManager navigation
 @inject IPostSer sev
 @inject IJSRuntime JS
 @using BlazorBootstrap
-
 @using HangKenhFE.Models
 @inject ILoginService LoginServices
 
@@ -33,6 +36,9 @@
         position: relative;
     }
 
+    button {
+        margin: 5px;
+    }
     .close {
         color: #aaa;
         position: absolute;
@@ -340,21 +346,28 @@
                     </form>
                 </div>
 
-                <!-- Form Đăng ký -->
                 <div class="col-2">
                     <h3>Đăng ký</h3>
                     <form @onsubmit="HandleRegisterAsync">
-                        <p class="message">@registerMessage</p> <!-- Thông báo đăng ký -->
-                        <label for="reg_uname">Họ và tên *</label>
-                        <input type="text" @bind="registerModel.Username" id="reg_uname" placeholder="Họ và tên" required>
-
+                        <p class="message">@registerMessage</p>
                         <label for="reg_email">Email *</label>
                         <input type="email" @bind="registerModel.Email" id="reg_email" placeholder="Nhập e-mail" required>
 
                         <label for="reg_password">Mật khẩu *</label>
                         <input type="password" @bind="registerModel.Password" id="reg_password" placeholder="Nhập mật khẩu" required>
 
-                        <input type="password" @bind="registerModel.ConfirmPassword" placeholder="Nhập lại mật khẩu" required>
+                        <label for="reg_confirm_password">Xác nhận mật khẩu *</label>
+                        <input type="password" @bind="registerModel.ConfirmPassword" id="reg_confirm_password" placeholder="Xác nhận mật khẩu" required>
+
+                        <label for="reg_phone">Số điện thoại *</label>
+                        <input type="text" @bind="registerModel.Phone" id="reg_phone" placeholder="Nhập số điện thoại" required>
+
+                        <button type="button" class="btn btn-secondary mt-2" @onclick="SendOtp" style="width: 100%;">Gửi OTP</button>
+
+                        <div class="form-group mt-3">
+                            <label for="reg_otp">Nhập OTP *</label>
+                            <input type="text" @bind="registerModel.OTP" id="reg_otp" placeholder="Nhập OTP" class="form-control" required>
+                        </div>
 
                         <p class="privacy-notice">
                             Dữ liệu cá nhân của bạn sẽ được sử dụng để hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này.
@@ -364,6 +377,39 @@
                         <button type="submit" class="btn-register">Đăng ký</button>
                     </form>
                 </div>
+
+                @if (showOtpReminderModal)
+                {
+                    <div class="modal" style="display: block;">
+                        <div class="modal-content" style="width: 650px; margin-top: 200px; padding: 30px; position: relative;">
+                            <span class="close" style="position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer;" @onclick="CloseOtpReminderModal">&times;</span>
+
+                            <div class="otp-reminder-modal">
+                                <div class="otp-reminder-modal-content">
+                                    <h3 class="text-danger text-center">Thông báo quan trọng</h3>
+                                    <p>Chúng tôi có chức năng <strong class="text-danger">đồng bộ thông tin qua số điện thoại</strong>. Điều này sẽ giúp bạn có thông tin về Hóa đơn bạn <strong>Đã thanh toán</strong> tại quầy ở cửa hàng của chúng tôi. Vui lòng nhập số điện thoại <strong class="text-danger">đã đăng ký tại quầy (nếu có)</strong>.</p>
+                                    Còn nếu bạn chưa từng mua sắn tại của hàng của chúng tôi thì bạn chỉ cần xác thực <strong>OTP</strong> bình thường.
+                                    <hr />
+                                    <p>
+                                        <span class="text-danger">Lưu ý:</span> Số điện thoại chỉ được xác thực <strong>1 lần duy nhất</strong> và <strong class="text-danger">không thể hoàn tác</strong>. Số điện thoại phải là số thực. Điều này sẽ đảm bảo quyền lợi của bạn khi mua sắm tại cửa hàng của chúng tôi. <br /> Bạn có thắc mắc gì vui lòng <a href="/faq" target="_blank" class="text-primary">nhấn vào đây</a>.
+                                    </p>                               
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(generatedOtp))
+                            {
+                                <div class="text-center mt-4">
+                                    <p class="text-success" style="font-size: 18px; font-weight: bold;">
+                                        Mã OTP của bạn (Giả lập): <strong>@generatedOtp</strong>
+                                    </p>
+                                </div>
+                            }
+                            <div class="text-center mt-4">
+                                <button class="btn btn-primary" @onclick="CloseOtpReminderModal">Gửi OTP</button>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -483,6 +529,30 @@
                     </ul>
                 </div>
             </nav>
+            @if (showSyncCartModal)
+            {
+                <div class="modal" style="display:block;">
+                    <div class="modal-content" style="width:650px; margin-top:200px; padding:30px; position:relative;">
+                        <h3 style="text-align: center; font-size: 24px; margin-bottom: 20px;">Đồng bộ giỏ hàng</h3>
+                        <p style="text-align: justify; line-height: 1.6;">
+                            Bạn có muốn đồng bộ giỏ hàng từ <strong style="color:red;">LocalStorage</strong> với tài khoản của mình không?
+                        </p>
+                        <hr />
+                        <p style="text-align: justify; line-height: 1.6; font-size: 14px; color: #555;">
+                            <span style="color:red; font-weight:bold;">Lưu ý:</span>
+                            Các sản phẩm trong giỏ hàng sẽ chỉ được đồng bộ <strong style="color:red;">duy nhất 1 lần</strong> và không thể hoàn tác.
+                            Hãy chắc chắn về hành động này. Các hóa đơn
+                            <strong style="color:blue;">"Pending"</strong> sẽ không được đồng bộ và sẽ <strong style="color:red;">xóa</strong> ngay khi quá trình này thực hiện. Bạn có thắc mắc gì vui lòng
+                            <a href="/faq" class="text-primary">nhấn vào đây</a>.
+                        </p>
+                        <div style="text-align: center; margin-top: 30px;">
+                            <button @onclick="ConfirmSyncCart" class="btn btn-success" style="width: 150px; margin: 0 10px; font-size: 16px;">Đồng ý</button>
+                            <button @onclick="CancelSyncCart" class="btn btn-danger" style="width: 150px; margin: 0 10px; font-size: 16px;">Hủy</button>
+                        </div>
+                    </div>
+                </div>
+
+            }
         </div>
         <Modal IsModalOpen="ModalService.IsModalOpen" IsModalOpenChanged="HandleModalChange" />
         <div class="menu-dropdown collapse p-4 position-absolute w-100" id="dropdownMenu" style="z-index: 999">
@@ -613,6 +683,8 @@
                 </div>
 
 
+                
+
 
             </div>
         </div>
@@ -642,6 +714,14 @@
     private string registerMessage = string.Empty;
     private bool firstRender = true;
 
+    private bool showSyncCartModal = false; 
+    private long currentUserId; 
+
+    private bool showOtpReminderModal = false; 
+    private string generatedOtp;              
+    private string otpError;                  
+    private bool otpSent = false; 
+
     private async Task<bool> ShowConfirmation(string message)
     {
         return await JS.InvokeAsync<bool>("confirm", message);
@@ -666,6 +746,8 @@
         }
     }
 
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var tokenAuto = await SessionStorage.GetItemAsStringAsync("RememberToken");
@@ -675,13 +757,11 @@
             if (loggedInUser != null)
             {
                 isLoggedIn = true;
-                // Tạo phiên người dùng
             }
         }
 
         if (firstRender)
         {
-            // Kiểm tra xem SessionStorage có chứa token không
             var token = await SessionStorage.GetItemAsStringAsync("user");
             if (!string.IsNullOrEmpty(token))
             {
@@ -721,10 +801,24 @@
             if (loggedInUser != null)
             {
                 await ShowToast("success", "Đăng nhập thành công");
+
+                currentUserId = loggedInUser.Id;
                 await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(loggedInUser));
-                isLoggedIn = true;
-                CloseModal();
-                navigation.NavigateTo("/");
+
+                // Kiểm tra LocalStorage có chứa giỏ hàng không
+                var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+                if (!string.IsNullOrEmpty(cartJson))
+                {
+                    // Modal đồng bộ
+                    showSyncCartModal = true;
+                }
+                else // Không có giỏ hàng, tiếp tục đăng nhập
+                {
+                    
+                    isLoggedIn = true;
+                    CloseModal();
+                    navigation.NavigateTo("/");
+                }
             }
             else
             {
@@ -737,35 +831,137 @@
         }
     }
 
-    private async Task HandleRegisterAsync()
+
+
+    private async Task ConfirmSyncCart()
     {
+        showSyncCartModal = false; 
+
+        // Đồng bộ giỏ hàng
+        await SyncCartWithLocalStorage(currentUserId);
+
+        // Xóa pendingOrder trong LocalStorage
+        await JS.InvokeVoidAsync("localStorage.removeItem", "pendingOrder");
+        var userJson = await SessionStorage.GetItemAsStringAsync("user");
+        if (!string.IsNullOrEmpty(userJson))
+        {
+            var loggedInUser = JsonConvert.DeserializeObject<Users>(userJson);
+            if (loggedInUser != null)
+            {
+                await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(loggedInUser));
+            }
+        }
+
+        isLoggedIn = true;
+        CloseModal();
+        navigation.NavigateTo("/");
+    }
+
+
+    private void CancelSyncCart()
+    {
+        showSyncCartModal = false; 
+        isLoggedIn = true;
+        CloseModal();
+        navigation.NavigateTo("/");
+    }
+
+
+    private DateTime? otpExpiryTime; // Thời gian hết hạn của OTP
+
+    private async Task SendOtp()
+    {
+        if (string.IsNullOrEmpty(registerModel.Phone))
+        {
+            otpError = "Số điện thoại không được để trống.";
+            await ShowToast("error", otpError);
+            return;
+        }
+
         try
         {
-            // Tạo đối tượng người dùng mới dựa trên dữ liệu từ giao diện
-            var newUser = new Users
-                {
-                    Name = registerModel.Username,
-                    Phone = "",
-                    Email = registerModel.Email,
-                    Password = registerModel.Password,
-                    Address = "Nothing",
-                    RememberToken = "Nothing",
-                    Created_at = DateTime.Now,
-                    Updated_at = DateTime.Now
-                };
+            var phoneExists = await userService.CheckPhoneNumberAsync(registerModel.Phone);
 
-            if (await userService.IsEmailExists(newUser.Email))
+            if (phoneExists)
             {
-                await ShowToast("warning", "Email đã tồn tại!");
+                otpError = "Số điện thoại đã tồn tại với tài khoản có mật khẩu. Vui lòng sử dụng chức năng quên mật khẩu.";
+                await ShowToast("error", otpError);
                 return;
             }
+
+            generatedOtp = new Random().Next(100000, 999999).ToString();
+            otpSent = true;
+            otpExpiryTime = DateTime.Now.AddMinutes(5);
+
+            showOtpReminderModal = true;
+            otpError = null;
+
+            await ShowToast("success", "Mã OTP đã được gửi. Vui lòng kiểm tra.");
+        }
+        catch (Exception ex)
+        {
+            otpError = "Đã xảy ra lỗi khi gửi OTP.";
+            await ShowToast("error", $"{otpError} Chi tiết: {ex.Message}");
+        }
+    }
+
+
+
+
+    private void CloseOtpReminderModal()
+    {
+        showOtpReminderModal = false;
+    }
+
+
+
+
+    private async Task HandleRegisterAsync()
+    {
+        // Kiểm tra OTP
+        if (string.IsNullOrEmpty(registerModel.OTP))
+        {
+            await ShowToast("error", "Vui lòng nhập OTP.");
+            return;
+        }
+
+        // Kiểm tra OTP có khớp không
+        if (registerModel.OTP != generatedOtp)
+        {
+            await ShowToast("error", "OTP không chính xác.");
+            return;
+        }
+
+        // Kiểm tra OTP có hết hạn không
+        if (otpExpiryTime == null || otpExpiryTime <= DateTime.Now)
+        {
+            await ShowToast("error", "OTP đã hết hạn. Vui lòng gửi lại.");
+            return;
+        }
+
+        // Kiểm tra mật khẩu xác nhận
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            await ShowToast("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
+            return;
+        }
+
+        try
+        {
+            var newUser = new Users
+            {
+                Email = registerModel.Email,
+                Phone = registerModel.Phone,
+                Password = registerModel.Password, 
+                OTPCheck = true,                  
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            };          
 
             var passwordHasher = new PasswordHasher<object>();
             newUser.Password = passwordHasher.HashPassword(null, newUser.Password);
 
-            // Gửi yêu cầu đăng ký đến API
             var createdUser = await userService.Create(newUser);
-
             if (createdUser != null && createdUser.Id > 0)
             {
                 await ShowToast("success", "Đăng ký thành công! Đang tự động đăng nhập...");
@@ -814,26 +1010,19 @@
     {
         try
         {
-            // Lấy thông tin người dùng từ SessionStorage
             var userInfo = await SessionStorage.GetItemAsStringAsync("user");
 
             if (!string.IsNullOrEmpty(userInfo))
             {
-                // Deserialize JSON để lấy thông tin người dùng
                 var currentUser = JsonConvert.DeserializeObject<Users>(userInfo);
 
                 if (currentUser != null && currentUser.Id > 0)
                 {
-                    // Điều hướng đến trang thông tin người dùng
                     navigation.NavigateTo($"/admin/UserDetails/{currentUser.Id}");
                     CloseDropdown();
                     return;
                 }
             }
-
-            // Nếu không tìm thấy thông tin người dùng, điều hướng đến trang đăng nhập
-           // await ShowToast("warning", "Vui lòng đăng nhập để xem thông tin cá nhân.");
-           // navigation.NavigateTo("/user/login");
             await JS.InvokeVoidAsync("toastr.error", $"Vui lòng đăng nhập để xem thông tin cá nhân.");
             return;
 
@@ -862,13 +1051,89 @@
 
     public class RegisterModel
     {
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string ConfirmPassword { get; set; }
+        public string Email { get; set; }       // Email người dùng
+        public string Password { get; set; }   // Mật khẩu
+        public string ConfirmPassword { get; set; } // Xác nhận mật khẩu
+        public string Phone { get; set; }      // Số điện thoại
+        public string OTP { get; set; }        // Mã OTP
     }
 
 
+
+
+    private async Task SyncCartWithLocalStorage(long userId)
+    {
+        // Lấy giỏ hàng từ LocalStorage
+        var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+        if (string.IsNullOrEmpty(cartJson)) return;
+
+        var localCart = JsonConvert.DeserializeObject<List<CartProduct>>(cartJson);
+        if (localCart == null || !localCart.Any()) return;
+
+        var cart = await cartServices.GetAll();
+        var userCart = cart.FirstOrDefault(c => c.UserId == userId);
+
+        if (userCart == null)
+        {
+            userCart = new Carts { UserId = userId };
+            await cartServices.Create(userCart);
+        }
+
+        foreach (var localProduct in localCart)
+        {
+            var productAttribute = await productAttributeServices.GetProductAttributesById(localProduct.Product_id);
+            if (productAttribute == null || productAttribute.Stock < localProduct.Quantity)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {localProduct.Title} không đủ hàng.");
+                continue;
+            }
+
+            var cartDetails = await cartDetailServices.GetAll();
+            var existingCartDetail = cartDetails.FirstOrDefault(cd => cd.Product_id == localProduct.Product_id && cd.Cart_id == userCart.Id);
+
+            if (existingCartDetail != null)
+            {
+                if (existingCartDetail.Quantity + localProduct.Quantity > productAttribute.Stock)
+                {
+                    await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {localProduct.Title} vượt quá số lượng trong kho.");
+                    continue;
+                }
+
+                existingCartDetail.Quantity += localProduct.Quantity;
+                await cartDetailServices.Update(existingCartDetail);
+            }
+            else
+            {
+                var newCartDetail = new Cart_details
+                    {
+                        Cart_id = userCart.Id,
+                        Product_id = localProduct.Product_id,
+                        Quantity = localProduct.Quantity,
+                        Status = "ok"
+                    };
+
+                await cartDetailServices.Create(newCartDetail);
+            }
+        }
+
+        // Xóa giỏ hàng trong LocalStorage
+        await JS.InvokeVoidAsync("localStorage.removeItem", "cart");
+        await JS.InvokeVoidAsync("toastr.success", "Đồng bộ giỏ hàng thành công.");
+    }
+
+    public class CartProduct
+    {
+        public long Product_id { get; set; }        // ID sản phẩm
+        public string Title { get; set; }         // Tên sản phẩm
+        public string ImageUrl { get; set; }      // URL hình ảnh
+        public string Color { get; set; }         // Màu sắc
+        public string Size { get; set; }          // Kích thước
+        public int Quantity { get; set; }         // Số lượng
+        public decimal UnitPrice { get; set; }    // Đơn giá
+        public decimal TotalPrice { get; set; }   // Tổng tiền
+    }
+
+    
     protected override async Task OnInitializedAsync()
     {
         await CheckUserLoggedInAsync();

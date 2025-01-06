@@ -1,9 +1,55 @@
-﻿@page "/admin/UserDetails/{userId:long}"
+﻿@page "/user/UserDetails/{userId:long}"
 @inject IUserService UserService
 @inject NavigationManager Navigation
 @inject AddressService address_Service
 @inject IJSRuntime JSRuntime
 
+
+<style>
+    .otp-reminder-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .otp-reminder-modal-content {
+        background-color: #fff;
+        padding: 20px 30px;
+        border-radius: 8px;
+        width: 600px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        animation: fadeInModal 0.3s ease-out;
+    }
+
+    .otp-reminder-modal-content h3 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .otp-reminder-modal-content p {
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+
+    .otp-reminder-modal-content a {
+        text-decoration: underline;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .otp-reminder-modal-content a:hover {
+        color: #0056b3;
+    }
+
+</style>
 <h3 class="text-center">Chi tiết Người dùng</h3>
 
 @if (user == null)
@@ -70,6 +116,25 @@ else
 
             </div>
 
+            @if (showOtpReminderModal)
+            {
+                <div class="otp-reminder-modal">
+                    <div class="otp-reminder-modal-content">
+                        <h3 class="text-danger text-center">Thông báo quan trọng</h3>
+                        <p>Xin chào mừng bạn khi đã tới với Web của chúng tôi. Để hoàn thành nốt thủ tục, chúng tôi muốn nhắc nhở bạn những nội dung <strong>quan trọng</strong> sau:</p>
+                        <p>Chúng tôi có chức năng <strong class="text-primary">đồng bộ thông tin qua số điện thoại</strong>. Điều này sẽ giúp bạn có thông tin về Hóa đơn bạn <strong>Đã thanh toán</strong> tại quầy ở cửa hàng của chúng tôi. Vui lòng nhập số điện thoại <strong class="text-primary">đã đăng ký tại quầy (nếu có)</strong>.</p>
+                        Còn nếu bạn chưa từng mua sắn tại của hàng của chúng tôi thì bạn chỉ cần xác thực <strong>OTP</strong> bình thường.
+                        <hr />
+                        <p>
+                            <span class="text-danger">Lưu ý:</span> Số điện thoại chỉ được xác thực <strong>1 lần duy nhất</strong> và <strong class="text-primary">không thể hoàn tác</strong>. Số điện thoại phải là số thực. Điều này sẽ đảm bảo quyền lợi của bạn khi mua sắm tại cửa hàng của chúng tôi. <br /> Bạn có thắc mắc gì vui lòng <a href="/faq" target="_blank" class="text-info">nhấn vào đây</a>.
+                        </p>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary" @onclick="CloseOtpReminderModal">Đã hiểu</button>
+                        </div>
+                    </div>
+                </div>
+            }
+
         </div>
     </div>
 }
@@ -88,6 +153,7 @@ else
     private DateTime? otpExpiryTime;
     private string otpError;
 
+    private bool showOtpReminderModal = false;
     private async Task<bool> ShowConfirmation(string message)
     {
         return await JSRuntime.InvokeAsync<bool>("confirm", message);
@@ -112,6 +178,7 @@ else
         }
     }
 
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -124,11 +191,21 @@ else
                 return;
             }
 
+            // Hiển thị Modal nếu OTPCheck == false
+            if (!user.OTPCheck)
+            {
+                showOtpReminderModal = true;
+            }
         }
         catch (Exception ex)
         {
             await ShowToast("error", $"Lỗi: {ex.Message}");
         }
+    }
+
+    private void CloseOtpReminderModal()
+    {
+        showOtpReminderModal = false; // Đóng Modal
     }
 
     private async Task SendOtp()
@@ -142,7 +219,7 @@ else
         // Tạo OTP giả lập
         generatedOtp = new Random().Next(100000, 999999).ToString();
         otpSent = true;
-        otpExpiryTime = DateTime.Now.AddMinutes(5); // OTP hết hạn sau 5 phút
+        otpExpiryTime = DateTime.Now.AddMinutes(5); 
 
         otpError = null;
         message = $"OTP của bạn là: {generatedOtp} (Giả lập, chỉ dành cho thử nghiệm)";

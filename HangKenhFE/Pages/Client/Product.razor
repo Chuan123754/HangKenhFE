@@ -403,7 +403,6 @@
             // Kiểm tra xem người dùng đã đăng nhập hay chưa
             if (user != null && user.Id > 0)
             {
-                // Lấy tất cả các giỏ hàng
                 var cart = await cartServices.GetAll();
                 // Kiểm tra giỏ hàng của người dùng
                 var cartUser = cart.FirstOrDefault(c => c.UserId == user.Id);
@@ -427,6 +426,7 @@
                             await JS.InvokeVoidAsync("toastr.error", $"Số lượng sản phẩm trong kho không đủ.");
                             return;
                         }
+
                         // Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng dồn số lượng
                         existingCartDetail.Quantity += 1;
                         await cartDetailServices.Update(existingCartDetail);
@@ -457,7 +457,6 @@
                             UserId = user.Id,
                         };
 
-                    // Tạo giỏ hàng mới
                     await cartServices.Create(newCart);
                     if (1 > productAttribute.Stock)
                     {
@@ -467,7 +466,7 @@
                     // Sau khi tạo giỏ hàng, thêm sản phẩm vào giỏ hàng
                     var newCartDetail = new Cart_details
                         {
-                            Cart_id = newCart.Id, // Sử dụng Id được gán sau khi tạo giỏ hàng
+                            Cart_id = newCart.Id,
                             Product_id = selectedProduct.Id,
                             Quantity = 1,
                             Status = "ok"
@@ -479,7 +478,55 @@
             }
             else
             {
-                await JS.InvokeVoidAsync("toastr.error", "Vui lòng đăng nhập trước khi thêm vào giỏ hàng");
+                // Chưa đăng nhập
+                var productAttribute = await productAttributeServices.GetProductAttributesById(selectedProduct.Id);
+
+                if (productAttribute.Stock <= 0 || productAttribute.Stock == null)
+                {
+                    await JS.InvokeVoidAsync("toastr.error", "Xin lỗi, sản phẩm này hiện không đủ.");
+                    return;
+                }
+
+                var productData = new CartProduct
+                    {
+                        Product_id = selectedProduct.Id,
+                        Title = selectedProduct.Posts.Title,
+                        ImageUrl = selectedProduct.Posts.Image_library.Split(',').FirstOrDefault() ?? "",
+                        Color = selectedProduct.Color?.Title ?? "N/A",
+                        Size = selectedProduct.Size?.Title ?? "N/A",
+                        Quantity = 1,
+                        UnitPrice = (decimal)(selectedProduct.Sale_price ?? selectedProduct.Regular_price ?? 0),
+                        TotalPrice = (decimal)(selectedProduct.Sale_price ?? selectedProduct.Regular_price ?? 0)
+                    };
+
+                // Lấy giỏ hàng từ LocalStorage
+                var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+                List<CartProduct> cart = string.IsNullOrEmpty(cartJson)
+                    ? new List<CartProduct>()
+                    : JsonSerializer.Deserialize<List<CartProduct>>(cartJson);
+
+                // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
+                var existingProduct = cart.FirstOrDefault(p => p.Product_id == productData.Product_id && p.Size == productData.Size && p.Color == productData.Color);
+                if (existingProduct != null)
+                {
+                    if (existingProduct.Quantity + 1 > productAttribute.Stock)
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Số lượng sản phẩm trong kho không đủ.");
+                        return;
+                    }
+                    existingProduct.Quantity += 1;
+                    existingProduct.TotalPrice = existingProduct.Quantity * existingProduct.UnitPrice;
+                }
+                else
+                {
+                    cart.Add(productData);
+                }
+
+                // Lưu lại vào LocalStorage
+                var updatedCartJson = JsonSerializer.Serialize(cart);
+                await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
+
+                await JS.InvokeVoidAsync("toastr.success", "Sản phẩm đã được thêm vào giỏ hàng (LocalStorage)");
             }
         }
         catch (Exception ex)
@@ -487,6 +534,20 @@
             await JS.InvokeVoidAsync("toastr.error", "Đã có lỗi xảy ra: " + ex.Message);
         }
     }
+
+
+    public class CartProduct
+    {
+        public long Product_id { get; set; }        // ID sản phẩm
+        public string Title { get; set; }         // Tên sản phẩm
+        public string ImageUrl { get; set; }      // URL hình ảnh
+        public string Color { get; set; }         // Màu sắc
+        public string Size { get; set; }          // Kích thước
+        public int Quantity { get; set; }         // Số lượng
+        public decimal UnitPrice { get; set; }    // Đơn giá
+        public decimal TotalPrice { get; set; }   // Tổng tiền
+    }
+
 
 
     private async void AddToWishlist()
@@ -506,7 +567,6 @@
 
                     if (existingWLP != null)
                     {
-                        // Nếu sản phẩm đã tồn tại trong wishlist, thông báo đã tồn tại trong wishlist
                         await JS.InvokeVoidAsync("toastr.error", "Sản phẩm đẫ tồn tại trong wishlist");
                         return;
                     }

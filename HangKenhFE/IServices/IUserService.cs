@@ -12,6 +12,7 @@ namespace HangKenhFE.IServices
         Task Register(Users user);
         Task<Users> Login(Users user, bool rememberMe);
         Task<Users> GetByPhoneNumber(string phone);
+        Task<bool> CheckPhoneNumberAsync(string phone);
         Task<bool> UpdatePassword(long userId, string newPassword);
         Task<Users> AutoLogin(string rememberToken);
         Task Logout(long idUser);
