@@ -1907,9 +1907,21 @@
 
     private async Task PayByCash()
     {
+        if (selectedAddress == null)
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
+            return;
+        }
+
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thanh toán khi nhận hàng ?");
         if (confirmed)
         {
+            if (SelectedVoucherId != null)
+            {
+                var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId ?? 0, user.Id);
+                appliedVoucher.IsApplied = true;
+                await userVoucherServices.Update(appliedVoucher);
+            }
             CheckOut("cash");
 
             if (user != null && user.Id > 0) // Người dùng đã đăng nhập
@@ -1943,6 +1955,11 @@
 
     private async Task PayByMomo()
     {
+        if (selectedAddress == null)
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
+            return;
+        }
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thanh toán bằng hình thức chuyển khoản MOMO ?");
         if (confirmed)
         {
@@ -2075,11 +2092,6 @@
 
     private async Task CheckOut(string paymentMethod)
     {
-        if (selectedAddress == null)
-        {
-            await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
-            return;
-        }
         if (lst_OrderDetail.Count == 0 || !lst_OrderDetail.Any() || lst_OrderDetail == null)
         {
             await JS.InvokeVoidAsync("toastr.error", "Đơn hàng chưa có sản phẩm nào!");
@@ -2183,6 +2195,5 @@
             await LoadCartDetails();
             StateHasChanged();
         }
- 
     }
 }
