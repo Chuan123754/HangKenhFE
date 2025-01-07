@@ -61,6 +61,35 @@ namespace HangKenhFE.Services
 
         }
 
+        public async Task<Address> CreateAddressNoLogin(Address address)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("https://localhost:7011/api/Address/CreateAddress", address);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Đọc nội dung phản hồi và chuyển đổi thành đối tượng Address
+                    var createdAddress = await response.Content.ReadFromJsonAsync<Address>();
+                    return createdAddress;
+                }
+                else
+                {
+                    // Nếu không thành công, log lỗi và trả về null
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error: {errorMessage}");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu có exception
+                Console.WriteLine($"Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+
         public async Task<Address> CreateAddressAndReturn(Address address)
         {
             try

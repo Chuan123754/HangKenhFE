@@ -1,5 +1,14 @@
 ﻿@page "/faq"
 @inject IQaService qa
+
+<style>
+    .accordion-button {
+        line-height: 1.5; /* Chiều cao dòng đồng nhất */
+        display: inline-block; /* Đảm bảo các phần tử được căn chỉnh đúng */
+        vertical-align: middle; /* Căn giữa theo chiều dọc */
+    }
+
+</style>
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
          class="w-100 h-100" alt="banner-image-3">
@@ -17,11 +26,13 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/"> Trang chủ</a></li>
                         <li class="breadcrumb-item active" aria-current="page">FAQ - Câu hỏi và câu trả lời về thảm trải sàn</li>
+                        
                     </ol>
                 </nav>
                 <div class="row">
                     <div class="col-12">
                         <h2 class="category-font-header">FAQ</h2>
+                        <a href="https://ibb.co/SJbx63C">Video hưỡng dẫn sử dụng Web</a>
                     </div>
                 </div>
             </header>
@@ -35,19 +46,25 @@
                             <article class="filter-group">
                                 <header class="accordion-header" id="@headingId">
                                     <button class="accordion-button filter-product-title collapsed"
-                                            style="font-family: 'Prata', sans-serif !important; font-weight: 400 !important; font-size: 18px; text-transform: none !important;"
+                                            style="font-family: sans-serif !important; font-weight: 400 !important; font-size: 18px; text-transform: none !important;"
                                             type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#@collapseId"
-                                            aria-expanded="false" aria-controls="@collapseId">
-                                        @item.Question
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId"
+                                            aria-expanded="false"
+                                            aria-controls="@collapseId">
+                                        @((MarkupString)item.Question)
                                     </button>
+
 
                                 </header>
                                 <div class="filter-content collapse accordion-collapse"
                                      id="@collapseId"
                                      aria-labelledby="@headingId">
-                                    <span style="font-family: 'Prata', sans-serif !important; line-height: 20px; font-size: 14px;">@item.Answer</span>
+                                    <span style=" sans-serif !important; line-height: 20px; font-size: 16px; margin-top: 8px;">
+                                        @((MarkupString)item.Answer)
+                                    </span>
                                 </div>
+
                             </article>
                         }
                     </div>
@@ -59,14 +76,158 @@
 </section>
 @code {
     private List<Q_A> listqa = new List<Q_A>();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadPosts();
+        if (listqa == null || !listqa.Any())
+        {
+            await CreateMockData();
+            await LoadPosts();
+        }
     }
+
     private async Task LoadPosts()
     {
         listqa = await qa.GetAll();
+
+        foreach (var item in listqa)
+        {
+            item.Answer = new MarkupString(item.Answer).Value;
+        }
+
         StateHasChanged();
     }
+
+    private async Task CreateMockData()
+    {
+        var mockData = new List<Q_A>
+        {
+            new Q_A
+            {
+                Question = "Alu alu, Test mic Test mic. À lộn, Ở đây là một số câu hỏi mà người dùng <b style='color:red;'>hay hỏi</b> <del>(Làm méo gì có)</del>. Vì vậy chúng tôi sẽ Trả lời hết sức... <del> Gần </del> đúng sự thật.",
+                Answer = "Câu này làm gì có câu trả lời đâu mà nhấn vô đây =))). Lướt lướt mấy cái dưới ấy. Yên tâm Web <b style='color:red;'>Uy tín</b>, có <b style='color:red;'>ít</b> Bug lắm. Còn nếu có thì...<del><strong>Thôi</strong></del>. <br>",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Tôi có thể mua hàng mà <strong>không đăng nhập</strong> không?",
+                Answer = "Có, bạn có thể mua hàng không đăng nhập.<br>Nếu bạn đã thêm sản phẩm hoặc hóa đơn trước khi đăng nhập thì yên tâm. Hệ thống sẽ tự bổ sung cho bạn <del>(Nếu không có vấn đề gì xảy ra)</del>. Phòng bệnh hơn chữa bệnh, Nên là <b style='color:red;'>ĐĂNG KÝ ĐÊ RỒI HÃNG MUA</b> NHÁ <del>(Đặc biệt là bọn có tài khoản rồi, Code mệt bỏ mợ)</del><br><b style='color:red;'>Lưu ý quan trọng</b>: Sản phẩm sẽ được thêm tự động vào tài khoản được đăng nhập <b style='color:red;'>đầu tiên</b>. Còn nếu bạn đăng nhập nhầm thì <del>Hết Cứu</del> hãy liên hệ với chúng tôi. Chúng tôi sẽ nói thầm với bạn Là Lần sau....<b style='color:red;'><strong><u>ĐĂNG NHẬP ĐÊ RỒI HÃNG MUA HÀNG.</u></strong></b>",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Hóa đơn của tôi có được <strong>bảo lưu</strong> khi thanh toán không?",
+                Answer = "Đang cập nhựt.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Tôi có thể xem lại <strong>Hóa đơn</strong> đã thanh toán tại <b style='color:red;'>Quầy</b> trên tài khoản của tôi không?",
+                Answer = "Tùy nhen. Nếu bạn mua hàng tại quầy mà cung cấp đúng số điện thoại thì khi tạo tài khoản, bạn có thể đồng bộ tài khoản khi xác nhận OTP. <del>Còn nếu số giả thì NIỆM</del>. <br><b style='color:red;'>Lưu ý quan trọng</b>: Số điện thoại chỉ xác thực và đồng bộ <b style='color:red;'>1 lần duy nhất</b>. Còn nếu bạn xác thực rồi thì chúng tôi cũng <strong>méo cứu được</strong>.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Khi nào là tôi đã mua hàng <strong>thành công</strong>? Và tôi theo dõi đơn hàng của mình thế nào?",
+                Answer = "Đơn hàng của bạn khi <b style='color:red;'>\"Thanh toán khi nhận hàng\" </b>sẽ cần nhân viên <b style='color:red;'>Xác nhận</b>, sau khi nhân viên <strong>xác nhận</strong> thì đơn hàng sẽ chuyển sang <b style='color:red;'>\"Đã xác nhận\"</b> và sẽ được vận chuyển đến bạn.<br>Nếu bạn <b style='color:red;'>Thanh toán bằng Momo</b> thì đơn hàng sẽ đặt luôn là <b style='color:red;'>\"Đã xác nhận\"</b> và sẽ được vận chuyển đến bạn.<br>Nếu đơn hàng chuẩn bị quá lâu thì là do <del>Bạn đen thôi</del> cửa hàng đang bận hoặc do lỗi vận chuyển. Bạn có thể liên hệ với chúng tôi để được trợ giúp.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Làm thế nào để thêm sản phẩm vào giỏ hàng?",
+                Answer = "Nhấp vào nút <strong>\"Thêm vào giỏ hàng\"</strong> bên dưới sản phẩm bạn muốn mua. <del>Cái này còn phải hỏi hả trời.</del><br><del>Và Mấy mẹ thêm ít thôi. Thêm thì mua luôn đi chứ Mở BD nặng chết mợ</del>",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Làm thế nào để xóa sản phẩm khỏi giỏ hàng?",
+                Answer = "Nhấp vào biểu tượng thùng rác hoặc nút <strong>\"Xóa\"</strong> bên cạnh sản phẩm.<br><del>Không có xiền để cũng để trưng</del>",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Các bài viết về dự án được cập nhật ở đâu?",
+                Answer = "Bạn có thể tìm thấy chúng trong mục \"Dự án\" trên thanh menu.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Làm sao để liên hệ với chúng tôi?",
+                Answer = "Bạn có thể sử dụng chức năng \"Liên hệ\" trên website, hoặc gọi số điện thoại hỗ trợ.<br><b style='color:red;'>Nhưng đừng Spam nhá. Vả vỡ alo đấy</b>",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Web Hệ thống có ổn định không? Sẽ không gặp lỗi gì chứ?",
+                Answer = "Yên tâm, web chúng tôi hoạt động vô cùng tốt (<b style='color:red;'>Trên lý thuyết</b>). Nếu bạn gặp lỗi thì đừng <del>rảnh</del> ngần ngại liên hệ chúng tôi, chúng tôi sẽ báo <strong><del>HẾT CỨU</del></strong> lỗi và khắc phục.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Web <strong>UY TÍN</strong> chứ?",
+                Answer = "Ô hay, hỏi vậy là có ý gì? <br>Bạn nhìn lại tên Leader Web chúng tôi đê. Tên <strong>\"Chuẩn\"</strong> đấy, <del>(Chuẩn gì thì không biết)</del>. <br>Đùa thôi, cửa hàng và Web chúng tôi vô cùng <b style='color:red;'><strong><u><i>UY TÍN</i></u></strong></b>. Mới chỉ phá sản ngay ngày đầu ra thị trường thôi.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Chi nhánh của cửa hàng nằm ở đâu?",
+                Answer = "<del>Ra cổng trường gặp Tao</del>. <br>Chúng tôi có 3 chi nhánh Tại:<br><strong>Hà Nội: Căn số 21 Khu Sunrise A - The Manor Central Park – Nguyễn Xiển - Hà Nội<br>Tp.Hồ Chí Minh: Số 76 Đường 10A – Phường An Khánh – TP. Thủ Đức - Tp.Hồ Chí Minh<br>Hải Phòng: Đội 7 – Xã An Thọ - Huyện An Lão - Tp. Hải Phòng</strong>",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            },
+            new Q_A
+            {
+                Question = "Còn Q&A Không?",
+                Answer = "Hết rồi, Viết mệt vãi nhái. Mà công nhận rảnh thật đấy.",
+                Created_by = 1,
+                Updated_by = 1,
+                Created_at = DateTime.Now,
+                Updated_at = DateTime.Now
+            }
+        
+        };
+
+        foreach (var qaItem in mockData)
+        {
+            await qa.Create(qaItem);
+        }
+    }
 }
+
 

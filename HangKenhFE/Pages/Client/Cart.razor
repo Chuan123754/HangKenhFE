@@ -103,7 +103,10 @@
                                     {
                                         <tr>
                                             <td class="text-center align-middle">
-                                                <input type="checkbox" @onchange="@(e => OnCheckboxChange(e, item.Id))" checked="@selectedCartDetails.Contains(item.Id)" />
+                                                <input type="checkbox"
+                                                       @onchange="@(e => OnCheckboxChange(e, user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0))"
+                                                       checked="@selectedCartDetails.Contains(user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0)" />
+
                                             </td>
                                             <!-- Ảnh sản phẩm -->
                                             <td class="text-center align-middle">
@@ -210,6 +213,19 @@
                         }
                     </div>
 
+                    @if (user.Id == 0)
+                    {
+                        <div class="mt-3 text-center">
+                            <hr style="border: 1px solid #ccc;" />
+                            <p>
+                                Để quá trình mua hàng ổn định thì hãy <a href="/#" class="text-primary">đăng nhập</a> để tránh rủi ro.
+                                Các sản phẩm vẫn sẽ được thêm tự động vào tài khoản. Bạn có thắc mắc gì vui lòng
+                                <a href="/faq" class="text-primary">nhấn vào đây</a>.
+                            </p>
+                            <hr style="border: 1px solid #ccc;" />
+                        </div>
+
+                    }
                 </div>
             </main>
             @if (isModalOrderVisiable)
@@ -226,11 +242,40 @@
                                     <div class="col-12 mb-3 p-4 border rounded shadow-sm" style="background-color: #f9f9f9;">
                                         <h5 class="mb-4 text-center">Thông tin khách hàng</h5>
                                         <div class="mb-2">
-                                            <label class="me-2"><strong>Tên khách hàng:</strong> @user.Name</label>
+                                            <label class="me-2">
+                                                <strong>Tên khách hàng:</strong>
+                                                @if (user != null && !string.IsNullOrEmpty(user.Name))
+                                                {
+                                                    @user.Name
+                                                }
+                                                else if (selectedAddress != null)
+                                                {
+                                                    @selectedAddress.Name
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Chưa có thông tin</span>
+                                                }
+                                            </label>
                                         </div>
                                         <div class="mb-2">
-                                            <label class="me-2"><strong>Số điện thoại:</strong> @user.Phone</label>
+                                            <label class="me-2">
+                                                <strong>Số điện thoại:</strong>
+                                                @if (user != null && !string.IsNullOrEmpty(user.Phone))
+                                                {
+                                                    @user.Phone
+                                                }
+                                                else if (selectedAddress != null)
+                                                {
+                                                    @selectedAddress.Phone
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Chưa có thông tin</span>
+                                                }
+                                            </label>
                                         </div>
+
                                         <div class="mb-2">
                                             <label class="me-2"><strong>Email:</strong> @user.Email</label>
                                         </div>
@@ -379,8 +424,44 @@
                                                     }
                                                     else
                                                     {
-                                                        <h1>Khách hàng chưa có thông tin về địa chỉ</h1>
+                                                        if (guestAddresses != null && guestAddresses.Any())
+                                                        {
+                                                            <table class="table table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>STT</th>
+                                                                        <th>Tên người nhận</th>
+                                                                        <th>Số điện thoại</th>
+                                                                        <th>Địa chỉ</th>
+                                                                        <th>Thao tác</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @for (int i = 0; i < guestAddresses.Count; i++)
+                                                                    {
+                                                                        var address = guestAddresses[i];
+                                                                        if (address != null)
+                                                                        {
+                                                                            <tr>
+                                                                                <td>@(i + 1)</td>
+                                                                                <td>@address.Name</td>
+                                                                                <td>@address.Phone</td>
+                                                                                <td>@($"{address.Street}, {address.Ward_commune}, {address.District}, {address.Province_city}")</td>
+                                                                                <td>
+                                                                                    <button class="btn btn-primary mt-2" @onclick="() => SelectAddress(address)">Chọn</button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        }
+                                                        else
+                                                        {
+                                                            <h1>Khách hàng chưa có thông tin về địa chỉ</h1>
+                                                        }
                                                     }
+
 
                                                 </div>
                                             </div>
@@ -495,6 +576,7 @@
                                     <div class="d-flex justify-content-center my-3">
                                         <button type="button" class="btn btn-outline-primary me-2" @onclick="PayByCash">Thanh toán khi nhận hàng</button>
                                         <button type="button" class="btn btn-outline-success" @onclick="PayByMomo">Thanh toán qua MoMo</button>
+                                        <button type="button" class="btn btn-outline-danger" @onclick="ConfirmDeleteOrder">Xóa hóa đơn</button>
                                     </div>
                                     @if (isMomoModalVisible)
                                     {
@@ -710,13 +792,8 @@
                     user = null; // Nếu JSON không hợp lệ
                 }
             }
-            else
-            {
-                user = null; // Nếu dữ liệu session trống
-                await JS.InvokeVoidAsync("toastr.error", "Vui lòng đăng nhập!");
-                return;
-            }
         }
+        CalculateTotalMoney();
     }
 
     protected override async Task OnInitializedAsync()
@@ -731,11 +808,14 @@
 
         await LoadCartDetails();
         await LoadOrderDetails();
+        await LoadUserAddresses();
+        CalculateTotalMoney();
 
     }
 
-    private void OpenVoucher()
+    private async void OpenVoucher()
     {
+        await OnInitializedAsync();
         isModalChooseVoucher = true;
     }
 
@@ -743,6 +823,30 @@
     {
         isModalChooseVoucher = false;
     }
+
+    private List<Address> guestAddresses = new List<Address>();
+
+    private async Task LoadUserAddresses()
+    {
+        if (user != null && user.Id > 0)
+        {
+            // Lấy địa chỉ từ API nếu người dùng đã đăng nhập
+            lst_Address = await addressServices.GetAddressByUserId(user.Id);
+        }
+        else
+        {
+            // Lấy địa chỉ từ localStorage nếu người dùng chưa đăng nhập
+            var localStorageAddresses = await JS.InvokeAsync<string>("localStorage.getItem", "addresses");
+            guestAddresses = string.IsNullOrEmpty(localStorageAddresses)
+                ? new List<Address>()
+                : Newtonsoft.Json.JsonConvert.DeserializeObject<List<Address>>(localStorageAddresses);
+
+            // Kiểm tra và loại bỏ phần tử null hoặc không hợp lệ
+            guestAddresses = guestAddresses?.Where(address => address != null).ToList() ?? new List<Address>();
+        }
+    }
+
+
 
     private long? SelectedVoucherId;
 
@@ -755,74 +859,170 @@
 
         if (isAllSelected)
         {
-            foreach (var item in lst_CartDetails)
+            if (user == null || user.Id <= 0) // Người dùng chưa đăng nhập
             {
-                selectedCartDetails.Add(item.Id);
-                totalAmount += item.Quantity * (decimal)(item.Product_Attributes.Sale_price ?? item.Product_Attributes.Regular_price??0);
-                totalPrincipal += item.Quantity * (decimal)(item.Product_Attributes.Regular_price ?? 0);
+                // Lấy danh sách sản phẩm từ localStorage
+                var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+                if (!string.IsNullOrEmpty(cartJson))
+                {
+                    var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);
+                    foreach (var product in cartProducts)
+                    {
+                        selectedCartDetails.Add(product.Product_id);
+                        totalAmount += product.Quantity * product.UnitPrice;
+                        totalPrincipal += product.Quantity * product.UnitPrice;
+                    }
+                }
+            }
+            else // Người dùng đã đăng nhập
+            {
+                foreach (var item in lst_CartDetails)
+                {
+                    selectedCartDetails.Add(item.Product_id ?? 0);
+                    totalAmount += item.Quantity * (decimal)(item.Product_Attributes.Sale_price ?? item.Product_Attributes.Regular_price ?? 0);
+                    totalPrincipal += item.Quantity * (decimal)(item.Product_Attributes.Regular_price ?? 0);
+                }
             }
         }
         CalculateTotalMoney();
         StateHasChanged();
     }
 
-    private void OnCheckboxChange(ChangeEventArgs e, long cartDetailId)
+
+
+    private async Task OnCheckboxChange(ChangeEventArgs e, long productId)
     {
         bool isChecked = e.Value is bool && (bool)e.Value;
 
-        var selectedItem = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-
         if (isChecked)
         {
-            if (!selectedCartDetails.Contains(cartDetailId))
+            // Thêm Product_id vào selectedCartDetails
+            if (!selectedCartDetails.Contains(productId))
             {
-                selectedCartDetails.Add(cartDetailId);
-                if (selectedItem != null)
-                {
-                    // Cập nhật tổng tiền hàng đã giảm và chưa giảm
-                    totalAmount += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Sale_price ?? selectedItem.Product_Attributes.Regular_price ?? 0);
-                    totalPrincipal += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Regular_price ?? 0);
-                }
+                selectedCartDetails.Add(productId);
             }
         }
         else
         {
-            if (selectedCartDetails.Contains(cartDetailId))
+            // Loại bỏ Product_id khỏi selectedCartDetails
+            if (selectedCartDetails.Contains(productId))
             {
-                selectedCartDetails.Remove(cartDetailId);
-                if (selectedItem != null)
+                selectedCartDetails.Remove(productId);
+            }
+        }
+
+        // Tính toán lại tổng tiền dựa trên trạng thái đã chọn
+        totalAmount = 0;
+        totalPrincipal = 0;
+
+        if (user == null || user.Id <= 0) // Người dùng chưa đăng nhập
+        {
+            // Lấy danh sách sản phẩm từ localStorage
+            var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);
+
+                foreach (var product in cartProducts)
                 {
-                    // Giảm tổng tiền hàng đã giảm và chưa giảm
-                    totalAmount += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Sale_price ?? selectedItem.Product_Attributes.Regular_price ?? 0);
-                    totalPrincipal += selectedItem.Quantity * (decimal)(selectedItem.Product_Attributes.Regular_price ?? 0);
+                    if (selectedCartDetails.Contains(product.Product_id))
+                    {
+                        totalAmount += product.Quantity * product.UnitPrice;
+                        totalPrincipal += product.Quantity * product.UnitPrice;
+                    }
                 }
             }
         }
-        isAllSelected = lst_CartDetails.All(item => selectedCartDetails.Contains(item.Id));
+        else // Người dùng đã đăng nhập
+        {
+            foreach (var item in lst_CartDetails)
+            {
+                if (selectedCartDetails.Contains(item.Product_id ?? 0))
+                {
+                    totalAmount += item.Quantity * (decimal)(item.Product_Attributes.Sale_price ?? item.Product_Attributes.Regular_price ?? 0);
+                    totalPrincipal += item.Quantity * (decimal)(item.Product_Attributes.Regular_price ?? 0);
+                }
+            }
+        }
+
         CalculateTotalMoney();
         StateHasChanged();
     }
 
+
+
+
+
+
     private async Task LoadCartDetails()
     {
-        var cartDetails = await cartDetailsService.GetAll();
-        var cart = await cartServices.GetAll();
-        if(user == null)
+        if (user != null && user.Id > 0)
         {
-            await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
-            return;
+            // Người dùng đã đăng nhập, lấy giỏ hàng từ database
+            var cartDetails = await cartDetailsService.GetAll();
+            var cart = await cartServices.GetAll();
+            var cartUser = cart.FirstOrDefault(c => c.UserId == user.Id);
+            if (cartUser == null)
+            {
+                lst_CartDetails = new List<Cart_details>();
+                return;
+            }
+            lst_CartDetails = cartDetails.Where(c => c.Cart_id == cartUser.Id).ToList();
         }
-        var cartUser = cart.Where(c => c.UserId == user.Id).FirstOrDefault();
-        if (cartUser == null)
+        else
         {
-            return;
+            // Người dùng chưa đăng nhập, lấy giỏ hàng từ LocalStorage
+            var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson) ?? new List<CartProduct>();
+
+                // Đảm bảo lst_CartDetails được tạo đầy đủ và không rỗng
+                lst_CartDetails = cartProducts.Select(cp => new Cart_details
+                    {
+                        Product_id = cp.Product_id,
+                        Quantity = cp.Quantity,
+                        Status = "ok",
+                        Product_Attributes = new Product_Attributes
+                        {
+                            Image = cp.ImageUrl,
+                            SKU = cp.Title,
+                            Color = new Color { Title = cp.Color },
+                            Size = new Size { Title = cp.Size },
+                            Regular_price = (long?)cp.UnitPrice,
+                            Sale_price = (long?)cp.UnitPrice
+                        }
+                    }).ToList();
+            }
+            else
+            {
+                lst_CartDetails = new List<Cart_details>();
+                selectedCartDetails.Clear();
+                isAllSelected = false;
+            }
+
         }
-        lst_CartDetails = cartDetails.Where(c => c.Cart_id == cartUser.Id).ToList();
+
+        CalculateTotalMoney();
     }
+
+    public class CartProduct
+    {
+        public int Product_id { get; set; }
+        public string Title { get; set; }
+        public string ImageUrl { get; set; }
+        public string Color { get; set; }
+        public string Size { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+    }
+
+
 
     private async Task UpdateQuantityView(long itemId, int newQuantity)
     {
-        if (newQuantity < 1) return; // Tránh việc số lượng nhỏ hơn 1
+        if (newQuantity < 1) return;
 
         var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Id == itemId);
         if (cartDetail != null)
@@ -836,26 +1036,34 @@
                 return;
             }
 
-            // Cập nhật số lượng trong giỏ hàng
+            // Cập nhật số lượng
             cartDetail.Quantity = newQuantity;
 
-            // Cập nhật số lượng trong lst_OrderDetail
-            var orderDetail = lst_OrderDetail.FirstOrDefault(od => od.Product_Attribute_Id == productVariant.Id);
-            if (orderDetail != null)
+            if (user != null && user.Id > 0)
             {
-                orderDetail.Quantity = newQuantity; // Cập nhật số lượng trong order details
-                orderDetail.UnitPrice = productVariant.Regular_price;
-                orderDetail.TotalDiscount = productVariant.Sale_price;
-                await orderDetailsServices.Update(orderDetail, orderDetail.Id); // Gọi dịch vụ để cập nhật thông tin
+                // Nếu người dùng đã đăng nhập, cập nhật trong database
+                await cartDetailsService.Update(cartDetail);
+            }
+            else
+            {
+                // Nếu người dùng chưa đăng nhập, cập nhật trong SessionStorage
+                var guestCartJson = await SessionStorage.GetItemAsync<string>("guestCart");
+                var guestCart = string.IsNullOrEmpty(guestCartJson)
+                    ? new List<Cart_details>()
+                    : JsonSerializer.Deserialize<List<Cart_details>>(guestCartJson);
+                var existingCartItem = guestCart.FirstOrDefault(x => x.Id == itemId);
+                if (existingCartItem != null)
+                {
+                    existingCartItem.Quantity = newQuantity;
+                    await SessionStorage.SetItemAsync("guestCart", guestCart);
+                }
             }
 
             CalculateTotalMoney();
-            await UpdateCartDetail(cartDetail);
-            // Cập nhật lại giao diện
-            await LoadOrderDetails();
             StateHasChanged();
         }
     }
+
 
     private async Task UpdateCartDetail(Cart_details cartDetail)
     {
@@ -864,9 +1072,27 @@
 
     private async Task DeleteCartDetail(long id)
     {
-        await cartDetailsService.Delete(id);
+        if (user != null && user.Id > 0)
+        {
+            // Nếu người dùng đã đăng nhập, xóa trong database
+            await cartDetailsService.Delete(id);
+            await LoadCartDetails();
+        }
+        else
+        {
+            // Nếu người dùng chưa đăng nhập, xóa trong SessionStorage
+            var guestCartJson = await SessionStorage.GetItemAsync<string>("guestCart");
+            var guestCart = string.IsNullOrEmpty(guestCartJson)
+                ? new List<Cart_details>()
+                : JsonSerializer.Deserialize<List<Cart_details>>(guestCartJson);
+            guestCart.RemoveAll(x => x.Id == id);
+            await SessionStorage.SetItemAsync("guestCart", guestCart);
+        }
+
         await LoadCartDetails();
     }
+
+        
 
     private async Task SelectVoucher(long id)
     {
@@ -933,43 +1159,97 @@
 
     private async Task CreateModalOrder()
     {
-        voucher = null;
-        voucherAmount = 0;
-        SelectedVoucherId = null;
-        // Kiểm tra số lượng sản phẩm trong kho cho tất cả các item trong selectedCartDetails
-        if (selectedCartDetails.Count == 0 || selectedCartDetails == null)
+        // Danh sách giỏ hàng để xử lý
+        List<Cart_details> cartDetailsToProcess = new List<Cart_details>();
+
+        if (user != null && user.Id > 0) // Người dùng đã đăng nhập
         {
-            await JS.InvokeVoidAsync("toastr.error", $"Vui lòng chọn sản phẩm trước khi thanh toán");
-            return;
+            cartDetailsToProcess = lst_CartDetails.Where(c => selectedCartDetails.Contains(c.Id)).ToList();
         }
-        foreach (var cartDetailId in selectedCartDetails)
+        else // Người dùng chưa đăng nhập
         {
-            var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-            if(cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
+            try
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} số lượng không đủ.");
-                return;
-            }
-            if (cartDetail == null)
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} không tồn tại trong giỏ hàng.");
-                return;
-            }
+                // Kiểm tra xem đã có hóa đơn "Pending" trong LocalStorage chưa
+                var pendingOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
+                if (!string.IsNullOrEmpty(pendingOrderJson))
+                {
+                    // Hiển thị thông báo và hóa đơn "Pending" hiện tại
+                    order = JsonSerializer.Deserialize<Orders>(pendingOrderJson);
+                    await JS.InvokeVoidAsync("toastr.error", "Bạn đã có một hóa đơn đang chờ xử lý.\nCT Chỉ hỗ trợ 1 hóa đơn chờ nếu bạn chưa đăng nhập.");
 
-            var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-            if (productAttribute == null)
+                    // Gọi hàm hiển thị thông tin hóa đơn
+                    isModalOrderVisiable = true;
+                    await LoadOrderDetails();
+                    StateHasChanged();
+                    return;
+                }
+
+                // Nếu chưa có, lấy danh sách sản phẩm từ LocalStorage
+                var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+                if (!string.IsNullOrEmpty(cartJson))
+                {
+                    // if (cartDetail.Quantity > productAttribute.Stock)
+                    // {
+                    //     await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm [ {cartDetail.Product_Attributes.SKU} ][ {cartDetail.Product_Attributes.Color.Title} ][ {cartDetail.Product_Attributes.Size.Title} ] hiện không đủ số lượng quý khách mong muốn!");
+                    //     return;
+                    // }
+                    var localCart = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);
+                    
+                    // Lọc chỉ các sản phẩm được tích
+                    var selectedProducts = localCart.Where(cp => selectedCartDetails.Contains(cp.Product_id)).ToList();
+
+                    cartDetailsToProcess = selectedProducts.Select(cp => new Cart_details
+                        {
+                            Product_id = cp.Product_id,
+                            Quantity = cp.Quantity
+                        }).ToList();
+
+                    // Tìm kiếm Product_Attributes cho từng sản phẩm
+                    foreach (var cartDetail in cartDetailsToProcess)
+                    {
+                        var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
+                        if (productAttribute != null)
+                        {
+                            cartDetail.Product_Attributes = productAttribute;
+                        }
+                        else
+                        {
+                            await JS.InvokeVoidAsync("toastr.error", $"Không tìm thấy thông tin sản phẩm với ID {cartDetail.Product_id}");
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("toastr.error", "Giỏ hàng trống, vui lòng thêm sản phẩm trước khi đặt hàng.");
+                    return;
+                }
+            }
+            catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetail.Product_id} không tồn tại.");
+                await JS.InvokeVoidAsync("toastr.error", $"Lỗi khi xử lý dữ liệu giỏ hàng: {ex.Message}");
                 return;
             }
-
-            if (cartDetail.Quantity > productAttribute.Stock)
-            {
-                await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm [ {cartDetail.Product_Attributes.SKU} ][ {cartDetail.Product_Attributes.Color.Title} ][ {cartDetail.Product_Attributes.Size.Title} ] hiện không đủ số lượng quý khách mong muốn!");
-                return;
-            }
-
         }
+
+        // Kiểm tra số lượng sản phẩm trong kho
+        foreach (var cartDetail in cartDetailsToProcess)
+        {
+            if (cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng.");
+                return;
+            }
+
+            if (cartDetail.Quantity > cartDetail.Product_Attributes.Stock)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng trong kho.");
+                return;
+            }
+        }
+
+        // Xác nhận tạo đơn hàng
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
         if (confirmed)
         {
@@ -977,76 +1257,31 @@
 
             try
             {
-                // Lấy danh sách đơn hàng của người dùng
-                var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
-                if (ordersUser == null)
+                if (user != null && user.Id > 0) // Người dùng đã đăng nhập
                 {
-                    await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy thông tin đơn hàng cho người dùng này.");
-                    return;
-                }
-                var existingOrderPending = ordersUser.FirstOrDefault(o => o.Status == "Pending");
-
-                // Nếu tồn tại đơn hàng "Pending", sử dụng lại
-                if (existingOrderPending != null)
-                {
-                    order = existingOrderPending;
-                }
-                else
-                {
-                    if (user == null)
+                    var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
+                    var existingOrderPending = ordersUser?.FirstOrDefault(o => o.Status == "Pending");
+                    if (existingOrderPending != null)
                     {
-                        await JS.InvokeVoidAsync("toastr.warning", "Người dùng không hợp lệ!");
-                        return;
-                    }
-
-                    // Tạo đơn hàng mới
-                    var newOrder = new Orders
-                        {
-                            User_id = user?.Id,
-                            Created_at = DateTime.Now,
-                            Note = "Giao hàng",
-                            Status = "Pending"
-                        };
-
-                    var createdOrder = await orderServices.Create(newOrder);
-                    if (createdOrder != null)
-                    {
-                        order = createdOrder;
+                        order = existingOrderPending;
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
-                        return;
+                        order = await CreateNewOrder();
                     }
+                }
+                else // Người dùng chưa đăng nhập
+                {
+                    // Tạo hóa đơn mới và lưu vào LocalStorage
+                    order = await CreateNewOrder();
+                    var orderJson = JsonSerializer.Serialize(order);
+                    await JS.InvokeVoidAsync("localStorage.setItem", "pendingOrder", orderJson);
                 }
 
                 if (order != null)
                 {
-                    // Khởi tạo danh sách order detail nếu chưa có
-                    if (lst_OrderDetail == null)
+                    foreach (var cartDetail in cartDetailsToProcess)
                     {
-                        lst_OrderDetail = new List<Order_details>();
-                    }
-
-                    // Thêm các item từ selectedCartDetails vào lst_OrderDetail
-                    foreach (var cartDetailId in selectedCartDetails)
-                    {
-                        var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                        if (cartDetail == null)
-                        {
-                            Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
-                            continue;
-                        }
-
-                        // Kiểm tra thông tin sản phẩm
-                        var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-                        if (productAttribute == null)
-                        {
-                            Console.WriteLine($"Product attribute for ID {cartDetail.Product_id} not found.");
-                            continue;
-                        }
-
-                        // Kiểm tra xem sản phẩm đã có trong order details chưa
                         var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(order.Id, cartDetail.Product_Attributes.Id);
                         if (existingDetail == null)
                         {
@@ -1054,47 +1289,241 @@
                                 {
                                     OrderId = order.Id,
                                     Product_Attribute_Id = cartDetail.Product_Attributes.Id,
-                                    Quantity = cartDetail.Quantity??0,
+                                    Quantity = cartDetail.Quantity ?? 0,
                                     TotalDiscount = cartDetail.Product_Attributes.Sale_price,
                                     UnitPrice = cartDetail.Product_Attributes.Regular_price
                                 };
                             await orderDetailsServices.Create(newOrderDetail);
-                            lst_OrderDetail.Add(newOrderDetail); // Thêm vào lst_OrderDetail
-                        }
-                        else
-                        {
-                            existingDetail.Quantity = cartDetail.Quantity??0;
-                            existingDetail.UnitPrice = cartDetail.Product_Attributes.Regular_price;
-                            existingDetail.TotalDiscount = cartDetail.Product_Attributes.Sale_price;
-                            await orderDetailsServices.Update(existingDetail, existingDetail.Id);
-                        }
-                    }
-
-                    // Xóa các item không còn trong selectedCartDetails
-                    var allOrderDetails = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
-                    foreach (var detail in allOrderDetails)
-                    {
-                        bool shouldDelete = !lst_CartDetails
-                            .Where(item => selectedCartDetails.Contains(item.Id))
-                            .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
-
-                        if (shouldDelete)
-                        {
-                            await orderDetailsServices.Delete(detail.Id);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error occurred: " + ex.ToString()); // Log the complete error
+                Console.WriteLine("Error occurred: " + ex.ToString());
             }
+
             await LoadOrderDetails();
             await LoadCartDetails();
             StateHasChanged();
             CalculateTotalMoney();
         }
     }
+
+
+
+
+    private async Task<Orders> CreateNewOrder()
+    {
+        var newOrder = new Orders
+        {
+            User_id = user != null && user.Id > 0 ? user.Id : null,
+            Created_at = DateTime.Now,
+            Note = "Giao hàng",
+            Status = "Pending"
+        };
+
+        return await orderServices.Create(newOrder);
+    }
+
+    private async Task ConfirmDeleteOrder()
+    {
+        // Hiển thị xác nhận trước khi xóa
+        bool confirmed = await JS.InvokeAsync<bool>("confirm",
+            "Bạn có chắc về hành động này? Lưu ý: Hóa đơn xóa không thể khôi phục!");
+        if (confirmed)
+        {
+            try
+            {
+                // Xóa hóa đơn theo ID trong cơ sở dữ liệu
+                if (order != null && order.Id > 0)
+                {
+                    await orderServices.Delete(order.Id);
+                }
+
+                // Xóa hóa đơn khỏi LocalStorage
+                var pendingOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
+                if (!string.IsNullOrEmpty(pendingOrderJson))
+                {
+                    var pendingOrder = JsonSerializer.Deserialize<Orders>(pendingOrderJson);
+                    if (pendingOrder != null && pendingOrder.Id == order.Id)
+                    {
+                        await JS.InvokeVoidAsync("localStorage.removeItem", "pendingOrder");
+                    }
+                }
+
+                order = null;
+                lst_OrderDetail.Clear();
+                isModalOrderVisiable = false;
+                await LoadCartDetails();
+                await JS.InvokeVoidAsync("toastr.success", "Hóa đơn đã được xóa thành công.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi xóa hóa đơn: {ex.Message}");
+                await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi xóa hóa đơn. Vui lòng thử lại.");
+            }
+        }
+    }
+
+    // Code Cũ ===============
+
+    // private async Task CreateModalOrder()
+    // {
+    //     // Kiểm tra số lượng sản phẩm trong kho cho tất cả các item trong selectedCartDetails
+    //     foreach (var cartDetailId in selectedCartDetails)
+    //     {
+    //         var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+    //         if(cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} số lượng không đủ.");
+    //             return;
+    //         }
+    //         if (cartDetail == null)
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} không tồn tại trong giỏ hàng.");
+    //             return;
+    //         }
+
+    //         var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
+    //         if (productAttribute == null)
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetail.Product_id} không tồn tại.");
+    //             return;
+    //         }
+
+    //         if (cartDetail.Quantity > productAttribute.Stock)
+    //         {
+    //             await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm {cartDetail.Product_Attributes.SKU} hiện không đủ số lượng quý khách mong muốn!");
+    //             return;
+    //         }
+
+    //     }
+
+    //     bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
+    //     if (confirmed)
+    //     {
+    //         isModalOrderVisiable = true;
+    //         try
+    //         {
+    //             // Lấy danh sách đơn hàng của người dùng
+    //             var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
+    //             if (ordersUser == null)
+    //             {
+    //                 await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy thông tin đơn hàng cho người dùng này.");
+    //                 return;
+    //             }
+    //             var existingOrderPending = ordersUser.FirstOrDefault(o => o.Status == "Pending");
+
+    //             // Nếu tồn tại đơn hàng "Pending", sử dụng lại
+    //             if (existingOrderPending != null)
+    //             {
+    //                 order = existingOrderPending;
+    //             }
+    //             else
+    //             {
+    //                 if (user == null)
+    //                 {
+    //                     await JS.InvokeVoidAsync("toastr.warning", "Người dùng không hợp lệ!");
+    //                     return;
+    //                 }
+
+    //                 // Tạo đơn hàng mới
+    //                 var newOrder = new Orders
+    //                     {
+    //                         User_id = user?.Id,
+    //                         Created_at = DateTime.Now,
+    //                         Note = "Giao hàng",
+    //                         Status = "Pending"
+    //                     };
+
+    //                 var createdOrder = await orderServices.Create(newOrder);
+    //                 if (createdOrder != null)
+    //                 {
+    //                     order = createdOrder;
+    //                 }
+    //                 else
+    //                 {
+    //                     await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
+    //                     return;
+    //                 }
+    //             }
+
+    //             if (order != null)
+    //             {
+    //                 // Khởi tạo danh sách order detail nếu chưa có
+    //                 if (lst_OrderDetail == null)
+    //                 {
+    //                     lst_OrderDetail = new List<Order_details>();
+    //                 }
+
+    //                 // Thêm các item từ selectedCartDetails vào lst_OrderDetail
+    //                 foreach (var cartDetailId in selectedCartDetails)
+    //                 {
+    //                     var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+    //                     if (cartDetail == null)
+    //                     {
+    //                         Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
+    //                         continue;
+    //                     }
+
+    //                     // Kiểm tra thông tin sản phẩm
+    //                     var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
+    //                     if (productAttribute == null)
+    //                     {
+    //                         Console.WriteLine($"Product attribute for ID {cartDetail.Product_id} not found.");
+    //                         continue;
+    //                     }
+
+    //                     // Kiểm tra xem sản phẩm đã có trong order details chưa
+    //                     var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(order.Id, cartDetail.Product_Attributes.Id);
+    //                     if (existingDetail == null)
+    //                     {
+    //                         var newOrderDetail = new Order_details
+    //                             {
+    //                                 OrderId = order.Id,
+    //                                 Product_Attribute_Id = cartDetail.Product_Attributes.Id,
+    //                                 Quantity = cartDetail.Quantity??0,
+    //                                 TotalDiscount = cartDetail.Product_Attributes.Sale_price,
+    //                                 UnitPrice = cartDetail.Product_Attributes.Regular_price
+    //                             };
+    //                         await orderDetailsServices.Create(newOrderDetail);
+    //                         lst_OrderDetail.Add(newOrderDetail); // Thêm vào lst_OrderDetail
+    //                     }
+    //                     else
+    //                     {
+    //                         existingDetail.Quantity = cartDetail.Quantity??0;
+    //                         existingDetail.UnitPrice = cartDetail.Product_Attributes.Regular_price;
+    //                         existingDetail.TotalDiscount = cartDetail.Product_Attributes.Sale_price;
+    //                         await orderDetailsServices.Update(existingDetail, existingDetail.Id);
+    //                     }
+    //                 }
+
+    //                 // Xóa các item không còn trong selectedCartDetails
+    //                 var allOrderDetails = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
+    //                 foreach (var detail in allOrderDetails)
+    //                 {
+    //                     bool shouldDelete = !lst_CartDetails
+    //                         .Where(item => selectedCartDetails.Contains(item.Id))
+    //                         .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
+
+    //                     if (shouldDelete)
+    //                     {
+    //                         await orderDetailsServices.Delete(detail.Id);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             Console.WriteLine("Error occurred: " + ex.ToString()); // Log the complete error
+    //         }
+    //         await LoadOrderDetails();
+    //         await LoadCartDetails();
+    //         StateHasChanged();
+    //         CalculateTotalMoney();
+    //     }
+    // }
 
     private async Task CloseModalOrder()
     {
@@ -1104,8 +1533,23 @@
 
     private async Task LoadOrderDetails()
     {
-        lst_OrderDetail = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
+        try
+        {
+            lst_OrderDetail = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
+            CalculateTotalMoney();
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"HTTP Request Error: {ex.Message}");
+            await JS.InvokeVoidAsync("toastr.error", "Không thể tải thông tin chi tiết đơn hàng. Vui lòng thử lại sau.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected Error: {ex.Message}");
+            await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi không xác định. Vui lòng thử lại sau.");
+        }
     }
+
 
     private async Task ChoseAddressModal()
     {
@@ -1136,42 +1580,175 @@
             await JS.InvokeVoidAsync("toastr.error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số.");
             return;
         }
-        var orderPending = await orderServices.GetByIdOrders(order.Id);
-        if (orderPending?.User_id.HasValue == true)
+
+        if (user != null && user.Id > 0) // Người dùng đã đăng nhập
         {
-            address.User_Id = orderPending.User_id.Value; // Gắn User_Id từ Order
-            if (address.Type == null) address.Type = "";
-            if (address.Status == null) address.Status = "";
-
-            var province = provinces.FirstOrDefault(p => p.ProvinceID.ToString() == address.Province_city);
-            var district = districts.FirstOrDefault(d => d.DistrictID.ToString() == address.District);
-            var ward = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
-            var codeWard = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
-            var districtId = districts.FirstOrDefault(w => w.DistrictID.ToString() == address.District);
-            address.Province_city = province.ProvinceName;
-            address.District = district?.DistrictName;
-            address.Ward_commune = ward?.WardName;
-            address.WardCode = codeWard?.WardCode;
-            address.DistrictId = districtId?.DistrictID;
-
-            var result = await addressServices.CreateAddress(address);
-
-            if (result)
+            var orderPending = await orderServices.GetByIdOrders(order.Id);
+            if (orderPending?.User_id.HasValue == true)
             {
-                await JS.InvokeVoidAsync("toastr.success", "Địa chỉ đã được tạo thành công.");
-                isModalCreateAddress = false;
-                lst_Address = await addressServices.GetAddressByUserId(orderPending.User_id.Value);
+                address.User_Id = orderPending.User_id.Value; // Gắn User_Id từ Order
             }
             else
             {
-                await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
+                await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy người dùng liên kết với đơn hàng.");
+                return;
             }
         }
+        else // Người dùng chưa đăng nhập
+        {
+            address.User_Id = null;
+        }
+
+        if (address.Type == null) address.Type = "";
+        if (address.Status == null) address.Status = "";
+
+        var province = provinces.FirstOrDefault(p => p.ProvinceID.ToString() == address.Province_city);
+        var district = districts.FirstOrDefault(d => d.DistrictID.ToString() == address.District);
+        var ward = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
+
+        address.Province_city = province?.ProvinceName;
+        address.District = district?.DistrictName;
+        address.Ward_commune = ward?.WardName;
+
+        try
+        {
+            var result = await addressServices.CreateAddressNoLogin(address);
+
+            if (result != null)
+            {
+                await JS.InvokeVoidAsync("toastr.success", "Địa chỉ đã được tạo thành công.");
+                isModalCreateAddress = false;
+
+                // Cập nhật vào Order
+                if (user != null && user.Id > 0) // Người dùng đã đăng nhập
+                {
+                    lst_Address = await addressServices.GetAddressByUserId(address.User_Id.Value);
+                }
+                else
+                {
+                    if (order != null)
+                    {
+                        order.Address_Id = result.Id;
+                        order.Strees = $"{address.Street} - {address.Ward_commune} - {address.District} - {address.Province_city}";
+                        await orderServices.Update(order, order.Id);
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới cho khách chưa đăng nhập.");
+                    }
+                }
+
+                // Lưu vào localStorage
+                var localStorageAddresses = await JS.InvokeAsync<string>("localStorage.getItem", "addresses");
+                var addresses = string.IsNullOrEmpty(localStorageAddresses)
+                    ? new List<Address>()
+                    : Newtonsoft.Json.JsonConvert.DeserializeObject<List<Address>>(localStorageAddresses);
+
+                addresses.Add(result);
+                await JS.InvokeVoidAsync("localStorage.setItem", "addresses", Newtonsoft.Json.JsonConvert.SerializeObject(addresses));
+            }
         else
         {
-            await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy người dùng liên kết với đơn hàng.");
+            await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
         }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Lỗi khi tạo địa chỉ: {ex.Message}");
+        await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi tạo địa chỉ.");
+    }
+}
+
+
+    // private async Task CreateAddress()
+    // {
+    //     if (string.IsNullOrEmpty(address.Ward_commune) || string.IsNullOrEmpty(address.Province_city) || string.IsNullOrEmpty(address.District))
+    //     {
+    //         await JS.InvokeVoidAsync("toastr.error", "Vui lòng nhập đầy đủ thông tin địa chỉ.");
+    //         return;
+    //     }
+    //     if (string.IsNullOrEmpty(address.Phone) || !Regex.IsMatch(address.Phone, @"^0\d{9}$"))
+    //     {
+    //         await JS.InvokeVoidAsync("toastr.error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số.");
+    //         return;
+    //     }
+
+    //     if (user != null && user.Id > 0) // Người dùng đã đăng nhập
+    //     {
+    //         var orderPending = await orderServices.GetByIdOrders(order.Id);
+    //         if (orderPending?.User_id.HasValue == true)
+    //         {
+    //             address.User_Id = orderPending.User_id.Value; // Gắn User_Id từ Order
+    //         }
+    //         else
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy người dùng liên kết với đơn hàng.");
+    //             return;
+    //         }
+    //     }
+    //     else // Người dùng chưa đăng nhập
+    //     {
+    //         // Gắn một Id mặc định cho khách chưa đăng nhập
+    //         address.User_Id = null;
+    //     }
+
+    //     // Xử lý thông tin địa chỉ
+    //     if (address.Type == null) address.Type = "";
+    //     if (address.Status == null) address.Status = "";
+
+    //     var province = provinces.FirstOrDefault(p => p.ProvinceID.ToString() == address.Province_city);
+    //     var district = districts.FirstOrDefault(d => d.DistrictID.ToString() == address.District);
+    //     var ward = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
+    //     var codeWard = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
+    //     var districtId = districts.FirstOrDefault(w => w.DistrictID.ToString() == address.District);
+
+    //     address.Province_city = province?.ProvinceName;
+    //     address.District = district?.DistrictName;
+    //     address.Ward_commune = ward?.WardName;
+    //     address.WardCode = codeWard?.WardCode;
+    //     address.DistrictId = districtId?.DistrictID;
+
+    //     try
+    //     {
+    //         var result = await addressServices.CreateAddressNoLogin(address);
+
+    //         if (result != null)
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.success", "Địa chỉ đã được tạo thành công.");
+    //             isModalCreateAddress = false;
+
+    //             if (user != null && user.Id > 0) // Người dùng đã đăng nhập
+    //             {
+    //                 lst_Address = await addressServices.GetAddressByUserId(address.User_Id.Value);
+    //             }
+    //             else // Gắn địa chỉ vào đơn hàng cho khách chưa đăng nhập
+    //             {               
+
+    //                 if (order != null)
+    //                 {
+    //                     order.Address_Id = result.Id;
+    //                     order.Strees = $"{address.Street} - {address.Ward_commune} - {address.District} - {address.Province_city}";
+    //                     await orderServices.Update(order, order.Id);
+    //                 }
+    //                 else
+    //                 {
+    //                     await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới cho khách chưa đăng nhập.");
+    //                 }
+    //             }
+    //         }
+    //         else
+    //         {
+    //             await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Lỗi khi tạo địa chỉ: {ex.Message}");
+    //         await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi tạo địa chỉ.");
+    //     }
+    // }
+
+
 
     private void CloseCreateAddress()
     {
@@ -1225,7 +1802,45 @@
     private string ward;
     private string street;
     private string phone;
+    private string name;
     private Address selectedAddress;
+
+    // private async Task SelectAddress(Address address)
+    // {
+    //     ClearInfoAddress();
+    //     if (address != null)
+    //     {
+    //         selectedAddress = address;
+    //         city = address.Province_city;
+    //         district = address.District;
+    //         ward = address.Ward_commune;
+    //         street = address.Street;
+    //         phone = address.User?.Phone;
+    //     }
+    //     var orderPending = await orderServices.GetByIdOrders(order.Id);
+    //     orderPending.Address_Id = selectedAddress.Id;
+    //     orderPending.CreatedByAdminId = null;
+    //     await orderServices.Update(orderPending, orderPending.Id);
+    //     var shippingRequest = new ShippingRequest
+    //         {
+    //             service_type_id = 2,
+    //             to_district_id = address.DistrictId,
+    //             to_ward_code = address.WardCode.ToString(),
+    //             length = 100,
+    //             width = 80,
+    //             height = 5,
+    //             weight = 1000,
+    //             insurance_value = 500000,
+    //             coupon = null,
+    //             cod_failed_amount = null,
+    //             cod_value = null
+    //         };
+    //     feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
+    //     isModalAddressVisiable = false;
+    //     isModalAddressVisiable = false;
+    //     CalculateTotalMoney();
+    // }
+
     private async Task SelectAddress(Address address)
     {
         ClearInfoAddress();
@@ -1236,31 +1851,30 @@
             district = address.District;
             ward = address.Ward_commune;
             street = address.Street;
-            phone = address.User?.Phone;
+            phone = address.Phone;
+            name = address.Name;
         }
+
+        // Lấy thông tin đơn hàng đang chờ
         var orderPending = await orderServices.GetByIdOrders(order.Id);
-        orderPending.Address_Id = selectedAddress.Id;
-        orderPending.CreatedByAdminId = null;
-        await orderServices.Update(orderPending, orderPending.Id);
-        var shippingRequest = new ShippingRequest
-            {
-                service_type_id = 2,
-                to_district_id = address.DistrictId,
-                to_ward_code = address.WardCode.ToString(),
-                length = 100,
-                width = 80,
-                height = 5,
-                weight = 1000,
-                insurance_value = 500000,
-                coupon = null,
-                cod_failed_amount = null,
-                cod_value = null
-            };
-        feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
+        if (orderPending != null)
+        {
+            orderPending.Address_Id = selectedAddress.Id;
+            orderPending.CreatedByAdminId = null;
+
+            // Cập nhật địa chỉ vào đơn hàng
+            await orderServices.Update(orderPending, orderPending.Id);
+        }
+
+        // Tạm thời bỏ qua phần phí ship
+        // feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
+
         isModalAddressVisiable = false;
-        isModalAddressVisiable = false;
-        CalculateTotalMoney();
+        CalculateTotalMoney(); // Tính lại tổng số tiền (không tính phí ship)
+        StateHasChanged();
     }
+
+
     private void ClearInfoAddress()
     {
         selectedAddress = null;
@@ -1297,14 +1911,24 @@
         if (confirmed)
         {
             CheckOut("cash");
-            foreach (var cartDetailId in selectedCartDetails)
+
+            if (user != null && user.Id > 0) // Người dùng đã đăng nhập
             {
-                var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-                productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
-                await productAttributeServices.Update(productAttribute, productAttribute.Id);
-                await cartDetailsService.Delete(cartDetailId);
+                foreach (var cartDetailId in selectedCartDetails)
+                {
+                    var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+                    var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
+                    productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
+                    await productAttributeServices.Update(productAttribute, productAttribute.Id);
+                    await cartDetailsService.Delete(cartDetailId);
+                }
             }
+            else // Người dùng chưa đăng nhập
+            {
+                await RemoveSelectedFromLocalStorage();
+            }
+
+         
             var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId??0, user.Id);
             appliedVoucher.IsApplied = true;
             await userVoucherServices.Update(appliedVoucher);
@@ -1314,8 +1938,8 @@
             await ResetViewState();
             StateHasChanged();
         }
-
     }
+
 
     private async Task PayByMomo()
     {
@@ -1328,18 +1952,25 @@
 
     private async Task ConfirmMomoPayment()
     {
-
         var updateitem = await orderServices.GetByIdOrders(order.Id);
         if (updateitem.Status == "Chờ xác nhận")
         {
-            foreach (var cartDetailId in selectedCartDetails)
+            if (user != null && user.Id > 0) // Người dùng đã đăng nhập
             {
-                var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-                productAttribute.Stock -= cartDetail.Quantity;
-                await productAttributeServices.Update(productAttribute, productAttribute.Id);
-                await cartDetailsService.Delete(cartDetailId);
+                foreach (var cartDetailId in selectedCartDetails)
+                {
+                    var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+                    var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
+                    productAttribute.Stock -= cartDetail.Quantity;
+                    await productAttributeServices.Update(productAttribute, productAttribute.Id);
+                    await cartDetailsService.Delete(cartDetailId);
+                }
             }
+            else // Người dùng chưa đăng nhập
+            {
+                await RemoveSelectedFromLocalStorage();
+            }
+
             var orderUpdate = await orderServices.GetByIdOrders(order.Id);
             var newOrderTracking = new order_trackings
                 {
@@ -1365,6 +1996,25 @@
             await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng chưa được thanh toán");
         }
     }
+
+
+    private async Task RemoveSelectedFromLocalStorage()
+    {
+        var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+        if (!string.IsNullOrEmpty(cartJson))
+        {
+            var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);    
+            cartProducts = cartProducts?.Where(cp => !selectedCartDetails.Contains(cp.Product_id)).ToList();
+
+            var updatedCartJson = JsonSerializer.Serialize(cartProducts);
+            await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Cart in localStorage is empty or null.");
+        }
+    }
+
 
     private async Task CancelMomoPayment()
     {

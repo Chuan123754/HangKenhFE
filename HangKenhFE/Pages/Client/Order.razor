@@ -202,7 +202,20 @@
                             </div>
                         </div>
                     </div>
-                
+
+                <div class="mt-3 text-center">
+                    <br />
+                    <hr style ="border: 1px solid #ccc;" />
+                    <p>
+                        Các hóa đơn <strong>"Pending"</strong> sẽ tạm thời chưa có tổng tiền đến khi bạn thanh toán  <del>(Chắc vậy) </del>.
+                        Nếu bạn muốn tiếp tục thanh toán hóa đơn <strong>"Pending"</strong> vui lòng quay lại
+                        <a href="/cart" class="text-primary">Giỏ hàng</a>, chứ copy
+                        <del>Bug bỏ mợ</del> =))). Bạn có thắc mắc gì vui lòng
+                        <a href="/faq" class="text-primary">nhấn vào đây</a>.
+                    </p>
+                    <hr style="border: 1px solid #ccc;" />
+                </div>
+
             </div>
         </div>
     </div>
@@ -336,12 +349,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (ParsedUserId != null)
-        {
-            await LoadOrders();
-            await ListOrder();
-            LoadPagedOrders();
-        }
+        
+        await LoadOrders();
+        await ListOrder();
+        LoadPagedOrders();
+        
     }
 
     public async Task ListOrder()
@@ -349,16 +361,45 @@
         // Lấy UserId từ Session
         await GetUserIdFromSession();
 
-        if (ParsedUserId == null)
+        if (ParsedUserId == null) // Người dùng chưa đăng nhập
         {
-            lst_Orders = new List<Orders>(); // Không có UserId thì danh sách hóa đơn trống
+            // Lấy Order ID từ LocalStorage
+            var localStorageOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
+
+            if (!string.IsNullOrEmpty(localStorageOrderJson))
+            {
+                try
+                {
+                    var localOrder = JsonSerializer.Deserialize<Orders>(localStorageOrderJson);
+
+                    if (localOrder != null)
+                    {
+                        var allOrders = await orderService.GetAll();
+                        // Lọc theo ID trong LocalStorage
+                        lst_Orders = allOrders.Where(o => o.Id == localOrder.Id).ToList();
+                    }
+                    else
+                    {
+                        lst_Orders = new List<Orders>(); // Không có Order
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Lỗi khi parse JSON từ LocalStorage: {ex.Message}");
+                    lst_Orders = new List<Orders>();
+                }
+            }
+            else
+            {
+                lst_Orders = new List<Orders>(); // Không có Order trong LocalStorage
+            }
+
+            LoadPagedOrders();
             return;
         }
 
-        // Lấy danh sách đơn hàng từ service
         var orders = await orderService.GetAll();
 
-        // Lọc đơn hàng theo UserId
         lst_Orders = orders
             .Where(o => o.User_id == ParsedUserId)
             .OrderByDescending(o => o.Status == "Hóa đơn treo")
@@ -379,6 +420,9 @@
 
         LoadPagedOrders();
     }
+
+
+
 
     private async Task SearchOrders(ChangeEventArgs e)
     {
