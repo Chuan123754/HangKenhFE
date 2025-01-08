@@ -76,8 +76,8 @@
             <!-- Main Giỏ hàng -->
             <main class="col-md-12">
                 <div class=" mb-4">
-               @*      <div class="card-header text-center">
-                        <h4>Thông tin giỏ hàng</h4>
+                    @*      <div class="card-header text-center">
+                    <h4>Thông tin giỏ hàng</h4>
                     </div> *@
                     <div class="card-body">
                         <div class="table-responsive">
@@ -144,22 +144,27 @@
 
                                             <!-- Đơn giá -->
                                             <td class="text-center align-middle">
+
                                                 @if (item.Product_Attributes.Sale_price != null && item.Product_Attributes.Sale_price > 0)
                                                 {
                                                     <div>
                                                         <span style="text-decoration: line-through; color: gray;">
-                                                            @string.Format("{0:N0}", item.Product_Attributes.Regular_price) VNĐ
+                                                            @string.Format("{0:N0}", item.Product_Attributes.Regular_price).Replace(".", ",") VNĐ
                                                         </span>
                                                     </div>
                                                     <div>
-                                                        <span style="color: red; font-weight: bold;">
-                                                            @string.Format("{0:N0}", item.Product_Attributes.Sale_price) VNĐ
+                                                        <span style="font-weight: bold; color: red;">
+                                                            @string.Format("{0:N0}", item.Product_Attributes.Sale_price).Replace(".", ",") VNĐ
                                                         </span>
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <span>@string.Format("{0:N0}", item.Product_Attributes.Regular_price) VNĐ</span>
+                                                    <div>
+                                                        <span>
+                                                            @string.Format("{0:N0}", item.Product_Attributes.Regular_price).Replace(".", ",") VNĐ
+                                                        </span>
+                                                    </div>
                                                 }
                                             </td>
 
@@ -544,7 +549,7 @@
                                         </div>
                                         <div class="col-12 text-end">
                                             <div class="d-flex justify-content-end my-3">
-                                                <button type="button" class="btn btn-outline-primary me-2" @onclick =OpenVoucher>VOUCHER</button>
+                                                <button type="button" class="btn btn-outline-primary me-2" @onclick=OpenVoucher>VOUCHER</button>
                                             </div>
                                             <div class="d-flex justify-content-between">
                                                 <span>Tổng tiền hàng:</span>
@@ -637,7 +642,7 @@
                                     decimal totalAmountValue = totalAmount ?? 0m;
                                     if (decimal.TryParse(item.Vouchers.Condition, out conditionValue))
                                     {
-                                        suggestBuy = Math.Max(0, conditionValue - totalAmountValue); 
+                                        suggestBuy = Math.Max(0, conditionValue - totalAmountValue);
                                     }
                                     if (!decimal.TryParse(item.Vouchers.Condition, out conditionValue))
                                     {
@@ -699,7 +704,7 @@
                                                     }
                                                 </div>
 
-                                        
+
                                             }
                                         </div>
                                         <div style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
@@ -800,7 +805,7 @@
     {
         provinces = await address_Service.GetProvincesAsync();
         var allVoucher = await userVoucherServices.GetAll();
-        if(user!=null)
+        if (user != null)
         {
             lst_UserVoucher = allVoucher.Where(v => v.UserId == user.Id && v.IsApplied == false).ToList();
         }
@@ -1092,7 +1097,7 @@
         await LoadCartDetails();
     }
 
-        
+
 
     private async Task SelectVoucher(long id)
     {
@@ -1130,7 +1135,7 @@
         discountAmount = totalPrincipal - totalAmount;
         // tính tiền giảm từ voucher
         decimal percentValue = 0;
-        if(voucher!=null)
+        if (voucher != null)
         {
             if (!string.IsNullOrEmpty(voucher.Percent) && !decimal.TryParse(voucher.Percent, out percentValue))
             {
@@ -1167,94 +1172,30 @@
             cartDetailsToProcess = lst_CartDetails.Where(c => selectedCartDetails.Contains(c.Id)).ToList();
         }
         else // Người dùng chưa đăng nhập
-        {
-            try
+             // Kiểm tra số lượng sản phẩm trong kho
+            foreach (var cartDetail in cartDetailsToProcess)
             {
-                // Kiểm tra xem đã có hóa đơn "Pending" trong LocalStorage chưa
-                var pendingOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
-                if (!string.IsNullOrEmpty(pendingOrderJson))
+                if (cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
                 {
-                    // Hiển thị thông báo và hóa đơn "Pending" hiện tại
-                    order = JsonSerializer.Deserialize<Orders>(pendingOrderJson);
-                    await JS.InvokeVoidAsync("toastr.error", "Bạn đã có một hóa đơn đang chờ xử lý.\nCT Chỉ hỗ trợ 1 hóa đơn chờ nếu bạn chưa đăng nhập.");
-
-                    // Gọi hàm hiển thị thông tin hóa đơn
-                    isModalOrderVisiable = true;
-                    await LoadOrderDetails();
-                    StateHasChanged();
+                    await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng.");
                     return;
                 }
 
-                // Nếu chưa có, lấy danh sách sản phẩm từ LocalStorage
-                var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
-                if (!string.IsNullOrEmpty(cartJson))
+                if (cartDetail.Quantity > cartDetail.Product_Attributes.Stock)
                 {
-                    // if (cartDetail.Quantity > productAttribute.Stock)
-                    // {
-                    //     await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm [ {cartDetail.Product_Attributes.SKU} ][ {cartDetail.Product_Attributes.Color.Title} ][ {cartDetail.Product_Attributes.Size.Title} ] hiện không đủ số lượng quý khách mong muốn!");
-                    //     return;
-                    // }
-                    var localCart = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);
-                    
-                    // Lọc chỉ các sản phẩm được tích
-                    var selectedProducts = localCart.Where(cp => selectedCartDetails.Contains(cp.Product_id)).ToList();
-
-                    cartDetailsToProcess = selectedProducts.Select(cp => new Cart_details
-                        {
-                            Product_id = cp.Product_id,
-                            Quantity = cp.Quantity
-                        }).ToList();
-
-                    // Tìm kiếm Product_Attributes cho từng sản phẩm
-                    foreach (var cartDetail in cartDetailsToProcess)
-                    {
-                        var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
-                        if (productAttribute != null)
-                        {
-                            cartDetail.Product_Attributes = productAttribute;
-                        }
-                        else
-                        {
-                            await JS.InvokeVoidAsync("toastr.error", $"Không tìm thấy thông tin sản phẩm với ID {cartDetail.Product_id}");
-                            return;
-                        }
-                    }
-                }
-                else
-                {
-                    await JS.InvokeVoidAsync("toastr.error", "Giỏ hàng trống, vui lòng thêm sản phẩm trước khi đặt hàng.");
+                    await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng trong kho.");
                     return;
                 }
             }
-            catch (Exception ex)
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Lỗi khi xử lý dữ liệu giỏ hàng: {ex.Message}");
-                return;
-            }
-        }
-
-        // Kiểm tra số lượng sản phẩm trong kho
-        foreach (var cartDetail in cartDetailsToProcess)
-        {
-            if (cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng.");
-                return;
-            }
-
-            if (cartDetail.Quantity > cartDetail.Product_Attributes.Stock)
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng trong kho.");
-                return;
-            }
-        }
 
         // Xác nhận tạo đơn hàng
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
         if (confirmed)
         {
             isModalOrderVisiable = true;
-
+            voucher = null;
+            SelectedVoucherId = null;
+            voucherAmount = 0;
             try
             {
                 if (user != null && user.Id > 0) // Người dùng đã đăng nhập
@@ -1310,18 +1251,15 @@
         }
     }
 
-
-
-
     private async Task<Orders> CreateNewOrder()
     {
         var newOrder = new Orders
-        {
-            User_id = user != null && user.Id > 0 ? user.Id : null,
-            Created_at = DateTime.Now,
-            Note = "Giao hàng",
-            Status = "Pending"
-        };
+            {
+                User_id = user != null && user.Id > 0 ? user.Id : null,
+                Created_at = DateTime.Now,
+                Note = "Giao hàng",
+                Status = "Pending"
+            };
 
         return await orderServices.Create(newOrder);
     }
@@ -1647,17 +1585,17 @@
                 addresses.Add(result);
                 await JS.InvokeVoidAsync("localStorage.setItem", "addresses", Newtonsoft.Json.JsonConvert.SerializeObject(addresses));
             }
-        else
+            else
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
+            }
+        }
+        catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
+            Console.WriteLine($"Lỗi khi tạo địa chỉ: {ex.Message}");
+            await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi tạo địa chỉ.");
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Lỗi khi tạo địa chỉ: {ex.Message}");
-        await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi tạo địa chỉ.");
-    }
-}
 
 
     // private async Task CreateAddress()
@@ -1722,7 +1660,7 @@
     //                 lst_Address = await addressServices.GetAddressByUserId(address.User_Id.Value);
     //             }
     //             else // Gắn địa chỉ vào đơn hàng cho khách chưa đăng nhập
-    //             {               
+    //             {
 
     //                 if (order != null)
     //                 {
@@ -1868,7 +1806,21 @@
 
         // Tạm thời bỏ qua phần phí ship
         // feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
-
+        var shippingRequest = new ShippingRequest
+            {
+                service_type_id = 2,
+                to_district_id = address.DistrictId,
+                to_ward_code = address.WardCode.ToString(),
+                length = 100,
+                width = 80,
+                height = 5,
+                weight = 1000,
+                insurance_value = 500000,
+                coupon = null,
+                cod_failed_amount = null,
+                cod_value = null
+            };
+        feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
         isModalAddressVisiable = false;
         CalculateTotalMoney(); // Tính lại tổng số tiền (không tính phí ship)
         StateHasChanged();
@@ -1939,11 +1891,6 @@
             {
                 await RemoveSelectedFromLocalStorage();
             }
-
-         
-            var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId??0, user.Id);
-            appliedVoucher.IsApplied = true;
-            await userVoucherServices.Update(appliedVoucher);
             selectedCartDetails.Clear();
             await LoadOrderDetails();
             await LoadCartDetails();
@@ -2020,7 +1967,7 @@
         var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
         if (!string.IsNullOrEmpty(cartJson))
         {
-            var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);    
+            var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson);
             cartProducts = cartProducts?.Where(cp => !selectedCartDetails.Contains(cp.Product_id)).ToList();
 
             var updatedCartJson = JsonSerializer.Serialize(cartProducts);
@@ -2041,7 +1988,7 @@
             foreach (var cartDetailId in selectedCartDetails)
             {
                 var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
+                var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
                 productAttribute.Stock -= cartDetail.Quantity;
                 await productAttributeServices.Update(productAttribute, productAttribute.Id);
                 await cartDetailsService.Delete(cartDetailId);
@@ -2101,8 +2048,8 @@
         if (orderUpdate != null)
         {
             CalculateTotalMoney();
-            orderUpdate.TotalAmount = totalAmount; 
-            orderUpdate.TotalPrincipal = totalPrincipal; 
+            orderUpdate.TotalAmount = totalAmount;
+            orderUpdate.TotalPrincipal = totalPrincipal;
             orderUpdate.Totalmoney = totalMoney;
             orderUpdate.FeeShipping = feeShipping;
             orderUpdate.TotalVoucher = voucherAmount;
@@ -2150,7 +2097,7 @@
                         Created_by = null
                     };
                 await orderTrackingServices.AddOrderTracking(newOrderTracking);
-           
+
             }
             if (orderUpdate.Status == "Chờ xác nhận")
             {
