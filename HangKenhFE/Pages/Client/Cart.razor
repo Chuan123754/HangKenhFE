@@ -633,7 +633,7 @@
                                         <input type="text" id="searchCustomer" class="form-control" style="width: 250px;" placeholder="CODE">
                                     </div>
                                 </div>
-                                @foreach (var item in lst_UserVoucher)
+                                @foreach (var item in lst_UserVoucher.Where(v => v.Vouchers.Status == "Đang diễn ra" && v.Vouchers.End_time > DateTime.Now || v.Vouchers.Status == "Tạm dừng"))
                                 {
                                     decimal suggestBuy = 0;
                                     decimal conditionValue = 0m;
@@ -659,33 +659,70 @@
                                     {
                                         formattedPercent = percentValue.ToString("N0");
                                     }
+                                    @if (item.Vouchers.Status == "Tạm dừng")
+                                    {
+                                        <div>
+                                            <div style="opacity: 0.5; pointer-events: none; cursor: not-allowed;">
+                                                <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px;">
+                                                    <div style="background: #3366CC; color: white; padding: 10px; border-radius: 10px 10px 0 0;">
+                                                        <span style="font-weight: bold;">@item.Vouchers.Code</span>
+                                                    </div>
+                                                    @if (item.Vouchers.Description == "Percentage")
+                                                    {
+                                                        <h2 style="margin: 0; font-size: 18px; color: #333;">
+                                                            Giảm @formattedPercent % cho đơn hàng đạt tối thiểu @conditionValue.ToString("N0") VNĐ
+                                                        </h2>
+                                                        <p style="margin: 8px 0; color: #666; font-size: 15px">
+                                                            Giảm tối đa @maxDiscountValue.ToString("N0") VNĐ
+                                                        </p>
+                                                    }
+                                                    else
+                                                    {
+                                                        <h2 style="margin: 0; font-size: 18px; color: #333;">
+                                                            Giảm @formattedPercent VNĐ cho đơn hàng đạt tối thiểu @conditionValue.ToString("N0") VNĐ
+                                                        </h2>
+                                                    }
+                                                    <p style="margin: 8px 0; color: red; font-size: 15px">
+                                                        <small>Hết hạn lúc: @item.Vouchers.End_time</small>
+                                                    </p>
 
-                                    <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px;">
-                                        <div style="background: #3366CC; color: white; padding: 10px; border-radius: 10px 10px 0 0;">
-                                            <span style="font-weight: bold;">@item.Vouchers.Code</span>
+                                                </div>
+                                            </div>
+                                            <div style="margin-top: 10px; text-align: left;">
+                                                <div style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+                                                    <strong>Voucher sẽ sớm được kích hoạt lại</strong>
+                                                    <span style="color: red;">Đang tạm khóa</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        @if (item.Vouchers.Description == "Percentage")
-                                        {
-                                            <h2 style="margin: 0; font-size: 18px; color: #333;">Giảm @formattedPercent % cho đơn hàng đạt tối thiểu @conditionValue.ToString("N0") VNĐ</h2>
-                                            <p style="margin: 8px 0; color: #666; font-size: 15px">Giảm tối đa @maxDiscountValue.ToString("N0") VNĐ</p>
-                                        }
-                                        else
-                                        {
-                                            <h2 style="margin: 0; font-size: 18px; color: #333;">Giảm @formattedPercent VNĐ cho đơn hàng đạt tối thiểu @conditionValue.ToString("N0") VNĐ</h2>
-
-                                        }
-
-                                        <p style="margin: 8px 0; color: red; font-size: 15px"><small>Hết hạn lúc: @item.Vouchers.End_time</small></p>
-                                        <div style="margin-top: 10px; text-align: left;">
-                                            @if (suggestBuy > 0)
+                                    }
+                                    else
+                                    {
+                                        <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px;">
+                                            <div style="background: #3366CC; color: white; padding: 10px; border-radius: 10px 10px 0 0;">
+                                                <span style="font-weight: bold;">@item.Vouchers.Code</span>
+                                            </div>
+                                            @if (item.Vouchers.Description == "Percentage")
                                             {
-                                                <button class="btn btn-outline-warning">
-                                                    Mua thêm @suggestBuy.ToString("N0") VNĐ để sử dụng
-                                                </button>
+                                                <h2 style="margin: 0; font-size: 18px; color: #333;">Giảm @formattedPercent % cho đơn hàng đạt tối thiểu @conditionValue.ToString("N0") VNĐ</h2>
+                                                <p style="margin: 8px 0; color: #666; font-size: 15px">Giảm tối đa @maxDiscountValue.ToString("N0") VNĐ</p>
                                             }
                                             else
                                             {
-                                                <div class="d-flex justify-content-between">
+                                                <h2 style="margin: 0; font-size: 18px; color: #333;">Giảm @formattedPercent VNĐ cho đơn hàng đạt tối thiểu @conditionValue.ToString("N0") VNĐ</h2>
+
+                                            }
+
+                                            <p style="margin: 8px 0; color: red; font-size: 15px"><small>Hết hạn lúc: @item.Vouchers.End_time</small></p>
+                                            <div style="margin-top: 10px; text-align: left;">
+                                                @if (suggestBuy > 0)
+                                                {
+                                                    <button class="btn btn-outline-warning">
+                                                        Mua thêm @suggestBuy.ToString("N0") VNĐ để sử dụng
+                                                    </button>
+                                                }
+                                                else
+                                                {
                                                     <button class="btn btn-outline-success" @onclick="() => SelectVoucher(item.VoucherId)">
                                                         @if (SelectedVoucherId == item.VoucherId)
                                                         {
@@ -702,27 +739,10 @@
                                                             Tiết kiệm được : @string.Format("{0:N0}", voucherAmount) VNĐ
                                                         </span>
                                                     }
-                                                </div>
-
-
-                                            }
+                                                }
+                                            </div>
                                         </div>
-                                        <div style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-                                            <strong>Trạng thái:</strong>
-                                            @if (item.Vouchers.Status == "Đang diễn ra")
-                                            {
-                                                <span style="color: green;">Còn hiệu lực</span>
-                                            }
-                                            else if (item.IsApplied)
-                                            {
-                                                <span style="color: red;">Đã sử dụng</span>
-                                            }
-                                            else
-                                            {
-                                                <span style="color: red;">Hết hiệu lực</span>
-                                            }
-                                        </div>
-                                    </div>
+                                    }
                                 }
 
 
@@ -1251,12 +1271,12 @@
                 return;
             }
 
-                if (cartDetail.Quantity > cartDetail.Product_Attributes.Stock)
-                {
-                    await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng trong kho.");
-                    return;
-                }
+            if (cartDetail.Quantity > cartDetail.Product_Attributes.Stock)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng trong kho.");
+                return;
             }
+        }
 
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
         if (confirmed)
@@ -1944,7 +1964,18 @@
             await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
             return;
         }
+        if (SelectedVoucherId != null)
+        {
+            var voucherSelected = await voucherServices.Details(SelectedVoucherId??0);
+            if(voucherSelected.Status=="Tạm dừng")
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Voucher bạn vừa áp dụng đã có sự thay đổi. Vui lòng thử lại");
+                voucher=null;
+                voucherAmount = 0;
+                return;
+            }
 
+        }
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thanh toán khi nhận hàng ?");
         if (confirmed)
         {
@@ -1954,6 +1985,7 @@
                 appliedVoucher.IsApplied = true;
                 await userVoucherServices.Update(appliedVoucher);
             }
+ 
             CheckOut("cash");
 
             if (user != null && user.Id > 0) // Người dùng đã đăng nhập
