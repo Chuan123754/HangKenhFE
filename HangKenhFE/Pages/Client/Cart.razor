@@ -1184,6 +1184,11 @@
         totalQuantity = lst_OrderDetail.Sum(item => item.Quantity);
 
         totalMoney = feeShipping + totalAmount - voucherAmount;
+        if (totalMoney <= 0)
+        {
+            totalMoney = 0;
+        }
+        StateHasChanged();
     }
 
     private async Task CreateModalOrder()
@@ -1955,10 +1960,10 @@
             {
                 foreach (var cartDetailId in selectedCartDetails)
                 {
-                    var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                    var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
-                    productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
-                    await productAttributeServices.Update(productAttribute, productAttribute.Id);
+                    // var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
+                    // var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
+                    // productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
+                    // await productAttributeServices.Update(productAttribute, productAttribute.Id);
                     await cartDetailsService.Delete(cartDetailId);
                 }
             }
