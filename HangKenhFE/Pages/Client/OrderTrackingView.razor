@@ -4,6 +4,8 @@
 @inject IOrderIServices orderService
 @inject OrderDetailsIServices orderDetailService
 @inject IOrderTrackingServices orderTrackingService
+@inject IOrderVoucherServices orderVoucherServices
+@inject IUserVoucherService userVoucherServices
 @inject IAddressServices addressService
 @inject IAccountService accountService
 @inject IUserService userService
@@ -496,6 +498,17 @@
                         Created_at = DateTime.Now
                     };
                 await orderTrackingService.AddOrderTracking(newTracking);
+                // hủy đơn hoàn voucher 
+                var allOrderVoucher = await orderVoucherServices.GetAll();
+                var voucherRollBack = allOrderVoucher.Where(o => o.OrderId == OrderId).FirstOrDefault();
+                if(voucherRollBack!=null)
+                {
+                    var userVoucher = await userVoucherServices.GetByVoucherIdAndUserId(voucherRollBack.VoucherId, Order.User_id ?? 0);
+                    userVoucher.IsApplied = false;
+                    await userVoucherServices.Update(userVoucher);
+                }
+
+
                 await JS.InvokeVoidAsync("toastr.success", "Hủy đơn hàng thành công");
                 modalCacelOrder = false;
                 await ReloadTrackingData();
