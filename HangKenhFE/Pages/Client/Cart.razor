@@ -4,6 +4,7 @@
 @inject ICartDetailsService cartDetailsService
 @inject ICartService cartServices
 @inject IOrderIServices orderServices
+@inject IOrderVoucherServices orderVoucherServices
 @inject OrderDetailsIServices orderDetailsServices
 @inject IOrderTrackingServices orderTrackingServices
 @inject EmailNotification email
@@ -484,7 +485,7 @@
                                         <div class="col-2 d-flex align-items-center justify-content-center">Thành tiền</div>
                                     </div>
 
-                                    @foreach (var item in lst_OrderDetail)
+                                    @foreach (var item in lst_OrderDetail.Where(o=>o.ProductAttributes.Status !="delete"))
                                     {
                                         <div class="row mb-3 align-items-center border-bottom pb-3">
                                             <div class="col-3 text-center">
@@ -764,6 +765,7 @@
     private List<Cart_details> lst_CartDetails = new List<Cart_details>();
     private Cart_details cart_Details = new Cart_details();
     private Orders order = new Orders();
+    private Order_Vouchers ordervouhcer = new Order_Vouchers();
     private List<Order_details> lst_OrderDetail = new List<Order_details>();
     private List<Address> lst_Address = new List<Address>();
     private List<UserVouchers> lst_UserVoucher = new List<UserVouchers>();
@@ -1992,10 +1994,6 @@
             {
                 foreach (var cartDetailId in selectedCartDetails)
                 {
-                    // var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-                    // var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
-                    // productAttribute.Stock -= cartDetail.Quantity; // khi đặt hàng thì chưa trừ số lượng => đợi nhân viên xác nhận rồi mới trừ
-                    // await productAttributeServices.Update(productAttribute, productAttribute.Id);
                     await cartDetailsService.Delete(cartDetailId);
                 }
             }
@@ -2014,6 +2012,13 @@
                     appliedVoucher.IsApplied = true;
                     await userVoucherServices.Update(appliedVoucher);
                 }
+                ordervouhcer = new Order_Vouchers
+                    {
+                        OrderId = order.Id,
+                        VoucherId = SelectedVoucherId??0,
+                        AppliedAt = DateTime.Now
+                    };
+                await orderVoucherServices.Create(ordervouhcer);
             }
 
             selectedCartDetails.Clear();
