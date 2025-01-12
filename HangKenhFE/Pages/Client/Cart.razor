@@ -4,6 +4,7 @@
 @inject ICartDetailsService cartDetailsService
 @inject ICartService cartServices
 @inject IOrderIServices orderServices
+
 @inject IOrderVoucherServices orderVoucherServices
 @inject OrderDetailsIServices orderDetailsServices
 @inject IOrderTrackingServices orderTrackingServices
@@ -136,7 +137,10 @@
                                                     <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity - 1??0)">
                                                         <i class="bi bi-dash"></i> <!-- Sử dụng icon Bootstrap -->
                                                     </button>
-                                                    <span class="btn btn-light btn-sm mx-2 px-2 py-1">@item.Quantity</span>
+                                                    <input type="number" class="form-control d-inline mt-1 mx-2 no-arrows" style="width: 50px; height:32px; text-align: center;"
+                                                           @bind="item.Quantity"
+                                                           @bind:event="oninput"
+                                                           @onchange="(e) => OnQuantityChange(e, item)" />
                                                     <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1??0)">
                                                         <i class="bi bi-plus-lg"></i>
                                                     </button>
@@ -977,10 +981,6 @@
     }
 
 
-
-
-
-
     private async Task LoadCartDetails()
     {
         if (user != null && user.Id > 0)
@@ -1045,9 +1045,6 @@
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }
     }
-
-
-
     private async Task UpdateQuantityView(long itemId, int newQuantity)
     {
         if (newQuantity < 1) return;
@@ -1112,8 +1109,52 @@
         CalculateTotalMoney();
         StateHasChanged();
     }
+    private List<Product_Attributes> lst_ProductAttributes = new List<Product_Attributes>();
+    private async Task LoadProducts()
+    {
+        lst_ProductAttributes = await productAttributeServices.GetAllProductAttributes();
+    }
+    private async Task OnQuantityChange(ChangeEventArgs e, HangKenhFE.Models.Cart_details item)
+    {
+        if (int.TryParse(e.Value.ToString(), out int newQuantity))
+        {
+            if (newQuantity < 1)
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Số lượng không thể nhỏ hơn 1.");
+                item.Quantity = 1;
+                await cartDetailsService.Update(item);
+            }
+            else if (newQuantity > item.Product_Attributes.Stock)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Số lượng không thể lớn hơn {item.Product_Attributes.Stock}.");
+                item.Quantity = item.Product_Attributes.Stock ?? 0;
+                await cartDetailsService.Update(item);
+            }
+            else
+            {
+                int quantityChange = newQuantity - (item.Quantity ?? 0);
+                // Cập nhật stock sản phẩm
+                item.Product_Attributes.Stock -= quantityChange;
+                item.Quantity = newQuantity;
 
+                // Lưu cập nhật vào database
+                await productAttributeServices.Update(item.Product_Attributes, item.Product_Attributes.Id);
+                await cartDetailsService.Update(item);
 
+                // Cập nhật lại tổng tiền và thông tin đơn hàng
+                await LoadProducts();
+                await LoadOrderDetails();
+                CalculateTotalMoney();
+            }
+
+            // Cập nhật lại giao diện sau khi cập nhật số lượng
+            StateHasChanged();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Giá trị không hợp lệ.");
+        }
+    }
 
 
     private async Task UpdateCartDetail(Cart_details cartDetail)
@@ -2303,3 +2344,15 @@
         }
     }
 }
+<style>
+    /* CSS để ẩn mũi tên tăng giảm trong các trình duyệt khác nhau */
+    input[type="number"].no-arrows::-webkit-inner-spin-button,
+    input[type="number"].no-arrows::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"].no-arrows {
+        -moz-appearance: textfield; /* Ẩn mũi tên trên Firefox */
+    }
+</style>
