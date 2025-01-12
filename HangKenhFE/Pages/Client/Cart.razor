@@ -2040,8 +2040,26 @@
             }
             else // Người dùng chưa đăng nhập
             {
+                // Lấy đơn hàng từ LocalStorage
+                var pendingOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
+                if (!string.IsNullOrEmpty(pendingOrderJson))
+                {
+                    var localOrder = JsonSerializer.Deserialize<Orders>(pendingOrderJson);
+                    if (localOrder != null)
+                    {
+                        localOrder.Status = "Chờ xác nhận";
+                        var updatedOrderJson = JsonSerializer.Serialize(localOrder);
+                        await JS.InvokeVoidAsync("localStorage.setItem", "pendingOrder", updatedOrderJson);
+
+                        await JS.InvokeVoidAsync("toastr.success", "Trạng thái đơn hàng đã được cập nhật thành công!");
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy thông tin đơn hàng trong LocalStorage.");
+                        return;
+                    }
+                }
                 await RemoveSelectedFromLocalStorage();
-                await RemovePaidOrderFromLocalStorage(); // Gọi thêm phương thức xóa Order từ LocalStorage
             }
 
             // Áp dụng Voucher nếu có
@@ -2090,7 +2108,7 @@
     private async Task ConfirmMomoPayment()
     {
         var updateitem = await orderServices.GetByIdOrders(order.Id);
-        if (updateitem.Status == "Chờ xác nhận")
+        if (updateitem.Status == "Đã xác nhận")
         {
             if (user != null && user.Id > 0) // Người dùng đã đăng nhập
             {
@@ -2105,6 +2123,25 @@
             }
             else // Người dùng chưa đăng nhập
             {
+                // Lấy đơn hàng từ LocalStorage
+                var pendingOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
+                if (!string.IsNullOrEmpty(pendingOrderJson))
+                {
+                    var localOrder = JsonSerializer.Deserialize<Orders>(pendingOrderJson);
+                    if (localOrder != null)
+                    {
+                        localOrder.Status = "Đã xác nhận";
+                        var updatedOrderJson = JsonSerializer.Serialize(localOrder);
+                        await JS.InvokeVoidAsync("localStorage.setItem", "pendingOrder", updatedOrderJson);
+
+                        await JS.InvokeVoidAsync("toastr.success", "Trạng thái đơn hàng đã được cập nhật thành công!");
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy thông tin đơn hàng trong LocalStorage.");
+                        return;
+                    }
+                }
                 await RemoveSelectedFromLocalStorage();
             }
 
@@ -2113,7 +2150,7 @@
                 {
                     OrderId = orderUpdate.Id,
                     Note = "Khách đã thanh toán MOMO",
-                    Status = "Chờ xác nhận",
+                    Status = "Đã xác nhận",
                     Created_at = DateTime.Now
                 };
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
@@ -2152,31 +2189,7 @@
         }
     }
 
-    private async Task RemovePaidOrderFromLocalStorage()
-{
-    try
-    {
-        // Kiểm tra xem có Order đang chờ trong LocalStorage không
-        var pendingOrderJson = await JS.InvokeAsync<string>("localStorage.getItem", "pendingOrder");
-
-        if (!string.IsNullOrEmpty(pendingOrderJson))
-        {
-            // Nếu tồn tại, xóa Order này
-            await JS.InvokeVoidAsync("localStorage.removeItem", "pendingOrder");
-            await JS.InvokeVoidAsync("toastr.success", "Hóa đơn vừa thanh toán đã được xóa khỏi LocalStorage.");
-        }
-        else
-        {
-            // Nếu không tồn tại, thông báo không có hóa đơn nào
-            await JS.InvokeVoidAsync("toastr.info", "Không tìm thấy hóa đơn nào trong LocalStorage để xóa.");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Lỗi khi xóa hóa đơn từ LocalStorage: {ex.Message}");
-        await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi xóa hóa đơn từ LocalStorage.");
-    }
-}
+    
 
 
 
@@ -2244,6 +2257,13 @@
             await JS.InvokeVoidAsync("toastr.error", "Đơn hàng chưa có sản phẩm nào!");
             return;
         }
+
+        if (selectedAddress == null)
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
+            return;
+        }
+
         var orderUpdate = await orderServices.GetByIdOrders(order.Id);
         if (orderUpdate != null)
         {
@@ -2260,10 +2280,9 @@
             {
                 try
                 {
-                    var momoResponse = await orderServices.CreateMomoPaymentUrl(user.Name, orderUpdate.Totalmoney ?? 0, $"Thanh toán hóa đơn {order.Id}");
+                    var momoResponse = await orderServices.CreateMomoPaymentUrl(user?.Name ?? selectedAddress?.Name, orderUpdate.Totalmoney ?? 0, $"Thanh toán hóa đơn {order.Id}");
                     if (!string.IsNullOrEmpty(momoResponse.PayUrl))
                     {
-
                         orderUpdate.TypePayment = "Chuyển khoản MoMo";
                         typePay = "Đã thanh toán";
                         ShowMomoModal(momoResponse.PayUrl);
@@ -2299,6 +2318,7 @@
                 await orderTrackingServices.AddOrderTracking(newOrderTracking);
 
             }
+
             if (orderUpdate.Status == "Chờ xác nhận")
             {
                 var fileBytes = await orderServices.ExportInvoice(orderUpdate.Id);
