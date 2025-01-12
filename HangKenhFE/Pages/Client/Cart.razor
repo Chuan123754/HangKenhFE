@@ -1051,7 +1051,7 @@
 
         if (user != null && user.Id > 0) // Người dùng đã đăng nhập
         {
-            var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Product_id == itemId);
+            var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Id == itemId);
             if (cartDetail != null)
             {
                 var productVariant = cartDetail.Product_Attributes;
