@@ -2162,8 +2162,12 @@
                 };
             await orderTrackingServices.AddOrderTracking(newOrderTracking);
             var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId ?? 0, user.Id);
-            appliedVoucher.IsApplied = true;
-            await userVoucherServices.Update(appliedVoucher);
+            if(appliedVoucher!=null)
+            {
+                appliedVoucher.IsApplied = true;
+                await userVoucherServices.Update(appliedVoucher);
+            }
+
             await JS.InvokeVoidAsync("toastr.success", $"Thanh toán thành công");
             isMomoModalVisible = false;
             selectedCartDetails.Clear();
