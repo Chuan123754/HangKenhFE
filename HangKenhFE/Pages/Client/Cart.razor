@@ -4,7 +4,6 @@
 @inject ICartDetailsService cartDetailsService
 @inject ICartService cartServices
 @inject IOrderIServices orderServices
-
 @inject IOrderVoucherServices orderVoucherServices
 @inject OrderDetailsIServices orderDetailsServices
 @inject IOrderTrackingServices orderTrackingServices
@@ -1051,7 +1050,7 @@
 
         if (user != null && user.Id > 0) // Người dùng đã đăng nhập
         {
-            var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Product_id == itemId);
+            var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Id == itemId);
             if (cartDetail != null)
             {
                 var productVariant = cartDetail.Product_Attributes;
@@ -1109,6 +1108,14 @@
         CalculateTotalMoney();
         StateHasChanged();
     }
+    private async Task UpdateOrderDetail(Order_details orderDetail)
+    {
+        var orderDetailUpdate = orderDetail;
+        orderDetailUpdate.TotalDiscount = (orderDetail.ProductAttributes.Sale_price);
+        orderDetailUpdate.UnitPrice = (orderDetail.ProductAttributes.Regular_price);
+        await orderDetailsServices.Update(orderDetailUpdate, orderDetailUpdate.Id);
+    }
+
     private List<Product_Attributes> lst_ProductAttributes = new List<Product_Attributes>();
     private async Task LoadProducts()
     {
@@ -2028,7 +2035,7 @@
                 appliedVoucher.IsApplied = true;
                 await userVoucherServices.Update(appliedVoucher);
             }
- 
+
             CheckOut("cash");
 
             if (user != null && user.Id > 0) // Người dùng đã đăng nhập
@@ -2189,10 +2196,6 @@
         }
     }
 
-    
-
-
-
     private async Task CancelMomoPayment()
     {
         var updateitem = await orderServices.GetByIdOrders(order.Id);
@@ -2275,6 +2278,11 @@
             orderUpdate.TotalVoucher = voucherAmount;
             orderUpdate.Address_Id = selectedAddress.Id;
             orderUpdate.Strees = $"{selectedAddress.Street} - {selectedAddress.Ward_commune} - {selectedAddress.District} - {selectedAddress.Province_city}";
+            await orderServices.Update(orderUpdate,orderUpdate.Id);
+            foreach (var item in lst_OrderDetail)
+            {
+                UpdateOrderDetail(item);
+            }
             string typePay = "";
             if (paymentMethod == "momo")
             {
