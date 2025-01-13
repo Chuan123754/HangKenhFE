@@ -130,7 +130,7 @@
             PostChunks = Posts
                 .Select((post, index) => new { post, index })
                 .GroupBy(x => x.index / 2) // Chia thành từng nhóm 3 bài viết
-                .Select(group => group.Select(x => x.post).ToList())
+                .Select(group => group.Select(x => x.post).Where(x => x.Status == "publish").ToList())
                 .ToList();
         }
     }
