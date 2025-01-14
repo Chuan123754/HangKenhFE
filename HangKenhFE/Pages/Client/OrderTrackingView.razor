@@ -210,7 +210,25 @@
                         }
 
                     </div>
-                    @if (Address != null)
+                    @if (Order.Users != null)
+                    {
+                        <p><strong>Tên khách hàng:</strong>@Order.Users.Name</p>
+                        <p><strong>Số điện thoại:</strong> @Order.Users.Phone</p>
+                        <p><strong>E-mail:</strong> @Order.Users.Email</p>
+                        @if (Address != null)
+                        {
+                            <p><strong>Tên Người nhận hàng:</strong>@Address.Name </p>
+                            <p><strong>Địa chỉ nhận hàng :</strong>  @Order.Strees</p>
+                            <p><strong>Ghi chú :</strong>  @Address.Status </p>
+                            <p><strong>Số điện thoại người nhận:</strong>@Address.Phone</p>
+                        }
+                    }
+                    else
+                    {
+                        <p><strong>Tên khách hàng:</strong>Khách lẻ</p>
+                        <p><strong>Số điện thoại:</strong> #N/A</p>
+                    }
+                  @*   @if (Address != null)
                     {
                         <p><strong>Tên Người nhận hàng:</strong>@Address.Name </p>
                         <p><strong>Địa chỉ nhận hàng:</strong>  @Address.Street</p>
@@ -234,7 +252,7 @@
                     else
                     {
                         <p><strong>Địa chỉ nhận hàng:</strong> Không có thông tin địa chỉ.</p>
-                    }
+                    } *@
                 </div>
             </div>
         </div>
@@ -457,14 +475,15 @@
 
     private async void OpenModalCacelOrder()
     {
+        Order = await orderService.GetByIdOrders(OrderId);
         if (Order.Status == "Đơn hủy")
         {
             await JS.InvokeVoidAsync("toastr.error", "Đơn hàng đã được hủy trước đó !");
             return;
         }
-        else if (Order.Status == "Đã lấy hàng" || Order.Status == "Đang vận chuyển" || Order.Status == "Giao thất bại" || Order.Status == "Giao thành công")
+        else if (Order.Status == "Đã lấy hàng" || Order.Status == "Đang vận chuyển" || Order.Status == "Giao thất bại" || Order.Status == "Giao thành công" || Order.Status == "Hoàn tất đơn")
         {
-            await JS.InvokeVoidAsync("toastr.error", "Bạn không thể hủy đơn hàng vào lúc này !");
+            await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}. Bạn không thể hủy đơn hàng vào lúc này !");
             return;
         }
         else
@@ -482,8 +501,14 @@
 
     private async Task ConfirmCancel()
     {
+        Order = await orderService.GetByIdOrders(OrderId);
         try
         {
+            if (Order.Status != "Đã chuẩn bị hàng" || Order.Status != "Đã xác nhận" || Order.Status != "Chờ xác nhận")
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}, không thể hủy đơn");
+                return;
+            }
             bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận hủy đơn hàng?");
             if (confirmed)
             {
@@ -549,6 +574,17 @@
 
     private async void OpenModalUpdateAddress()
     {
+        Order = await orderService.GetByIdOrders(OrderId);
+        if (Order.Status == "Đơn hủy")
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Đơn hàng đã được hủy trước đó !");
+            return;
+        }
+        else if (Order.Status == "Đã lấy hàng" || Order.Status == "Đang vận chuyển" || Order.Status == "Giao thất bại" || Order.Status == "Giao thành công" || Order.Status == "Hoàn tất đơn")
+        {
+            await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}. Bạn không thể hủy đơn hàng vào lúc này !");
+            return;
+        }
         Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
         TempAddress = new Address // Tạo bản sao để thao tác
             {
