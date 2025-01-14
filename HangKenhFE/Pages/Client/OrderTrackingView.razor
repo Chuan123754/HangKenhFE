@@ -504,6 +504,11 @@
         Order = await orderService.GetByIdOrders(OrderId);
         try
         {
+            if (Order.Status != "Đã chuẩn bị hàng" && Order.CreatedByAdminId == null || Order.Status != "Đã xác nhận" && Order.CreatedByAdminId == null || Order.Status != "Chờ xác nhận" && Order.CreatedByAdminId == null)
+            {
+                await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status} ,Và đơn hàng được bán tại quầy, không thể hủy đơn");
+                return;
+            }
             if (Order.Status != "Đã chuẩn bị hàng" || Order.Status != "Đã xác nhận" || Order.Status != "Chờ xác nhận")
             {
                 await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}, không thể hủy đơn");
@@ -527,18 +532,21 @@
                     await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy chi tiết đơn hàng");
                     return;
                 }
-
-                Order.Status = "Đơn hủy";
-                await orderService.Update(Order, OrderId);
-                foreach(var orderDetail in lst_orderDetail)
+                if(Order.Status !="Chờ xác nhận")
                 {
-                    var productAttribute = await productAttributeService.GetProductAttributesById(orderDetail.Product_Attribute_Id);
-                    if(productAttribute != null)
+                    foreach (var orderDetail in lst_orderDetail)
                     {
-                        productAttribute.Stock += orderDetail.Quantity;
-                        await productAttributeService.Update(productAttribute, orderDetail.Product_Attribute_Id);
+                        var productAttribute = await productAttributeService.GetProductAttributesById(orderDetail.Product_Attribute_Id);
+                        if (productAttribute != null)
+                        {
+                            productAttribute.Stock += orderDetail.Quantity;
+                            await productAttributeService.Update(productAttribute, orderDetail.Product_Attribute_Id);
+                        }
                     }
                 }
+                Order.Status = "Đơn hủy";
+                await orderService.Update(Order, OrderId);
+     
                 var newTracking = new order_trackings
                     {
                         OrderId = OrderId,
@@ -615,8 +623,8 @@
                     to_ward_code = selectedWardId.ToString(),
                     length = 100,
                     width = 80,
-                    height = 8,
-                    weight = 2000,
+                    height = 5,
+                    weight = 1000,
                     insurance_value = 500000,
                     coupon = null,
                     cod_failed_amount = null,
