@@ -1053,16 +1053,13 @@
             var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Id == itemId);
             if (cartDetail != null)
             {
-                var productVariant = cartDetail.Product_Attributes;
-                var stock = productVariant.Stock;
+                var productVariant = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
 
-                if (newQuantity > stock)
+                if (newQuantity > productVariant.Stock)
                 {
                     await JS.InvokeVoidAsync("toastr.error", "Số lượng trong kho không đủ");
                     return;
                 }
-
-                // Cập nhật số lượng
                 cartDetail.Quantity = newQuantity;
 
                 // Cập nhật trong database
@@ -1252,8 +1249,12 @@
 
 
         totalQuantity = lst_OrderDetail.Sum(item => item.Quantity);
-
-        totalMoney = feeShipping + totalAmount - voucherAmount;
+        decimal? totalAfterVoucher = totalAmount - voucherAmount;
+        if(totalAfterVoucher<0)
+        {
+            totalAfterVoucher = 0;
+        }
+        totalMoney = feeShipping + totalAfterVoucher;
         if (totalMoney <= 0)
         {
             totalMoney = 0;
@@ -1315,15 +1316,16 @@
 
         foreach (var cartDetail in cartDetailsToProcess)
         {
-            if (cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
+            var product = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
+            if (product.Stock == null || product.Stock <= 0)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng.");
+                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng.");
                 return;
             }
 
-            if (cartDetail.Quantity > cartDetail.Product_Attributes.Stock)
+            if (cartDetail.Quantity > product.Stock)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} không đủ số lượng trong kho.");
+                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng trong kho.");
                 return;
             }
         }
