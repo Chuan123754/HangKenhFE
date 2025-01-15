@@ -190,9 +190,9 @@
                                     <span class="description">@item.Post_categories.FirstOrDefault()?.Categories?.Title</span>
                                 </div>
                                 @if (item.MinPrice.HasValue && item.MaxPrice.HasValue)
-                                {
+                                {                                  
                                     <div class="product-price">
-                                        <span class="price">Giá: @item.MinPrice - @item.MaxPrice VND</span>
+                                        @string.Format("{0:N0}", item.MinPrice).Replace(".", ",") VNĐ -   @string.Format("{0:N0}", item.MaxPrice).Replace(".", ",") VNĐ
                                     </div>
                                 }
                                 else
@@ -208,124 +208,6 @@
         </div>
     </div>
 </section>
-<div>
-    @*
-    @if (product4?.Any() == true)
-    {
-    <!-- Swiper CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" rel="stylesheet" />
-    <!-- Video.js CSS -->
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-    <section class="section-5">
-    <!-- Slider for PC -->
-    <div class="swiper trending-slide pc">
-    <div class="swiper-wrapper">
-    @foreach (var product in product4)
-    {
-    <div class="swiper-slide ms-2">
-    <div class="swiper-wrapper">
-    <div class="row">
-    <div class="col-9">
-    <video id="content_video_@product.Id" class="video-js vjs-default-skin video-js-pc"
-    controls preload="auto" poster="main/assets/images/introduce-video.png">
-    <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
-    type="video/youtube" />
-    </video>
-    </div>
-    <div class="col-3">
-    <div class="position-relative">
-    <img style="height: 700px" src="@product.Posts.Feature_image"
-    alt="@product.Posts.Title">
-    <div class="img-title d-flex flex-column" style="gap: 8px">
-    <a href="#">
-    <h4 class="title">@product.Posts.Title</h4>
-    </a>
-    <p class="desc">@product.Posts.Post_categories?.FirstOrDefault()?.Categories?.Title</p>
-    <p class="price">@product.MinPrice VND</p>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    }
-    </div>
-    <!-- Pagination and Navigation -->
-    <div class="swiper-pagination pc"></div>
-    <div class="swiper-button-prev pc"></div>
-    <div class="swiper-button-next pc"></div>
-    </div>
-
-    <!-- Slider for Phone -->
-    <div class="trending-slide-phone phone">
-    @foreach (var product in product4)
-    {
-    <div class="trending-item">
-    <div class="trending-item-image">
-    <video id="content_video_m@product.Id" class="video-js vjs-default-skin video-js-mobile"
-    controls preload="auto" poster="@("/main/assets/images/introduce-video.png")">
-    <source src="https://youtu.be/wp90u2BtxVI?si=lpj-Ebc7kr_5dqMF"
-    type="video/youtube" />
-    </video>
-    </div>
-    <div class="trending-item-content">
-    <div class="position-relative">
-    <img src="@product.Posts.Feature_image" alt="@product.Posts.Title">
-    <div class="img-title d-flex flex-column" style="gap: 8px">
-    <a href="#">
-    <h4 class="title">@product.Posts.Title</h4>
-    </a>
-    <p class="desc">@product.Posts.Post_categories?.FirstOrDefault()?.Categories?.Title</p>
-    <p class="price">@product.MinPrice VND</p>
-    </div>
-    </div>
-    </div>
-    </div>
-    }
-    </div>
-    </section>
-    <!-- Video.js and Swiper.js Scripts -->
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <script src="/main/assets/js/Youtube.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-
-    <script>
-    // Initialize Video.js for PC
-    var videos = document.getElementsByClassName('video-js-pc');
-    for (var i = 0; i < videos.length; i++) {
-    videojs(videos[i].id, { autoplay: false });
-    }
-
-    // Initialize Video.js for Mobile
-    var mobileVideos = document.getElementsByClassName('video-js-mobile');
-    for (var i = 0; i < mobileVideos.length; i++) {
-    videojs(mobileVideos[i].id, { autoplay: false });
-    }
-
-    // Initialize Swiper.js for PC
-    var swiperPC = new Swiper('.trending-slide.pc', {
-    loop: true,
-    pagination: {
-    el: '.swiper-pagination.pc',
-    clickable: true,
-    },
-    navigation: {
-    nextEl: '.swiper-button-next.pc',
-    prevEl: '.swiper-button-prev.pc',
-    },
-    });
-
-    // Initialize Swiper.js for Mobile
-    var swiperPhone = new Swiper('.trending-slide-phone.phone', {
-    loop: true,
-    pagination: {
-    el: '.swiper-pagination.phone',
-    clickable: true,
-    },
-    });
-    </script>
-    } *@
-</div>
 <section class="library">
     <div class="container">
         <div class="row">
@@ -357,7 +239,7 @@
                     @foreach (var item2 in Secsion4_project_antuong.Take(2).Skip(1).ToList())
                     {
                         <div class="col">
-                            <img src="@item2.Feature_image" class="w-100" alt="@item2.Title">
+                            <img src="@item2.Feature_image" class="w-100" style="height:350px" alt="@item2.Title">
                             <div class="article">
                                 <h3 class="article-heading">@item2.Title</h3>
                                 <div class="article-description">
@@ -379,7 +261,7 @@
                     @foreach (var item3 in Secsion4_project_antuong.Take(3).Skip(2).ToList())
                     {
                         <div class="col mt-24px">
-                            <img src="@item3.Feature_image" class="w-100" alt="@item3.Title">
+                            <img src="@item3.Feature_image" class="w-100" style="height:365px" alt="@item3.Title">
                             <div class="article">
                                 <h3 class="article-heading">@item3.Title</h3>
                                 <div class="article-description">
