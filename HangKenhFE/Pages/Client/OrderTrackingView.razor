@@ -236,6 +236,10 @@
                     {
                         <p><strong>Tên khách hàng:</strong>Khách lẻ</p>
                         <p><strong>Số điện thoại:</strong> #N/A</p>
+                        <p><strong>Tên Người nhận hàng:</strong>@Address.Name </p>
+                        <p><strong>Địa chỉ nhận hàng :</strong>  @Order.Strees</p>
+                        <p><strong>Ghi chú :</strong>  @Address.Status </p>
+                        <p><strong>Số điện thoại người nhận:</strong>@Address.Phone</p>
                     }
                   @*   @if (Address != null)
                     {
@@ -529,11 +533,6 @@
         var Order = await orderService.GetByIdOrders(OrderId);
         try
         {
-            if (Order.Status != "Chờ xác nhận" || Order.Status != "Đã xác nhận" || Order.Status != "Đã chuẩn bị hàng")
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}, không thể hủy đơn");
-                return;
-            }
             // if (Order.Status != "Đã chuẩn bị hàng" || Order.Status != "Đã xác nhận" || Order.Status != "Chờ xác nhận")
             // {
             //     await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}, không thể hủy đơn");
