@@ -1319,13 +1319,13 @@
             var product = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
             if (product.Stock == null || product.Stock <= 0)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng.");
+                await JS.InvokeVoidAsync("toastr.error", $"{cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không có sẵn.");
                 return;
             }
 
             if (cartDetail.Quantity > product.Stock)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, sản phẩm {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng trong kho.");
+                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng trong kho. Chỉ còn {cartDetail.Quantity} ");
                 return;
             }
         }

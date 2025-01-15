@@ -6,6 +6,7 @@
 @inject IOrderTrackingServices orderTrackingService
 @inject IOrderVoucherServices orderVoucherServices
 @inject IUserVoucherService userVoucherServices
+@inject IVoucherService voucherService
 @inject IAddressServices addressService
 @inject IAccountService accountService
 @inject IUserService userService
@@ -30,7 +31,7 @@
         <!-- Lịch sử đơn hàng -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                <h5 class="card-title mb-0">Lịch sử đơn hàng</h5>
+                <h5 class="card-title mb-0">Lịch sử đơn hàng @OrderId</h5>
                 @if (Order.Status == "Chờ xác nhận" && Order.CreatedByAdminId == null || Order.Status == "Đã xác nhận" && Order.CreatedByAdminId == null || Order.Status == "Đã thanh toán"  && Order.CreatedByAdminId==null|| Order.Status == "Đã chuẩn bị hàng")
                 {
                     <button class="btn btn-danger mb-0" @onclick="OpenModalCacelOrder">Hủy đơn</button>
@@ -178,7 +179,15 @@
                     <p style="color: red;"><strong>Tổng tiền chiết khấu :</strong> - @OrderTracking.TotalDiscount.ToString("N0") VND</p>
                     <p><strong>Phí giao hàng: </strong> @OrderTracking.FeeShipping.ToString("N0") VND</p>
                     <p><strong>Tổng tiền hàng đã giảm: </strong> @OrderTracking.TotalAmount.ToString("N0") VND</p>
-                    <p style="color: red;"><strong>Giảm giá Voucher : </strong> @OrderTracking.TotalVoucher.ToString("N0") VND</p>
+                    @if(voucher == null )
+                    {
+                        <p style="color: red;"><strong>Giảm giá Voucher : </strong> @OrderTracking.TotalVoucher.ToString("N0") VND </p>
+                    }
+                    else
+                    {
+                        <p style="color: red;"><strong>Giảm giá Voucher : </strong> @OrderTracking.TotalVoucher.ToString("N0") VND || @voucher.Code</p>
+                    }
+
 
                     <p style="color: green;"><strong>Tổng tiền cần thanh toán: </strong> @OrderTracking.TotalMoney.ToString("N0") VND</p>
                 </div>
@@ -375,6 +384,7 @@
     private Orders? OrderAddress { get; set; }
     private Address Address = new Address();
     private Account admin = new Account();
+    private Vouchers voucher = new Vouchers();
     private long selectedTrackingId;
     private bool modalCacelOrder = false;
     private string reasonCancel;
@@ -409,6 +419,16 @@
             Address = await addressService.GetAddressById(Order.Address_Id ?? 0);
             provinces = await address_Service.GetProvincesAsync();
 
+            var allOrderVoucher = await orderVoucherServices.GetAll();
+            var voucherOrder = allOrderVoucher.Where(o => o.OrderId == OrderId).FirstOrDefault();
+            if(voucherOrder!= null)
+            {
+                voucher = await voucherService.Details(voucherOrder.VoucherId);
+            }
+            else
+            {
+                voucher = null;
+            }
             if (OrderTracking != null && OrderTracking.OrderTrackings.Any())
             {
                 // Sắp xếp theo Created_at giảm dần và lấy bản ghi mới nhất
@@ -475,15 +495,20 @@
 
     private async void OpenModalCacelOrder()
     {
-        Order = await orderService.GetByIdOrders(OrderId);
+        var Order = await orderService.GetByIdOrders(OrderId);
         if (Order.Status == "Đơn hủy")
         {
             await JS.InvokeVoidAsync("toastr.error", "Đơn hàng đã được hủy trước đó !");
             return;
         }
-        else if (Order.Status == "Đã lấy hàng" || Order.Status == "Đang vận chuyển" || Order.Status == "Giao thất bại" || Order.Status == "Giao thành công" || Order.Status == "Hoàn tất đơn")
+        else if (Order.Status == "Đã lấy hàng" || Order.Status == "Đang vận chuyển" || Order.Status == "Giao thất bại" || Order.Status == "Giao thành công" || Order.Status == "Hoàn tất đơn" )
         {
             await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}. Bạn không thể hủy đơn hàng vào lúc này !");
+            return;
+        }
+        else if (Order.CreatedByAdminId != null)
+        {
+            await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng được bán tại quầy, bạn không thể hủy đơn !");
             return;
         }
         else
@@ -501,19 +526,19 @@
 
     private async Task ConfirmCancel()
     {
-        Order = await orderService.GetByIdOrders(OrderId);
+        var Order = await orderService.GetByIdOrders(OrderId);
         try
         {
-            if (Order.Status != "Đã chuẩn bị hàng" && Order.CreatedByAdminId == null || Order.Status != "Đã xác nhận" && Order.CreatedByAdminId == null || Order.Status != "Chờ xác nhận" && Order.CreatedByAdminId == null)
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status} ,Và đơn hàng được bán tại quầy, không thể hủy đơn");
-                return;
-            }
-            if (Order.Status != "Đã chuẩn bị hàng" || Order.Status != "Đã xác nhận" || Order.Status != "Chờ xác nhận")
+            if (Order.Status != "Chờ xác nhận" || Order.Status != "Đã xác nhận" || Order.Status != "Đã chuẩn bị hàng")
             {
                 await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}, không thể hủy đơn");
                 return;
             }
+            // if (Order.Status != "Đã chuẩn bị hàng" || Order.Status != "Đã xác nhận" || Order.Status != "Chờ xác nhận")
+            // {
+            //     await JS.InvokeVoidAsync("toastr.error", $"Trạng thái đơn hàng là {Order.Status}, không thể hủy đơn");
+            //     return;
+            // }
             bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận hủy đơn hàng?");
             if (confirmed)
             {
@@ -544,6 +569,19 @@
                         }
                     }
                 }
+                // hủy đơn hoàn voucher
+                if(Order.Status=="Chờ xác nhận")
+                {
+                    var allOrderVoucher = await orderVoucherServices.GetAll();
+                    var voucherRollBack = allOrderVoucher.Where(o => o.OrderId == OrderId).FirstOrDefault();
+                    if (voucherRollBack != null)
+                    {
+                        voucher = await voucherService.Details(voucherRollBack.VoucherId);
+                        var userVoucher = await userVoucherServices.GetByVoucherIdAndUserId(voucherRollBack.VoucherId, Order.User_id ?? 0);
+                        userVoucher.IsApplied = false;
+                        await userVoucherServices.Update(userVoucher);
+                    }
+                }
                 Order.Status = "Đơn hủy";
                 await orderService.Update(Order, OrderId);
      
@@ -555,15 +593,7 @@
                         Created_at = DateTime.Now
                     };
                 await orderTrackingService.AddOrderTracking(newTracking);
-                // hủy đơn hoàn voucher 
-                var allOrderVoucher = await orderVoucherServices.GetAll();
-                var voucherRollBack = allOrderVoucher.Where(o => o.OrderId == OrderId).FirstOrDefault();
-                if(voucherRollBack!=null)
-                {
-                    var userVoucher = await userVoucherServices.GetByVoucherIdAndUserId(voucherRollBack.VoucherId, Order.User_id ?? 0);
-                    userVoucher.IsApplied = false;
-                    await userVoucherServices.Update(userVoucher);
-                }
+
 
 
                 await JS.InvokeVoidAsync("toastr.success", "Hủy đơn hàng thành công");
@@ -582,10 +612,15 @@
 
     private async void OpenModalUpdateAddress()
     {
-        Order = await orderService.GetByIdOrders(OrderId);
+        var Order = await orderService.GetByIdOrders(OrderId);
         if (Order.Status == "Đơn hủy")
         {
             await JS.InvokeVoidAsync("toastr.error", "Đơn hàng đã được hủy trước đó !");
+            return;
+        }
+        else if (Order.TypePayment == "Chuyển khoản MoMo")
+        {
+            await JS.InvokeVoidAsync("toastr.error", $"Đơn hàng được thanh toán MoMo, bạn không thể hủy đơn !");
             return;
         }
         else if (Order.Status == "Đã lấy hàng" || Order.Status == "Đang vận chuyển" || Order.Status == "Giao thất bại" || Order.Status == "Giao thành công" || Order.Status == "Hoàn tất đơn")
