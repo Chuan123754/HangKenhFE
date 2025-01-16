@@ -19,52 +19,52 @@
 @inject IJSRuntime JS
 <style>
     .color-preview {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     }
 
     .btn-outline-secondary {
-        border: 1px solid #ccc;
-        color: #555;
+    border: 1px solid #ccc;
+    color: #555;
     }
 
-        .btn-outline-secondary:hover {
-            background-color: #f8f9fa;
-        }
+    .btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    }
 
     .table {
-        border-collapse: collapse;
-        border: none; /* Loại bỏ viền bảng */
+    border-collapse: collapse;
+    border: none; /* Loại bỏ viền bảng */
     }
 
-        .table td, .table th {
-            border: none; /* Loại bỏ viền ô */
-            border-bottom: 1px solid #ddd; /* Chỉ giữ viền dưới */
-            text-align: center;
-        }
+    .table td, .table th {
+    border: none; /* Loại bỏ viền ô */
+    border-bottom: 1px solid #ddd; /* Chỉ giữ viền dưới */
+    text-align: center;
+    }
 
     .btn-danger {
-        color: #fff;
+    color: #fff;
     }
 
-        .btn-danger:hover {
-            background-color: #e74c3c;
-        }
+    .btn-danger:hover {
+    background-color: #e74c3c;
+    }
 
     .card-header {
-        background-color: #ffeb3d;
+    background-color: #ffeb3d;
     }
 
     .product-img {
-        width: 80px;
-        height: 105px;
+    width: 80px;
+    height: 105px;
     }
 </style>
 
 <section class="section-banner">
     <img src="main/assets/images/banner-category.jpg"
-         class="w-100 h-100" alt="banner-image-3">
+    class="w-100 h-100" alt="banner-image-3">
     <div class="title-banner">
         <h1>
             GIỎ HÀNG CỦA BẠN
@@ -105,8 +105,8 @@
                                         <tr>
                                             <td class="text-center align-middle">
                                                 <input type="checkbox"
-                                                       @onchange="@(e => OnCheckboxChange(e, user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0))"
-                                                       checked="@selectedCartDetails.Contains(user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0)" />
+                                                @onchange="@(e => OnCheckboxChange(e, user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0))"
+                                                checked="@selectedCartDetails.Contains(user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0)" />
 
                                             </td>
                                             <!-- Ảnh sản phẩm -->
@@ -122,7 +122,7 @@
                                                 <div class="d-flex align-items-center justify-content-center">
                                                     <span>@item.Product_Attributes.Color.Title</span>
                                                     <div class="color-preview"
-                                                         style="background-color: @item.Product_Attributes.Color.Color_code; width: 24px; height: 24px; margin-left: 8px; border: 1px solid #ccc;">
+                                                    style="background-color: @item.Product_Attributes.Color.Color_code; width: 24px; height: 24px; margin-left: 8px; border: 1px solid #ccc;">
                                                     </div>
                                                 </div>
                                             </td>
@@ -137,9 +137,9 @@
                                                         <i class="bi bi-dash"></i> <!-- Sử dụng icon Bootstrap -->
                                                     </button>
                                                     <input type="number" class="form-control d-inline mt-1 mx-2 no-arrows" style="width: 50px; height:32px; text-align: center;"
-                                                           @bind="item.Quantity"
-                                                           @bind:event="oninput"
-                                                           @onchange="(e) => OnQuantityChange(e, item)" />
+                                                    @bind="item.Quantity"
+                                                    @bind:event="oninput"
+                                                    @onchange="(e) => OnQuantityChange(e, item)" />
                                                     <button class="btn btn-outline-secondary btn-sm" @onclick="() => UpdateQuantityView(item.Id, item.Quantity + 1??0)">
                                                         <i class="bi bi-plus-lg"></i>
                                                     </button>
@@ -1053,17 +1053,24 @@
             var cartDetail = lst_CartDetails.FirstOrDefault(x => x.Id == itemId);
             if (cartDetail != null)
             {
-                var productVariant = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-
-                if (newQuantity > productVariant.Stock)
+                try
                 {
-                    await JS.InvokeVoidAsync("toastr.error", "Số lượng trong kho không đủ");
-                    return;
-                }
-                cartDetail.Quantity = newQuantity;
+                    var productVariant = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id ?? 0);
+                    if (newQuantity > productVariant.Stock)
+                    {
+                        await JS.InvokeVoidAsync("toastr.error", "Số lượng trong kho không đủ");
+                        return;
+                    }
+                    cartDetail.Quantity = newQuantity;
 
-                // Cập nhật trong database
-                await cartDetailsService.Update(cartDetail);
+                    // Cập nhật trong database
+                    await cartDetailsService.Update(cartDetail);
+                }
+                catch (Exception)
+                {                  
+                    await JS.InvokeVoidAsync("toastr.error", "Sản phẩm lỗi hoặc đã tạm dừng");
+                }
+                
             }
         }
         else // Người dùng chưa đăng nhập
@@ -1113,11 +1120,38 @@
         await orderDetailsServices.Update(orderDetailUpdate, orderDetailUpdate.Id);
     }
 
+
+    private async Task UpdateLocalCartQuantity(long productId, int newQuantity)
+    {
+        var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+        if (!string.IsNullOrEmpty(cartJson))
+        {
+            var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson) ?? new List<CartProduct>();
+
+            // Find the product in the cart
+            var existingCartItem = cartProducts.FirstOrDefault(x => x.Product_id == productId);
+            if (existingCartItem != null)
+            {
+                existingCartItem.Quantity = newQuantity;
+                existingCartItem.TotalPrice = existingCartItem.Quantity * existingCartItem.UnitPrice;
+
+                var updatedCartJson = JsonSerializer.Serialize(cartProducts);
+                await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Giỏ hàng không tồn tại hoặc không hợp lệ.");
+        }
+    }   
+
+
     private List<Product_Attributes> lst_ProductAttributes = new List<Product_Attributes>();
     private async Task LoadProducts()
     {
         lst_ProductAttributes = await productAttributeServices.GetAllProductAttributes();
     }
+
     private async Task OnQuantityChange(ChangeEventArgs e, HangKenhFE.Models.Cart_details item)
     {
         if (int.TryParse(e.Value.ToString(), out int newQuantity))
@@ -1126,32 +1160,52 @@
             {
                 await JS.InvokeVoidAsync("toastr.error", "Số lượng không thể nhỏ hơn 1.");
                 item.Quantity = 1;
-                await cartDetailsService.Update(item);
+
+                if (user != null && user.Id > 0)
+                {
+                    await cartDetailsService.Update(item);
+                }
+                else
+                {
+                    await UpdateLocalCartQuantity(item.Product_id ?? 0, 1);
+                }
             }
             else if (newQuantity > item.Product_Attributes.Stock)
             {
                 await JS.InvokeVoidAsync("toastr.error", $"Số lượng không thể lớn hơn {item.Product_Attributes.Stock}.");
                 item.Quantity = item.Product_Attributes.Stock ?? 0;
-                await cartDetailsService.Update(item);
+
+                if (user != null && user.Id > 0)
+                {
+                    await cartDetailsService.Update(item);
+                }
+                else
+                {
+                    await UpdateLocalCartQuantity(item.Product_id ?? 0, item.Quantity ?? 0);
+                }
             }
             else
             {
                 int quantityChange = newQuantity - (item.Quantity ?? 0);
-                // Cập nhật stock sản phẩm
-                item.Product_Attributes.Stock -= quantityChange;
-                item.Quantity = newQuantity;
 
-                // Lưu cập nhật vào database
-                await productAttributeServices.Update(item.Product_Attributes, item.Product_Attributes.Id);
-                await cartDetailsService.Update(item);
+                if (user != null && user.Id > 0)
+                {
+                    item.Product_Attributes.Stock -= quantityChange;
+                    item.Quantity = newQuantity;
 
-                // Cập nhật lại tổng tiền và thông tin đơn hàng
+                    await productAttributeServices.Update(item.Product_Attributes, item.Product_Attributes.Id);
+                    await cartDetailsService.Update(item);
+                }
+                else
+                {
+                    await UpdateLocalCartQuantity(item.Product_id ?? 0, newQuantity);
+                }
+
                 await LoadProducts();
                 await LoadOrderDetails();
                 CalculateTotalMoney();
             }
 
-            // Cập nhật lại giao diện sau khi cập nhật số lượng
             StateHasChanged();
         }
         else
@@ -1161,38 +1215,46 @@
     }
 
 
+
     private async Task UpdateCartDetail(Cart_details cartDetail)
     {
         await cartDetailsService.Update(cartDetail);
     }
 
     private async Task DeleteCartDetail(long id)
-{
-    if (user != null && user.Id > 0)
     {
-        await cartDetailsService.Delete(id);
-    }
-    else
-    {
-        var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
-        if (!string.IsNullOrEmpty(cartJson))
+        if (user != null && user.Id > 0)
         {
-            var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson) ?? new List<CartProduct>();
-            
-            // Tìm và loại bỏ sản phẩm có Product_id bằng id
-            var productToRemove = cartProducts.FirstOrDefault(cp => cp.Product_id == id);
-            if (productToRemove != null)
+            try
             {
-                cartProducts.Remove(productToRemove);
+                await cartDetailsService.Delete(id);
             }
-
-            var updatedCartJson = JsonSerializer.Serialize(cartProducts);
-            await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
+            catch (Exception)
+            {            
+                throw;
+            }
         }
-    }
+        else
+        {
+            var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson) ?? new List<CartProduct>();
 
-    await LoadCartDetails();
-}
+                // Tìm và loại bỏ sản phẩm có Product_id bằng id
+                var productToRemove = cartProducts.FirstOrDefault(cp => cp.Product_id == id);
+                if (productToRemove != null)
+                {
+                    cartProducts.Remove(productToRemove);
+                }
+
+                var updatedCartJson = JsonSerializer.Serialize(cartProducts);
+                await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
+            }
+        }
+
+        await LoadCartDetails();
+    }
 
 
 
@@ -1803,7 +1865,14 @@
             {
                 foreach (var cartDetailId in selectedCartDetails)
                 {
-                    await cartDetailsService.Delete(cartDetailId);
+                    try
+                    {
+                        await cartDetailsService.Delete(cartDetailId);
+                    }
+                    catch (Exception ex)
+                    {                      
+                        await JS.InvokeVoidAsync("toastr.error", "Sản phẩm không tồn tại");
+                    }
                 }
             }
             else // Người dùng chưa đăng nhập
