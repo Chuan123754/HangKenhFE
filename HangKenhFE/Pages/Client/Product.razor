@@ -590,7 +590,7 @@
                     var updatedCartJson = JsonSerializer.Serialize(cart);
                     await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
 
-                    await JS.InvokeVoidAsync("toastr.success", "Sản phẩm đã được thêm vào giỏ hàng (LocalStorage)");
+                    await JS.InvokeVoidAsync("toastr.success", "Sản phẩm đã được thêm vào giỏ hàng");
                 }
             }
         }
