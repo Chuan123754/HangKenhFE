@@ -531,6 +531,11 @@
     private async Task ConfirmCancel()
     {
         var Order = await orderService.GetByIdOrders(OrderId);
+        if (Order.Status == "Đơn hủy")
+        {
+            await JS.InvokeVoidAsync("toastr.error", "Đơn hàng đã được hủy trước đó !");
+            return;
+        }
         try
         {
             // if (Order.Status != "Đã chuẩn bị hàng" || Order.Status != "Đã xác nhận" || Order.Status != "Chờ xác nhận")
