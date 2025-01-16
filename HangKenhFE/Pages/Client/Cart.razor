@@ -1167,26 +1167,33 @@
     }
 
     private async Task DeleteCartDetail(long id)
+{
+    if (user != null && user.Id > 0)
     {
-        if (user != null && user.Id > 0)
-        {
-            // Nếu người dùng đã đăng nhập, xóa trong database
-            await cartDetailsService.Delete(id);
-            await LoadCartDetails();
-        }
-        else
-        {
-            // Nếu người dùng chưa đăng nhập, xóa trong SessionStorage
-            var guestCartJson = await SessionStorage.GetItemAsync<string>("cart");
-            var guestCart = string.IsNullOrEmpty(guestCartJson)
-                ? new List<Cart_details>()
-                : JsonSerializer.Deserialize<List<Cart_details>>(guestCartJson);
-            guestCart.RemoveAll(x => x.Id == id);
-            await SessionStorage.SetItemAsync("cart", guestCart);
-        }
-
-        await LoadCartDetails();
+        await cartDetailsService.Delete(id);
     }
+    else
+    {
+        var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
+        if (!string.IsNullOrEmpty(cartJson))
+        {
+            var cartProducts = JsonSerializer.Deserialize<List<CartProduct>>(cartJson) ?? new List<CartProduct>();
+            
+            // Tìm và loại bỏ sản phẩm có Product_id bằng id
+            var productToRemove = cartProducts.FirstOrDefault(cp => cp.Product_id == id);
+            if (productToRemove != null)
+            {
+                cartProducts.Remove(productToRemove);
+            }
+
+            var updatedCartJson = JsonSerializer.Serialize(cartProducts);
+            await JS.InvokeVoidAsync("localStorage.setItem", "cart", updatedCartJson);
+        }
+    }
+
+    await LoadCartDetails();
+}
+
 
 
 
@@ -1451,165 +1458,6 @@
         }
     }
 
-    // Code Cũ ===============
-
-    // private async Task CreateModalOrder()
-    // {
-    //     // Kiểm tra số lượng sản phẩm trong kho cho tất cả các item trong selectedCartDetails
-    //     foreach (var cartDetailId in selectedCartDetails)
-    //     {
-    //         var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-    //         if(cartDetail.Product_Attributes.Stock == null || cartDetail.Product_Attributes.Stock <= 0)
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} số lượng không đủ.");
-    //             return;
-    //         }
-    //         if (cartDetail == null)
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetailId} không tồn tại trong giỏ hàng.");
-    //             return;
-    //         }
-
-    //         var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-    //         if (productAttribute == null)
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.error", $"Sản phẩm với ID {cartDetail.Product_id} không tồn tại.");
-    //             return;
-    //         }
-
-    //         if (cartDetail.Quantity > productAttribute.Stock)
-    //         {
-    //             await JS.InvokeVoidAsync($"toastr.error", $"Xin lỗi quý khách, sản phẩm {cartDetail.Product_Attributes.SKU} hiện không đủ số lượng quý khách mong muốn!");
-    //             return;
-    //         }
-
-    //     }
-
-    //     bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
-    //     if (confirmed)
-    //     {
-    //         isModalOrderVisiable = true;
-    //         try
-    //         {
-    //             // Lấy danh sách đơn hàng của người dùng
-    //             var ordersUser = await orderServices.GetOrderByIdUser(user.Id);
-    //             if (ordersUser == null)
-    //             {
-    //                 await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy thông tin đơn hàng cho người dùng này.");
-    //                 return;
-    //             }
-    //             var existingOrderPending = ordersUser.FirstOrDefault(o => o.Status == "Pending");
-
-    //             // Nếu tồn tại đơn hàng "Pending", sử dụng lại
-    //             if (existingOrderPending != null)
-    //             {
-    //                 order = existingOrderPending;
-    //             }
-    //             else
-    //             {
-    //                 if (user == null)
-    //                 {
-    //                     await JS.InvokeVoidAsync("toastr.warning", "Người dùng không hợp lệ!");
-    //                     return;
-    //                 }
-
-    //                 // Tạo đơn hàng mới
-    //                 var newOrder = new Orders
-    //                     {
-    //                         User_id = user?.Id,
-    //                         Created_at = DateTime.Now,
-    //                         Note = "Giao hàng",
-    //                         Status = "Pending"
-    //                     };
-
-    //                 var createdOrder = await orderServices.Create(newOrder);
-    //                 if (createdOrder != null)
-    //                 {
-    //                     order = createdOrder;
-    //                 }
-    //                 else
-    //                 {
-    //                     await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới!");
-    //                     return;
-    //                 }
-    //             }
-
-    //             if (order != null)
-    //             {
-    //                 // Khởi tạo danh sách order detail nếu chưa có
-    //                 if (lst_OrderDetail == null)
-    //                 {
-    //                     lst_OrderDetail = new List<Order_details>();
-    //                 }
-
-    //                 // Thêm các item từ selectedCartDetails vào lst_OrderDetail
-    //                 foreach (var cartDetailId in selectedCartDetails)
-    //                 {
-    //                     var cartDetail = lst_CartDetails.FirstOrDefault(item => item.Id == cartDetailId);
-    //                     if (cartDetail == null)
-    //                     {
-    //                         Console.WriteLine($"Cart detail with ID {cartDetailId} not found in lst_CartDetails.");
-    //                         continue;
-    //                     }
-
-    //                     // Kiểm tra thông tin sản phẩm
-    //                     var productAttribute = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-    //                     if (productAttribute == null)
-    //                     {
-    //                         Console.WriteLine($"Product attribute for ID {cartDetail.Product_id} not found.");
-    //                         continue;
-    //                     }
-
-    //                     // Kiểm tra xem sản phẩm đã có trong order details chưa
-    //                     var existingDetail = await orderDetailsServices.GetByOrderIdAndProductAttributeId(order.Id, cartDetail.Product_Attributes.Id);
-    //                     if (existingDetail == null)
-    //                     {
-    //                         var newOrderDetail = new Order_details
-    //                             {
-    //                                 OrderId = order.Id,
-    //                                 Product_Attribute_Id = cartDetail.Product_Attributes.Id,
-    //                                 Quantity = cartDetail.Quantity??0,
-    //                                 TotalDiscount = cartDetail.Product_Attributes.Sale_price,
-    //                                 UnitPrice = cartDetail.Product_Attributes.Regular_price
-    //                             };
-    //                         await orderDetailsServices.Create(newOrderDetail);
-    //                         lst_OrderDetail.Add(newOrderDetail); // Thêm vào lst_OrderDetail
-    //                     }
-    //                     else
-    //                     {
-    //                         existingDetail.Quantity = cartDetail.Quantity??0;
-    //                         existingDetail.UnitPrice = cartDetail.Product_Attributes.Regular_price;
-    //                         existingDetail.TotalDiscount = cartDetail.Product_Attributes.Sale_price;
-    //                         await orderDetailsServices.Update(existingDetail, existingDetail.Id);
-    //                     }
-    //                 }
-
-    //                 // Xóa các item không còn trong selectedCartDetails
-    //                 var allOrderDetails = await orderDetailsServices.GetOrderDetailsByOrderId(order.Id);
-    //                 foreach (var detail in allOrderDetails)
-    //                 {
-    //                     bool shouldDelete = !lst_CartDetails
-    //                         .Where(item => selectedCartDetails.Contains(item.Id))
-    //                         .Any(item => item.Product_Attributes.Id == detail.Product_Attribute_Id);
-
-    //                     if (shouldDelete)
-    //                     {
-    //                         await orderDetailsServices.Delete(detail.Id);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             Console.WriteLine("Error occurred: " + ex.ToString()); // Log the complete error
-    //         }
-    //         await LoadOrderDetails();
-    //         await LoadCartDetails();
-    //         StateHasChanged();
-    //         CalculateTotalMoney();
-    //     }
-    // }
-
     private async Task CloseModalOrder()
     {
         isModalOrderVisiable = false;
@@ -1748,95 +1596,6 @@
             await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi tạo địa chỉ.");
         }
     }
-
-
-    // private async Task CreateAddress()
-    // {
-    //     if (string.IsNullOrEmpty(address.Ward_commune) || string.IsNullOrEmpty(address.Province_city) || string.IsNullOrEmpty(address.District))
-    //     {
-    //         await JS.InvokeVoidAsync("toastr.error", "Vui lòng nhập đầy đủ thông tin địa chỉ.");
-    //         return;
-    //     }
-    //     if (string.IsNullOrEmpty(address.Phone) || !Regex.IsMatch(address.Phone, @"^0\d{9}$"))
-    //     {
-    //         await JS.InvokeVoidAsync("toastr.error", "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số.");
-    //         return;
-    //     }
-
-    //     if (user != null && user.Id > 0) // Người dùng đã đăng nhập
-    //     {
-    //         var orderPending = await orderServices.GetByIdOrders(order.Id);
-    //         if (orderPending?.User_id.HasValue == true)
-    //         {
-    //             address.User_Id = orderPending.User_id.Value; // Gắn User_Id từ Order
-    //         }
-    //         else
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.error", "Không tìm thấy người dùng liên kết với đơn hàng.");
-    //             return;
-    //         }
-    //     }
-    //     else // Người dùng chưa đăng nhập
-    //     {
-    //         // Gắn một Id mặc định cho khách chưa đăng nhập
-    //         address.User_Id = null;
-    //     }
-
-    //     // Xử lý thông tin địa chỉ
-    //     if (address.Type == null) address.Type = "";
-    //     if (address.Status == null) address.Status = "";
-
-    //     var province = provinces.FirstOrDefault(p => p.ProvinceID.ToString() == address.Province_city);
-    //     var district = districts.FirstOrDefault(d => d.DistrictID.ToString() == address.District);
-    //     var ward = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
-    //     var codeWard = wards.FirstOrDefault(w => w.WardCode.ToString() == address.Ward_commune);
-    //     var districtId = districts.FirstOrDefault(w => w.DistrictID.ToString() == address.District);
-
-    //     address.Province_city = province?.ProvinceName;
-    //     address.District = district?.DistrictName;
-    //     address.Ward_commune = ward?.WardName;
-    //     address.WardCode = codeWard?.WardCode;
-    //     address.DistrictId = districtId?.DistrictID;
-
-    //     try
-    //     {
-    //         var result = await addressServices.CreateAddressNoLogin(address);
-
-    //         if (result != null)
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.success", "Địa chỉ đã được tạo thành công.");
-    //             isModalCreateAddress = false;
-
-    //             if (user != null && user.Id > 0) // Người dùng đã đăng nhập
-    //             {
-    //                 lst_Address = await addressServices.GetAddressByUserId(address.User_Id.Value);
-    //             }
-    //             else // Gắn địa chỉ vào đơn hàng cho khách chưa đăng nhập
-    //             {
-
-    //                 if (order != null)
-    //                 {
-    //                     order.Address_Id = result.Id;
-    //                     order.Strees = $"{address.Street} - {address.Ward_commune} - {address.District} - {address.Province_city}";
-    //                     await orderServices.Update(order, order.Id);
-    //                 }
-    //                 else
-    //                 {
-    //                     await JS.InvokeVoidAsync("toastr.error", "Không thể tạo đơn hàng mới cho khách chưa đăng nhập.");
-    //                 }
-    //             }
-    //         }
-    //         else
-    //         {
-    //             await JS.InvokeVoidAsync("toastr.error", "Tạo địa chỉ thất bại.");
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Lỗi khi tạo địa chỉ: {ex.Message}");
-    //         await JS.InvokeVoidAsync("toastr.error", "Đã xảy ra lỗi khi tạo địa chỉ.");
-    //     }
-    // }
 
 
 
