@@ -535,13 +535,13 @@
                     <div class="modal-content" style="width:650px; margin-top:200px; padding:30px; position:relative;">
                         <h3 style="text-align: center; font-size: 24px; margin-bottom: 20px;">Đồng bộ giỏ hàng</h3>
                         <p style="text-align: justify; line-height: 1.6;">
-                            Bạn có muốn đồng bộ giỏ hàng từ <strong style="color:red;">LocalStorage</strong> với tài khoản của mình không?
+                            Bạn có muốn đồng bộ giỏ hàng hiện tại với tài khoản của mình không?
                         </p>
                         <hr />
                         <p style="text-align: justify; line-height: 1.6; font-size: 14px; color: #555;">
                             <span style="color:red; font-weight:bold;">Lưu ý:</span>
                             Các sản phẩm trong giỏ hàng sẽ chỉ được đồng bộ <strong style="color:red;">duy nhất 1 lần</strong> và không thể hoàn tác.
-                            Hãy chắc chắn về hành động này. Các hóa đơn
+                            <strong style="color:red;">Hãy chắc chắn về hành động này.</strong> Các hóa đơn
                             <strong style="color:blue;">"Pending"</strong> sẽ không được đồng bộ và sẽ <strong style="color:red;">xóa</strong> ngay khi quá trình này thực hiện. Bạn có thắc mắc gì vui lòng
                             <a href="/faq" class="text-primary">nhấn vào đây</a>.
                         </p>
@@ -805,16 +805,26 @@
                 currentUserId = loggedInUser.Id;
                 await SessionStorage.SetItemAsStringAsync("user", JsonConvert.SerializeObject(loggedInUser));
 
-                // Kiểm tra LocalStorage có chứa giỏ hàng không
                 var cartJson = await JS.InvokeAsync<string>("localStorage.getItem", "cart");
                 if (!string.IsNullOrEmpty(cartJson))
                 {
-                    // Modal đồng bộ
-                    showSyncCartModal = true;
+                    // Deserialize cartJson to check if it contains any items
+                    var cartList = JsonConvert.DeserializeObject<List<CartProduct>>(cartJson);
+                    if (cartList != null && cartList.Any())
+                    {
+                        // Modal đồng bộ chỉ hiển thị nếu giỏ hàng không rỗng
+                        showSyncCartModal = true;
+                    }
+                    else
+                    {
+                        // Nếu giỏ hàng rỗng, không hiển thị modal và tiếp tục đăng nhập
+                        isLoggedIn = true;
+                        CloseModal();
+                        navigation.NavigateTo("/");
+                    }
                 }
                 else // Không có giỏ hàng, tiếp tục đăng nhập
                 {
-                    
                     isLoggedIn = true;
                     CloseModal();
                     navigation.NavigateTo("/");
