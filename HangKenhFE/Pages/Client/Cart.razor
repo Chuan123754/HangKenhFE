@@ -1154,6 +1154,7 @@
 
     private async Task OnQuantityChange(ChangeEventArgs e, HangKenhFE.Models.Cart_details item)
     {
+        var product = await productAttributeServices.GetProductAttributesById(item.Product_id??0);
         if (int.TryParse(e.Value.ToString(), out int newQuantity))
         {
             if (newQuantity < 1)
@@ -1715,43 +1716,6 @@
     private string phone;
     private string name;
     private Address selectedAddress;
-
-    // private async Task SelectAddress(Address address)
-    // {
-    //     ClearInfoAddress();
-    //     if (address != null)
-    //     {
-    //         selectedAddress = address;
-    //         city = address.Province_city;
-    //         district = address.District;
-    //         ward = address.Ward_commune;
-    //         street = address.Street;
-    //         phone = address.User?.Phone;
-    //     }
-    //     var orderPending = await orderServices.GetByIdOrders(order.Id);
-    //     orderPending.Address_Id = selectedAddress.Id;
-    //     orderPending.CreatedByAdminId = null;
-    //     await orderServices.Update(orderPending, orderPending.Id);
-    //     var shippingRequest = new ShippingRequest
-    //         {
-    //             service_type_id = 2,
-    //             to_district_id = address.DistrictId,
-    //             to_ward_code = address.WardCode.ToString(),
-    //             length = 100,
-    //             width = 80,
-    //             height = 5,
-    //             weight = 1000,
-    //             insurance_value = 500000,
-    //             coupon = null,
-    //             cod_failed_amount = null,
-    //             cod_value = null
-    //         };
-    //     feeShipping = await address_Service.CalculateShippingFee(shippingRequest);
-    //     isModalAddressVisiable = false;
-    //     isModalAddressVisiable = false;
-    //     CalculateTotalMoney();
-    // }
-
     private async Task SelectAddress(Address address)
     {
         ClearInfoAddress();
