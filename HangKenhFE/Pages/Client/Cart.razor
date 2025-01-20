@@ -104,9 +104,10 @@
                                     {
                                         <tr>
                                             <td class="text-center align-middle">
-                                                <input type="checkbox"
-                                                @onchange="@(e => OnCheckboxChange(e, user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0))"
-                                                checked="@selectedCartDetails.Contains(user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0)" />
+                                              <input type="checkbox"
+                                               @onchange="@(e => OnCheckboxChange(e, user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0))"
+                                               checked="@selectedCartDetails.Contains(user != null && user.Id > 0 ? item.Id : item.Product_id ?? 0)" />
+
 
                                             </td>
                                             <!-- Ảnh sản phẩm -->
@@ -235,6 +236,17 @@
                         </div>
 
                     }
+
+                    <div class="mt-3 text-center">
+                        <hr style="border: 1px solid #ccc;" />
+                        <p>
+                            Vui lòng đọc kỹ <a href="/chinh-sach-dat-hang" class="text-primary">Điều khoản</a trước khi mua hàng để bảo vệ quyền lợi của chính mình
+
+                        </p>
+
+                    </div>
+
+
                 </div>
             </main>
             @if (isModalOrderVisiable)
@@ -880,7 +892,7 @@
 
     private long? SelectedVoucherId;
 
-    private async Task ToggleSelectAll()
+    private async Task ToggleSelectAll(ChangeEventArgs e)
     {
         isAllSelected = !isAllSelected;
         selectedCartDetails.Clear();
@@ -908,11 +920,16 @@
             {
                 foreach (var item in lst_CartDetails)
                 {
-                    selectedCartDetails.Add(item.Product_id ?? 0);
+                    selectedCartDetails.Add(item.Id);
                     totalAmount += item.Quantity * (decimal)(item.Product_Attributes.Sale_price ?? item.Product_Attributes.Regular_price ?? 0);
                     totalPrincipal += item.Quantity * (decimal)(item.Product_Attributes.Regular_price ?? 0);
+                    
                 }
             }
+        }
+        else
+        {
+                   selectedCartDetails.Clear();
         }
         CalculateTotalMoney();
         StateHasChanged();
@@ -988,6 +1005,7 @@
             var cartDetails = await cartDetailsService.GetAll();
             var cart = await cartServices.GetAll();
             var cartUser = cart.FirstOrDefault(c => c.UserId == user.Id);
+
             if (cartUser == null)
             {
                 lst_CartDetails = new List<Cart_details>();
@@ -1070,7 +1088,7 @@
                 {                  
                     await JS.InvokeVoidAsync("toastr.error", "Sản phẩm lỗi hoặc đã tạm dừng");
                 }
-                
+
             }
         }
         else // Người dùng chưa đăng nhập
@@ -1154,64 +1172,71 @@
 
     private async Task OnQuantityChange(ChangeEventArgs e, HangKenhFE.Models.Cart_details item)
     {
-        var product = await productAttributeServices.GetProductAttributesById(item.Product_id??0);
-        if (int.TryParse(e.Value.ToString(), out int newQuantity))
+        try
         {
-            if (newQuantity < 1)
+            var product = await productAttributeServices.GetProductAttributesById(item.Product_id??0);
+            if (int.TryParse(e.Value.ToString(), out int newQuantity))
             {
-                await JS.InvokeVoidAsync("toastr.error", "Số lượng không thể nhỏ hơn 1.");
-                item.Quantity = 1;
-
-                if (user != null && user.Id > 0)
+                if (newQuantity < 1)
                 {
-                    await cartDetailsService.Update(item);
+                    await JS.InvokeVoidAsync("toastr.error", "Số lượng không thể nhỏ hơn 1.");
+                    item.Quantity = 1;
+
+                    if (user != null && user.Id > 0)
+                    {
+                        await cartDetailsService.Update(item);
+                    }
+                    else
+                    {
+                        await UpdateLocalCartQuantity(item.Product_id ?? 0, 1);
+                    }
+                }
+                else if (newQuantity > item.Product_Attributes.Stock)
+                {
+                    await JS.InvokeVoidAsync("toastr.error", $"Số lượng không thể lớn hơn {item.Product_Attributes.Stock}.");
+                    item.Quantity = item.Product_Attributes.Stock ?? 0;
+
+                    if (user != null && user.Id > 0)
+                    {
+                        await cartDetailsService.Update(item);
+                    }
+                    else
+                    {
+                        await UpdateLocalCartQuantity(item.Product_id ?? 0, item.Quantity ?? 0);
+                    }
                 }
                 else
                 {
-                    await UpdateLocalCartQuantity(item.Product_id ?? 0, 1);
-                }
-            }
-            else if (newQuantity > item.Product_Attributes.Stock)
-            {
-                await JS.InvokeVoidAsync("toastr.error", $"Số lượng không thể lớn hơn {item.Product_Attributes.Stock}.");
-                item.Quantity = item.Product_Attributes.Stock ?? 0;
+                    int quantityChange = newQuantity - (item.Quantity ?? 0);
 
-                if (user != null && user.Id > 0)
-                {
-                    await cartDetailsService.Update(item);
+                    if (user != null && user.Id > 0)
+                    {
+                        item.Product_Attributes.Stock -= quantityChange;
+                        item.Quantity = newQuantity;
+
+                        await productAttributeServices.Update(item.Product_Attributes, item.Product_Attributes.Id);
+                        await cartDetailsService.Update(item);
+                    }
+                    else
+                    {
+                        await UpdateLocalCartQuantity(item.Product_id ?? 0, newQuantity);
+                    }
+
+                    await LoadProducts();
+                    await LoadOrderDetails();
+                    CalculateTotalMoney();
                 }
-                else
-                {
-                    await UpdateLocalCartQuantity(item.Product_id ?? 0, item.Quantity ?? 0);
-                }
+
+                StateHasChanged();
             }
             else
             {
-                int quantityChange = newQuantity - (item.Quantity ?? 0);
-
-                if (user != null && user.Id > 0)
-                {
-                    item.Product_Attributes.Stock -= quantityChange;
-                    item.Quantity = newQuantity;
-
-                    await productAttributeServices.Update(item.Product_Attributes, item.Product_Attributes.Id);
-                    await cartDetailsService.Update(item);
-                }
-                else
-                {
-                    await UpdateLocalCartQuantity(item.Product_id ?? 0, newQuantity);
-                }
-
-                await LoadProducts();
-                await LoadOrderDetails();
-                CalculateTotalMoney();
+                await JS.InvokeVoidAsync("toastr.error", "Giá trị không hợp lệ.");
             }
-
-            StateHasChanged();
         }
-        else
+        catch(Exception)
         {
-            await JS.InvokeVoidAsync("toastr.error", "Giá trị không hợp lệ.");
+            await JS.InvokeVoidAsync("toastr.error", "Sản phẩm đã thay đổi, bạn có thể xóa khỏi giỏ hàng.");
         }
     }
 
@@ -1329,7 +1354,6 @@
         {
             totalMoney = 0;
         }
-        StateHasChanged();
     }
 
     private async Task CreateModalOrder()
@@ -1379,28 +1403,38 @@
             }
             catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Lỗi khi xử lý dữ liệu giỏ hàng: {ex.Message}");
+                await JS.InvokeVoidAsync("toastr.error", $"Lỗi khi xử lý dữ liệu giỏ hàng");
                 return;
             }
         }
 
         foreach (var cartDetail in cartDetailsToProcess)
         {
-            var product = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
-            if (product.Stock == null || product.Stock <= 0)
+            try
             {
-                await JS.InvokeVoidAsync("toastr.error", $"{cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không có sẵn.");
-                return;
-            }
+                var product = await productAttributeServices.GetProductAttributesById(cartDetail.Product_id??0);
+                if (product.Stock == null || product.Stock <= 0)
+                {
+                    await JS.InvokeVoidAsync("toastr.error", $"{cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không có sẵn.");
+                    return;
+                }
 
-            if (cartDetail.Quantity > product.Stock)
+                if (cartDetail.Quantity > product.Stock)
+                {
+                    await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng trong kho. Chỉ còn {cartDetail.Quantity} ");
+                    return;
+                }
+            }
+            catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("toastr.error", $"Xin lỗi, {cartDetail.Product_Attributes.SKU} {product.Size.Title} {product.Color.Title} không đủ số lượng trong kho. Chỉ còn {cartDetail.Quantity} ");
+                await JS.InvokeVoidAsync("toastr.error", $"{cartDetail.Product_Attributes.SKU}-{cartDetail.Product_Attributes.Color.Title}-{cartDetail.Product_Attributes.Size.Title} không có sẵn, hãy xóa khỏi giỏ hàng ");
                 return;
             }
+            
+           
         }
 
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận tạo đơn hàng?");
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Chắc chắn rằng bạn đã đọc kĩ điều khoản của chúng tôi !!!");
         if (confirmed)
         {
             isModalOrderVisiable = true;
@@ -1899,6 +1933,18 @@
             await JS.InvokeVoidAsync("toastr.error", "Vui lòng chọn địa chỉ giao hàng!");
             return;
         }
+        if (SelectedVoucherId != null)
+        {
+            var voucherSelected = await voucherServices.Details(SelectedVoucherId??0);
+            if(voucherSelected.Status=="Tạm dừng")
+            {
+                await JS.InvokeVoidAsync("toastr.error", "Voucher bạn vừa áp dụng đã có sự thay đổi. Vui lòng thử lại");
+                voucher=null;
+                voucherAmount = 0;
+                return;
+            }
+
+        }
         bool confirmed = await JS.InvokeAsync<bool>("confirm", "Xác nhận thanh toán bằng hình thức chuyển khoản MOMO ?");
         if (confirmed)
         {
@@ -1997,7 +2043,7 @@
     private async Task CancelMomoPayment()
     {
         var updateitem = await orderServices.GetByIdOrders(order.Id);
-        if (updateitem.Status == "Chờ xác nhận")
+        if (updateitem.Status == "Đã xác nhận")
         {
             foreach (var cartDetailId in selectedCartDetails)
             {
@@ -2027,7 +2073,7 @@
             var appliedVoucher = await userVoucherServices.GetByVoucherIdAndUserId(SelectedVoucherId ?? 0, user.Id);
             appliedVoucher.IsApplied = true;
             await userVoucherServices.Update(appliedVoucher);
-            await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thành công rồi");
+            await JS.InvokeVoidAsync("toastr.success", $"Đơn hàng đã được thanh toán thành công trước đó");
             isMomoModalVisible = false;
             selectedCartDetails.Clear();
             StateHasChanged();
@@ -2127,8 +2173,6 @@
 
             if (orderUpdate.Status == "Chờ xác nhận")
             {
-                var fileBytes = await orderServices.ExportInvoice(orderUpdate.Id);
-                var attachmentFileName = $"hoa_don_{orderUpdate.Id}.pdf";
                 var emailUser = user.Email;
                 string emailSubject = "YÊU CẦU ĐẶT HÀNG THÀNH CÔNG";
                 string emailMessage = $@"

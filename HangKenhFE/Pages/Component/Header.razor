@@ -360,7 +360,8 @@
                         <input type="password" @bind="registerModel.ConfirmPassword" id="reg_confirm_password" placeholder="Xác nhận mật khẩu" required>
 
                         <label for="reg_phone">Số điện thoại *</label>
-                        <input type="text" @bind="registerModel.Phone" id="reg_phone" placeholder="Nhập số điện thoại" required>
+                        <input type="text" @bind="registerModel.Phone" id="reg_phone" placeholder="Nhập số điện thoại"
+                               disabled="@registerModel.IsPhoneDisabled" required>
 
                         <button type="button" class="btn btn-secondary mt-2" @onclick="SendOtp" style="width: 100%;">Gửi OTP</button>
 
@@ -903,6 +904,9 @@
             otpSent = true;
             otpExpiryTime = DateTime.Now.AddMinutes(5);
 
+            // Khóa trường nhập số điện thoại
+            registerModel.IsPhoneDisabled = true;
+
             showOtpReminderModal = true;
             otpError = null;
 
@@ -914,7 +918,6 @@
             await ShowToast("error", $"{otpError} Chi tiết: {ex.Message}");
         }
     }
-
 
 
 
@@ -1028,7 +1031,7 @@
 
                 if (currentUser != null && currentUser.Id > 0)
                 {
-                    navigation.NavigateTo($"/admin/UserDetails/{currentUser.Id}");
+                    navigation.NavigateTo($"/user/UserDetails/{currentUser.Id}");
                     CloseDropdown();
                     return;
                 }
@@ -1066,6 +1069,7 @@
         public string ConfirmPassword { get; set; } // Xác nhận mật khẩu
         public string Phone { get; set; }      // Số điện thoại
         public string OTP { get; set; }        // Mã OTP
+        public bool IsPhoneDisabled { get; set; } = false;
     }
 
 
